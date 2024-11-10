@@ -24,32 +24,6 @@ We collect data from Basketball Reference (basketball-reference.com) by:
  - Actual FT% at each minute interval
  - Difference between expected and actual
 
-### Project Structure
-.
-├── data_collection/   # Scripts for gathering and processing data
-├── analysis/         # R analysis scripts 
-├── output/          # Results and visualizations
-└── README.md
-
-### Dependencies
-- Python 3.8+
-- R 4.0+
-- Required Python packages:
- - requests
- - pandas
- - beautifulsoup4
-- Required R packages:
- - tidyverse
- - ggplot2
-
-### Setup
-1. Clone the repository
-2. Install required packages:
-  pip install -r requirements.txt
-3. Run data collection scripts
-4. Execute analysis scripts
-5. View results in output directory
-
 ### Contributing
 1. Fork the repository
 2. Create a feature branch
