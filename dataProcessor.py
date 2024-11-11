@@ -40,7 +40,9 @@ class FreeThrowAnalyzer:
     def _process_game_data(self, pbp_data: List[dict]):
         """Process play by play data to extract free throw attempts and player minutes."""
         player_entry_times = {}  # Track when players entered the game
-        
+        #TODO: need to get info on starters for each game and their entry times to the above dictionary somehow
+
+
         playersThatSubbedOut = set()
 
         for play in pbp_data:
