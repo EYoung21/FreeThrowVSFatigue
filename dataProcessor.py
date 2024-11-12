@@ -207,13 +207,14 @@ class FreeThrowAnalyzer:
             minuteAverage = self.minutes[i+1][0] / self.minutes[i+1][0] + self.minutes[i+1][1]  #total made / total made + total missed
             atMinuteAverages[i+1] = minuteAverage * 100 #to get percentage
 
-            totalPercentage = 0
-            totalPlayers = len(self.minutes[i+1][2])
-            for i in range(totalPlayers): #looping through set of players that shot fts at each minute
-                currPlayerName = self.minutes[i+1][2][i] #curr player
-                totalPercentage += self.get_player_ft_pct(self, currPlayerName, season_stats, False)
+            totalPercentage = float(0)
+            players = list(self.minutes[i+1][2])
+            totalNumberPlayers = len(players)
+            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
+                currPlayerName = players[i] #curr player
+                totalPercentage += float(self.get_player_ft_pct(currPlayerName, season_stats))
 
-            averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalPlayers
+            averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
             atMinuteYearlyAverages[i+1] = averageFTPercentageForAllPlayersAtMinute
         
@@ -342,23 +343,28 @@ def main():
     # client.season_schedule(season_end_year=endYear, output_type=OutputType.CSV, output_file_path=f"./{endYear-1}_{endYear}_season.csv")
     # time.sleep(3.1)
 
-    for key in allTeams:
-        # below, "team" should be in this format: "Team.BOSTON_CELTICS"
-        arrHomeDates = get_team_home_dates(key)
-        print("currTeam: " + str(key))
-        print("homedates: " + str(arrHomeDates))
 
-        for date in arrHomeDates:
-            # print("here!")
-            curr_date = date.split("-")
-            analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
-            print("minutes: " + str(analyzer.minutes))
 
-            #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
+    #commented for a sec for testing
+    # for key in allTeams:
+    #     # below, "team" should be in this format: "Team.BOSTON_CELTICS"
+    #     arrHomeDates = get_team_home_dates(key)
+    #     print("currTeam: " + str(key))
+    #     print("homedates: " + str(arrHomeDates))
+
+    #     for date in arrHomeDates:
+    #         # print("here!")
+    #         curr_date = date.split("-")
+    #         analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+    #         print("minutes: " + str(analyzer.minutes))
+
+        
+        
+    #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
 
 
     # minuteAverages = calculateMinuteAverages()
-    
+    analyzer.minutes = {2: [11, 30, {'W. Matthews', 'T. Young', 'C. Braun', 'A. Burks', 'Z. Williams', 'M. Turner', 'D. Sharpe', 'O. Okongwu', 'N. Batum', 'M. Bagley', 'J. Johnson', 'M. Robinson', 'M. Morris', 'D. Barlow', 'D. Mitchell', 'P. Reed', 'D. Smith', 'J. Smith', 'S. Lundy', 'J. Embiid', 'B. Bogdanović', 'S. Bey'}], 3: [4, 21, {'W. Matthews', 'T. Young', 'L. Walker', 'S. Lundy', 'R. Barrett', 'C. Capela', 'J. Embiid', 'N. Claxton', 'S. Gilgeous-Alexander', 'M. Bridges', 'B. Bogdanović', 'D. House', 'S. Bey', 'D. Sharpe'}], 6: [4, 16, {'B. Wesley', 'R. Barrett', 'O. Toppin', 'T. Lyles', 'O. Okongwu', 'D. Hunter', 'B. Bogdanović', 'T. Maxey', 'S. Dinwiddie', 'N. Alexander-Walker', 'S. Bey', 'B. Mathurin'}], 8: [4, 12, {'K. Kuzma', 'C. Capela', 'J. Embiid', 'D. Murray', 'B. Bogdanović', 'C. Cunningham', 'S. Bey'}], 0: [5, 14, {'W. Matthews', 'D. Smith', 'B. Fernando', 'O. Okongwu', 'P. Baldwin', 'D. Hunter', 'S. Gilgeous-Alexander', 'D. Barlow', 'D. House', 'I. Hartenstein', 'J. Williams'}], 9: [4, 6, {'K. Lowry', 'J. Randle', 'B. Bogdanović', 'P. Banchero', 'S. Bey'}], 1: [7, 19, {'W. Matthews', 'J. Smith', 'B. Fernando', 'K. Caldwell-Pope', 'J. Embiid', 'O. Okongwu', 'C. Capela', 'R. Gobert', 'M. Bridges', 'C. Porter', 'J. Johnson'}], 4: [7, 15, {'E. Omoruyi', 'P. Beverley', 'C. Capela', 'O. Okongwu', 'J. Richardson', 'D. Murray', 'B. Bogdanović', 'M. Bridges', 'M. Turner', 'J. Williams', 'G. Mathews', 'Z. Nnaji'}], 5: [5, 17, {'O. Toppin', 'H. Highsmith', 'C. Capela', 'R. Rollins', 'O. Okongwu', 'B. Bogdanović', 'K. Oubre', 'A. Nesmith', 'K. Johnson', 'S. Bey', 'J. Johnson'}], 13: [0, 2, {'B. Bogdanović', 'A. Edwards'}], 7: [4, 18, {'J. Ivey', 'B. Coulibaly', 'J. Embiid', 'O. Okongwu', 'D. Hunter', 'S. Gilgeous-Alexander', 'M. Bridges', 'S. Merrill', 'S. Bey'}], 11: [2, 7, {'J. Randle', 'M. Monk', 'B. Bogdanović', 'M. Bridges', 'S. Bey'}], 15: [1, 1, {'S. Gilgeous-Alexander', 'J. Randle'}], 17: [1, 0, {'J. Embiid'}], 10: [3, 9, {'O. Okongwu', 'S. Gilgeous-Alexander', 'B. Bogdanović', 'M. Bridges', 'B. Mathurin'}], -29: [1, 1, {'M. Bridges'}], 16: [1, 1, {'S. Gilgeous-Alexander'}]}
     ansArr = analyzer.calculateMinuteAndYearlyAverages()
     
     minuteAveragesDict = ansArr[0]
