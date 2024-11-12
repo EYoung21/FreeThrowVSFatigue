@@ -172,6 +172,7 @@ def plot_ft_percentages(minute_averages, yearly_averages):
 #     print("here!")
 
 #     for team in allTeams:
+            #below, "team" should be in this format: "Team.BOSTON_CELTICS"
 #         arrHomeDates = get_team_home_dates(team, schedule)
 #         print("homedates: " + str(arrHomeDates))
 #         for date in arrHomeDates:
@@ -215,9 +216,9 @@ def test_single_game():
         # Try with a 2022 game instead (older data might be more accessible)
         game = client.play_by_play(
             home_team=Team.BOSTON_CELTICS,
-            year=2022,
-            month=12,
-            day=1
+            year=2023,
+            month=10,
+            day=27
         )
         
         print("Successfully accessed game!")
@@ -233,7 +234,7 @@ def test_single_game():
             try:
                 client.play_by_play(
                     home_team=Team.BOSTON_CELTICS, 
-                    year=2018, month=10, day=16, 
+                    year=2023, month=10, day=27, 
                     output_type=OutputType.JSON
                 )
                 print("Success on second attempt!")
