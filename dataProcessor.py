@@ -9,6 +9,9 @@ import math
 from basketball_reference_web_scraper.data import Team, Location
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime, timedelta
+import csv
+import pytz
 
 class FreeThrowAnalyzer:
     def __init__(self):
@@ -204,21 +207,32 @@ def get_team_home_dates(team):
         # Skip the header row
         next(reader)
         
-        # Initialize the dates list
-        dates = []
+        # Initialize the dates set
+        dates = set()
         
-        # Loop through each row in the CSV
+        # Create timezone objects
+        utc = pytz.UTC
+        et = pytz.timezone('US/Eastern')  # NBA typically uses Eastern Time
+        
         for row in reader:
-            print("we're here!")
-            # Check if the team is the home team
-            print("in column home team: " + str(row[3]))
-            print("inputed team: " + str(team))
-            if row[3] == team:  # Assuming home team is in the 4th column (index 3)
-                print("checked!")
-                # Append the date part of the start_time column to dates
-                dates.append(row[0].split(" ")[0])
+            if row[3] == team:  # If this is a home game
+                # Parse the UTC timestamp
+                utc_time = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S%z')
+                
+                # Convert to Eastern Time
+                et_time = utc_time.astimezone(et)
+                
+                # Get just the date part in ET
+                game_date = et_time.date()
+                
+                dates.add(game_date.strftime('%Y-%m-%d'))
+                
+                print("CSV DATE: " + row[0])
+                print("Converted date: " + game_date.strftime('%Y-%m-%d'))
+                print()
+
         
-    return dates
+    return sorted(list(dates))
 
 def plot_ft_percentages(minute_averages, yearly_averages):
     # Get all minutes (x-axis)
@@ -297,7 +311,7 @@ def main():
     # client.season_schedule(season_end_year=2024, output_type=OutputType.CSV, output_file_path="./2023_2024_season.csv")
     # exit()
 
-    print("here!")
+    # print("here!")
 
     for key in allTeams:
         # below, "team" should be in this format: "Team.BOSTON_CELTICS"
