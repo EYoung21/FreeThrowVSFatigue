@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import csv
 import pytz
 import pandas as pd
+from bs4 import BeautifulSoup
 
 class FreeThrowAnalyzer:
     def __init__(self):
@@ -145,62 +146,151 @@ class FreeThrowAnalyzer:
 
 
 
-    def get_player_ft_pct(self, player_name, season_stats): 
-        #number_repeated represents how many consequetive times a player's ft average comes from another team
+    def get_player_ft_pct(self, df, player_name):
+        """
+        Look up a player's free throw percentage from the DataFrame.
         
-        for i in range(len(season_stats)):
-            player = season_stats[i]
-            if player['name'] == player_name:
-                # Calculate FT%
-                if player['free_throws_attempted'] > 0:  # avoid division by zero
-                    made = player['free_throws_made']
-                    missed = player['free_throws_attempted']
-                    if season_stats[i+1]['name'] != player_name:
-                        return (made / (made+missed)) * 100 #calculates average
-                    else: #handles case where player played on different teams in a year (got traded?)
-                        indicesToCheck = []
-                        j = i+1
-                        while j < len(season_stats):
-                            if season_stats[j]['name'] == player_name:
-                                indicesToCheck.append(j)
-                            j += 1
-
-                        for k in range(len(indicesToCheck)):
-                            if season_stats[k]['free_throws_attempted'] > 0:
-                                made += season_stats[k]['free_throws_made']
-                                missed += season_stats[k]['free_throws_attempted']
-
-                        return (made / (made+missed)) * 100
-
-        return None #if player requested wasn't in season stats
+        Parameters:
+        df (pandas.DataFrame): DataFrame containing player stats
+        player_name (str): Name of the player to look up
         
+        Returns:
+        float: Player's FT percentage, or None if player not found
+        """
+        try:
+            # Case-insensitive search for the player
+            player_row = df[df['Player'].str.lower() == player_name.lower()]
+            
+            if len(player_row) == 0:
+                return None
+                
+            ft_percentage = player_row['FT%'].iloc[0]
+            return ft_percentage
+            
+        except Exception as e:
+            print(f"Error looking up player: {e}")
+            return None
+
+    # Example usage:
+    # ft_percent = get_player_ft_percentage(df, "Colin Castleton")
+    # print(f"FT%: {ft_percent}%")
+
+    
+    def get_ft_percentages(self, year):
+        """
+        Scrapes Basketball Reference for current season FT percentages.
+        
+        Args:
+            year (int): The season end year (e.g., 2024 for 2023-24 season)
+            
+        Returns:
+            pandas.DataFrame: DataFrame with player names and FT percentages
+        """
+        # URL for the current season's totals
+        url = f"https://www.basketball-reference.com/leagues/NBA_{year}_totals.html"
+        
+        try:
+            # Add headers to mimic a browser request
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            # Make the request
+            response = requests.get(url, headers=headers)
+            response.raise_for_status()
+            
+            # Parse the HTML
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Find the main stats table
+            table = soup.find('table', id='totals_stats')
+            
+            # Convert to pandas DataFrame
+            df = pd.read_html(str(table))[0]
+            
+            # Clean up the data
+            df = df[df['Player'].notna()]  # Remove any rows without player names
+            df = df[['Player', 'FT', 'FTA']]  # Keep only player name, FT made, and FT attempts
+            
+            # Format player names to first initial + period + last name
+            def format_player_name(name):
+                # Split the name into parts
+                parts = name.split()
+                if len(parts) >= 2:
+                    # Take first letter of first name + period + rest of name
+                    first_initial = parts[0][0]
+                    last_name = ' '.join(parts[1:])  # Join all parts after first name
+                    return f"{first_initial}. {last_name}"
+                return name
+            
+            # Apply the name formatting
+            df['Player'] = df['Player'].apply(format_player_name)
+            
+            # Remove rows where FTA is 0
+            df = df[df['FTA'] > 0]
+            
+            # Group by player and sum their FT stats
+            grouped_df = df.groupby('Player').agg({
+                'FT': 'sum',
+                'FTA': 'sum'
+            }).reset_index()
+            
+            # Calculate FT% after combining stats
+            grouped_df['FT%'] = (grouped_df['FT'] / grouped_df['FTA'] * 100).round(1)
+            
+            # Sort by FT% descending
+            grouped_df = grouped_df.sort_values('FT%', ascending=False)
+            
+            # Reset index
+            grouped_df = grouped_df.reset_index(drop=True)
+            
+            return grouped_df
+            
+        except requests.exceptions.RequestException as e:
+            print(f"Error fetching data: {e}")
+            return pd.DataFrame()
+        except Exception as e:
+            print(f"Error processing data: {e}")
+            return pd.DataFrame()
+
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
     def calculateMinuteAndYearlyAverages(self):
         # print("minutes: " + str(self.minutes))
         #this didn't print anything ??
+        year = 2024
+        data = self.get_ft_percentages(year)
+
+        # print(str(data))
+
+        # exit()
 
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        try:
-            season_stats = client.players_season_totals(season_end_year=2024)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                # Get the Retry-After header, if available
-                retry_after = e.response.headers.get("Retry-After")
-                if retry_after:
-                    # If Retry-After is in seconds, wait that long
-                    print(f"Rate limited. Retrying after {retry_after} seconds.")
-                    time.sleep(int(retry_after))
-                    # Retry the request
-                    season_stats = client.players_season_totals(season_end_year=2024)
-                else:
-                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-                    time.sleep(60)  # Default wait time if Retry-After header is missing
-                    season_stats = client.players_season_totals(season_end_year=2024)
-            else:
-                # Re-raise if it's a different HTTP error
-                raise
+        # try:
+        #     season_stats = client.players_season_totals(season_end_year=2024)
+        # except requests.exceptions.HTTPError as e:
+        #     if e.response.status_code == 429:
+        #         # Get the Retry-After header, if available
+        #         retry_after = e.response.headers.get("Retry-After")
+        #         if retry_after:
+        #             # If Retry-After is in seconds, wait that long
+        #             print(f"Rate limited. Retrying after {retry_after} seconds.")
+        #             time.sleep(int(retry_after))
+        #             # Retry the request
+        #             season_stats = client.players_season_totals(season_end_year=2024)
+        #         else:
+        #             print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+        #             time.sleep(60)  # Default wait time if Retry-After header is missing
+        #             season_stats = client.players_season_totals(season_end_year=2024)
+        #     else:
+        #         # Re-raise if it's a different HTTP error
+        #         raise
+
+        # print("seasonstats: " + str(season_stats))
+
+        #https://www.basketball-reference.com/leagues/NBA_2024_totals.html
+        #could maybe parse the above url to get seaosn stats (more specifically yearly ft % for specific players in 2023-24)
 
 
         for i in range(len(self.minutes)): #minute would be i (index + 1)
@@ -212,7 +302,11 @@ class FreeThrowAnalyzer:
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
                 currPlayerName = players[i] #curr player
-                totalPercentage += float(self.get_player_ft_pct(currPlayerName, season_stats))
+                print("|" + str(currPlayerName) + "|")
+                # print(str(data))
+                # print(str(self.get_player_ft_pct(data, "Joel Embid")))
+                # exit()
+                totalPercentage += float(self.get_player_ft_pct(data, currPlayerName))
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
