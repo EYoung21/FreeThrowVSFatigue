@@ -197,7 +197,16 @@ class FreeThrowAnalyzer:
 
 
 def get_team_home_dates(team, schedule):
-    return [game['start_time'].date() for game in schedule if game['home_team'] == team]
+    # return [game['start_time'].date() for game in schedule if game['home_team'] == team]
+
+    dates = []
+    for game in schedule:
+        if game['home_team'] == team:
+            # print("currGameGettingDate: " + str(game))
+            dates.append(game['start_time'])
+
+
+    return dates
 
 def plot_ft_percentages(minute_averages, yearly_averages):
     # Get all minutes (x-axis)
@@ -250,12 +259,12 @@ def main():
         arrHomeDates = get_team_home_dates(team, schedule)
         print("currTeam: " + str(team))
         print("homedates: " + str(arrHomeDates))
-        print()
-        print("Year:" + str(arrHomeDates[0].year))
-        print("Month: " + str(arrHomeDates[0].month))
-        print("Day: " + str(arrHomeDates[0].day))
 
         for date in arrHomeDates:
+            print()
+            print("Year:" + str(date.year))
+            print("Month: " + str(date.month))
+            print("Day: " + str(date.day))
             analyzer.process_team_games(team, date.year, date.month, date.day) #team, year, month, day
 
             #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff

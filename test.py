@@ -77,12 +77,10 @@ from basketball_reference_web_scraper import client
 
 try:
     sch = client.season_schedule(
-    season_end_year=2024, 
-    output_type=OutputType.CSV, 
-    output_file_path="./2023_2024_season.csv"
+    season_end_year=2023,
     )
 
-    print(str(sch))
+    # print(str(sch))
 except requests.exceptions.HTTPError as e:
     if e.response.status_code == 429:
         # Get the Retry-After header, if available
@@ -93,28 +91,27 @@ except requests.exceptions.HTTPError as e:
             time.sleep(int(retry_after))
             # Retry the request
             sch = client.season_schedule(
-            season_end_year=2018, 
-            output_type=OutputType.CSV, 
-            output_file_path="./2017_2018_season.csv"
+            season_end_year=2024, 
             )
 
-            print(str(sch))
+            # print(str(sch))
         else:
             print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
             time.sleep(60)  # Default wait time if Retry-After header is missing
             sch = client.season_schedule(
-            season_end_year=2018, 
-            output_type=OutputType.CSV, 
-            output_file_path="./2017_2018_season.csv"
+            season_end_year=2024,
             )
 
-            print(str(sch))
+            # print(str(sch))
     else:
         raise
 
 
-#testing verison of main below to test rate limits
+for game in sch:
+    if game['home_team'] == Team.BOSTON_CELTICS:
+        print(game)
 
+#testing verison of main below to test rate limits
 
 
 # import time
