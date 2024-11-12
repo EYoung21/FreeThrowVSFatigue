@@ -35,6 +35,9 @@ class FreeThrowAnalyzer:
             )
             time.sleep(3.1)
 
+            # print("play by play: " + str(pbp_data))
+            # exit()
+
 
             # print("playByPlay dara: " + str(pbp_data))
             
@@ -67,10 +70,12 @@ class FreeThrowAnalyzer:
         playersThatSubbedOut = set()
 
         for play in pbp_data:
-            
+            # print(play.get('description', ''))
+            # continue
+            # exit()
             # Track substitutions
-            if 'ENTERS' in str(play.get('description', '')):
-                desParsed = play['description'].split(' ENTERS')
+            if 'enters' in str(play.get('description', '')):
+                desParsed = play['description'].split(' enters')
                 player_in = desParsed[0]
                 desParsed2 = desParsed.split('for ')
 
@@ -80,7 +85,7 @@ class FreeThrowAnalyzer:
                 #calculateConvertedIGT will convert from remaining seconds in period + quarter to current minute in game
                         
             # Track free throws
-            if 'FREE THROW' in str(play.get('description', '')):
+            if 'free throw' in str(play.get('description', '')):
                 player = play['description'].split(' ')[0]
 
                 if player in playersThatSubbedOut:
@@ -91,19 +96,25 @@ class FreeThrowAnalyzer:
 
                 entry_time = player_entry_times.get(player)
 
-                minutes_played = (entry_time - self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')))
+                print("entry time:" + str(entry_time))
+
+                print("Converted time at freethrow: " + str(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))))
+
+                # exit()
+
+                minutes_played = (self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')) - float(entry_time))
                 
                 curr_minute = math.floor(minutes_played)
 
                 if curr_minute not in self.minutes:
-                    if 'MAKES' in play['description']: #the player made the freethrow, they're now 1 for 1
+                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
                         self.minutes[curr_minute] = [1, 0, set()] #total made, total missed, players at this minute
                         self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
                         self.minutes[curr_minute] = [0, 1, set()] #they're 0 for 1
                         self.minutes[curr_minute][2].add(player)
                 else: #the minute already was instantiated
-                    if 'MAKES' in play['description']: #the player made the freethrow, they're now 1 for 1
+                    if 'misses' in play['description']: #the player made the freethrow, they're now 1 for 1
                         self.minutes[curr_minute][0] += 1 #adds a make
                         self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
@@ -111,16 +122,20 @@ class FreeThrowAnalyzer:
                         self.minutes[curr_minute][2].add(player)
 
     def calculateConvertedIGT(self, remainingSecondsInQuarter, quarter): #remaining seconds, quarter (1, 2, 3, 4)
+        # print("remaining seconds: " + str(remainingSecondsInQuarter))
+        # print("quarter: " + str(quarter))
+        # exit()
+        
         remainingMinutes = remainingSecondsInQuarter / 60
         minutesPlayedInQuarter = 12 - remainingMinutes
 
-        if quarter == "1":
+        if str(quarter) == "1":
             return minutesPlayedInQuarter
-        elif quarter == "2":
+        elif str(quarter) == "2":
             return 12 + minutesPlayedInQuarter
-        elif quarter == "3":
+        elif str(quarter) == "3":
             return 24 + minutesPlayedInQuarter
-        elif quarter == "4":
+        elif str(quarter) == "4":
             return 36 + minutesPlayedInQuarter
 
 
