@@ -1,3 +1,4 @@
+import csv
 from basketball_reference_web_scraper import client
 import time
 import requests
@@ -196,16 +197,27 @@ class FreeThrowAnalyzer:
     
 
 
-def get_team_home_dates(team, schedule):
-    # return [game['start_time'].date() for game in schedule if game['home_team'] == team]
-
-    dates = []
-    for game in schedule:
-        if game['home_team'] == team:
-            # print("currGameGettingDate: " + str(game))
-            dates.append(game['start_time'])
-
-
+def get_team_home_dates(team):
+    # Open the file and create the reader
+    with open("./2023_2024_season.csv") as file:
+        reader = csv.reader(file, delimiter=',')
+        # Skip the header row
+        next(reader)
+        
+        # Initialize the dates list
+        dates = []
+        
+        # Loop through each row in the CSV
+        for row in reader:
+            print("we're here!")
+            # Check if the team is the home team
+            print("in column home team: " + str(row[3]))
+            print("inputed team: " + str(team))
+            if row[3] == team:  # Assuming home team is in the 4th column (index 3)
+                print("checked!")
+                # Append the date part of the start_time column to dates
+                dates.append(row[0].split(" ")[0])
+        
     return dates
 
 def plot_ft_percentages(minute_averages, yearly_averages):
@@ -247,26 +259,55 @@ def main():
 
     #now, for every team loop from 
 
-    allTeams = [Team.BOSTON_CELTICS, Team.NEW_JERSEY_NETS, Team.NEW_YORK_KNICKS, Team.PHILADELPHIA_76ERS, Team.TORONTO_RAPTORS, Team.CHICAGO_BULLS, Team.CLEVELAND_CAVALIERS, Team.DETROIT_PISTONS, Team.INDIANA_PACERS, Team.MILWAUKEE_BUCKS, Team.ATLANTA_HAWKS, Team.CHARLOTTE_HORNETS, Team.MIAMI_HEAT, Team.ORLANDO_MAGIC, Team.WASHINGTON_WIZARDS, Team.DENVER_NUGGETS, Team.MINNESOTA_TIMBERWOLVES, Team.OKLAHOMA_CITY_THUNDER, Team.PORTLAND_TRAIL_BLAZERS, Team.UTAH_JAZZ, Team.GOLDEN_STATE_WARRIORS, Team.LOS_ANGELES_CLIPPERS, Team.LOS_ANGELES_LAKERS, Team.PHOENIX_SUNS, Team.SACRAMENTO_KINGS, Team.DALLAS_MAVERICKS, Team.HOUSTON_ROCKETS, Team.MEMPHIS_GRIZZLIES, Team.NEW_ORLEANS_PELICANS, Team.SAN_ANTONIO_SPURS]
-    
+    allTeams = {
+        "ATLANTA HAWKS": Team.ATLANTA_HAWKS,
+        "BOSTON CELTICS": Team.BOSTON_CELTICS,
+        "BROOKLYN NETS": Team.BROOKLYN_NETS,
+        "CHARLOTTE HORNETS": Team.CHARLOTTE_HORNETS,
+        "CHICAGO BULLS": Team.CHICAGO_BULLS,
+        "CLEVELAND CAVALIERS": Team.CLEVELAND_CAVALIERS,
+        "DALLAS MAVERICKS": Team.DALLAS_MAVERICKS,
+        "DENVER NUGGETS": Team.DENVER_NUGGETS,
+        "DETROIT PISTONS": Team.DETROIT_PISTONS,
+        "GOLDEN STATE WARRIORS": Team.GOLDEN_STATE_WARRIORS,
+        "HOUSTON ROCKETS": Team.HOUSTON_ROCKETS,
+        "INDIANA PACERS": Team.INDIANA_PACERS,
+        "LOS ANGELES CLIPPERS": Team.LOS_ANGELES_CLIPPERS,
+        "LOS ANGELES LAKERS": Team.LOS_ANGELES_LAKERS,
+        "MEMPHIS GRIZZLIES": Team.MEMPHIS_GRIZZLIES,
+        "MIAMI HEAT": Team.MIAMI_HEAT,
+        "MILWAUKEE BUCKS": Team.MILWAUKEE_BUCKS,
+        "MINNESOTA TIMBERWOLVES": Team.MINNESOTA_TIMBERWOLVES,
+        "NEW ORLEANS PELICANS": Team.NEW_ORLEANS_PELICANS,
+        "NEW YORK KNICKS": Team.NEW_YORK_KNICKS,
+        "OKLAHOMA CITY THUNDER": Team.OKLAHOMA_CITY_THUNDER,
+        "ORLANDO MAGIC": Team.ORLANDO_MAGIC,
+        "PHILADELPHIA 76ERS": Team.PHILADELPHIA_76ERS,
+        "PHOENIX SUNS": Team.PHOENIX_SUNS,
+        "PORTLAND TRAIL BLAZERS": Team.PORTLAND_TRAIL_BLAZERS,
+        "SACRAMENTO KINGS": Team.SACRAMENTO_KINGS,
+        "SAN ANTONIO SPURS": Team.SAN_ANTONIO_SPURS,
+        "TORONTO RAPTORS": Team.TORONTO_RAPTORS,
+        "UTAH JAZZ": Team.UTAH_JAZZ,
+        "WASHINGTON WIZARDS": Team.WASHINGTON_WIZARDS
+    }
+
     #it's possible that we will have to manually create the date of home games for each team for the entire season
     print("Writing games for 2017-2018 season to CSV file")
-    client.season_schedule(season_end_year=2024, output_type=OutputType.CSV, output_file_path="./2023_2024_season.csv")
+    # client.season_schedule(season_end_year=2024, output_type=OutputType.CSV, output_file_path="./2023_2024_season.csv")
     # exit()
+
     print("here!")
 
-    for team in allTeams:
+    for key in allTeams:
         # below, "team" should be in this format: "Team.BOSTON_CELTICS"
-        arrHomeDates = get_team_home_dates(team, schedule)
-        print("currTeam: " + str(team))
+        arrHomeDates = get_team_home_dates(key)
+        print("currTeam: " + str(key))
         print("homedates: " + str(arrHomeDates))
 
         for date in arrHomeDates:
-            print()
-            print("Year:" + str(date.year))
-            print("Month: " + str(date.month))
-            print("Day: " + str(date.day))
-            analyzer.process_team_games(team, date.year, date.month, date.day) #team, year, month, day
+            curr_date = date.split("-")
+            analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
 
             #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
 
