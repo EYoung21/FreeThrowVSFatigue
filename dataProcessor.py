@@ -84,7 +84,7 @@ class FreeThrowAnalyzer:
 
                 playersThatSubbedOut.add(desParsed2[1])
                 
-                player_entry_times[player_in] = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
+                player_entry_times[player_in] = float(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')))
                 #calculateConvertedIGT will convert from remaining seconds in period + quarter to current minute in game
                         
             # Track free throws
@@ -98,19 +98,19 @@ class FreeThrowAnalyzer:
                     continue #we only want to track the first stretch of playing time
                 
                 if player not in player_entry_times: #they were a starter
-                    player_entry_times[player] = "0" #they came into the game at 0 minutes
+                    player_entry_times[player] = float(0) #they came into the game at 0 minutes
 
-                entry_time = player_entry_times.get(player)
+                entry_time = float(player_entry_times.get(player))
 
-                print("entry time:" + str(entry_time))
+                print("entry time: " + str(entry_time))
 
                 print("Converted time at freethrow: " + str(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))))
 
                 # exit()
 
-                minutes_played = (self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')) - float(entry_time))
+                minutes_played = float((float(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))) - float(entry_time)))
                 
-                curr_minute = math.floor(minutes_played)
+                curr_minute = int(math.floor(minutes_played))
 
                 if curr_minute not in self.minutes:
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
@@ -126,6 +126,8 @@ class FreeThrowAnalyzer:
                     else: #the freethrow was missed
                         self.minutes[curr_minute][1] += 1 #adds a miss
                         self.minutes[curr_minute][2].add(player)
+            # exit()
+            
 
     def calculateConvertedIGT(self, remainingSecondsInQuarter, quarter): #remaining seconds, quarter (1, 2, 3, 4)
         # print("remaining seconds: " + str(remainingSecondsInQuarter))
@@ -136,13 +138,13 @@ class FreeThrowAnalyzer:
         minutesPlayedInQuarter = 12 - remainingMinutes
 
         if str(quarter) == "1":
-            return minutesPlayedInQuarter
+            return float(minutesPlayedInQuarter)
         elif str(quarter) == "2":
-            return 12 + minutesPlayedInQuarter
+            return float(12 + minutesPlayedInQuarter)
         elif str(quarter) == "3":
-            return 24 + minutesPlayedInQuarter
+            return float(24 + minutesPlayedInQuarter)
         elif str(quarter) == "4":
-            return 36 + minutesPlayedInQuarter
+            return float(36 + minutesPlayedInQuarter)
 
 
 
@@ -293,12 +295,13 @@ class FreeThrowAnalyzer:
         #could maybe parse the above url to get seaosn stats (more specifically yearly ft % for specific players in 2023-24)
 
 
-        for i in range(len(self.minutes)): #minute would be i (index + 1)
-            minuteAverage = self.minutes[i+1][0] / self.minutes[i+1][0] + self.minutes[i+1][1]  #total made / total made + total missed
-            atMinuteAverages[i+1] = minuteAverage * 100 #to get percentage
+        for key in self.minutes: #minute would be i (index + 1)
+            #self.minutes[i+1] may not be the first minute, ex if 1 was not in it, TODO: need to change this
+            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
+            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
             totalPercentage = float(0)
-            players = list(self.minutes[i+1][2])
+            players = list(self.minutes[key][2])
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
                 currPlayerName = players[i] #curr player
@@ -310,7 +313,7 @@ class FreeThrowAnalyzer:
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
-            atMinuteYearlyAverages[i+1] = averageFTPercentageForAllPlayersAtMinute
+            atMinuteYearlyAverages[key] = averageFTPercentageForAllPlayersAtMinute
         
         return [atMinuteAverages, atMinuteYearlyAverages]
     
