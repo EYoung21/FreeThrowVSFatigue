@@ -12,11 +12,12 @@ import numpy as np
 from datetime import datetime, timedelta
 import csv
 import pytz
+import pandas as pd
 
 class FreeThrowAnalyzer:
     def __init__(self):
         # self.processed_games: Set[str] = set()
-        self.minutes:Set[int] = set()
+        self.minutes = dict()
         #each minute should have a total made and total missed
         #AND a an average of each player's yearly ft % that is included in the above
         #      - we can accomplish this by keeping a set of players that show freethrows during this consequetive minute
@@ -243,6 +244,15 @@ def plot_ft_percentages(minute_averages, yearly_averages):
     yearly_percentages = [yearly_averages[m] for m in minutes]
     differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
     
+    # Create DataFrame and save to CSV
+    df = pd.DataFrame({
+        'Minute': minutes,
+        'Minute_Average_FT%': ft_percentages,
+        'Season_Average_FT%': yearly_percentages,
+        'Difference': differences
+    })
+    df.to_csv('ft_percentage_data.csv', index=False)
+    
     # Create the plot
     plt.figure(figsize=(12, 8))
     
@@ -319,9 +329,10 @@ def main():
         print("homedates: " + str(arrHomeDates))
 
         for date in arrHomeDates:
-            print("here!")
+            # print("here!")
             curr_date = date.split("-")
             analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+            print("minutes: " + str(analyzer.minutes))
 
             #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
 
