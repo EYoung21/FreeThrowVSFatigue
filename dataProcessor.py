@@ -76,8 +76,10 @@ class FreeThrowAnalyzer:
             # Track substitutions
             if 'enters' in str(play.get('description', '')):
                 desParsed = play['description'].split(' enters')
+                # print(str(desParsed))
+                # exit()
                 player_in = desParsed[0]
-                desParsed2 = desParsed.split('for ')
+                desParsed2 = desParsed[1].split('for ')
 
                 playersThatSubbedOut.add(desParsed2[1])
                 
@@ -86,7 +88,10 @@ class FreeThrowAnalyzer:
                         
             # Track free throws
             if 'free throw' in str(play.get('description', '')):
-                player = play['description'].split(' ')[0]
+                if 'makes' in play['description']:
+                    player = play['description'].split(' makes')[0]
+                if 'misses' in play['description']:
+                    player = play['description'].split(' misses')[0]
 
                 if player in playersThatSubbedOut:
                     continue #we only want to track the first stretch of playing time
