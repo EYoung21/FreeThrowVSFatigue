@@ -250,8 +250,9 @@ def main():
     allTeams = [Team.BOSTON_CELTICS, Team.NEW_JERSEY_NETS, Team.NEW_YORK_KNICKS, Team.PHILADELPHIA_76ERS, Team.TORONTO_RAPTORS, Team.CHICAGO_BULLS, Team.CLEVELAND_CAVALIERS, Team.DETROIT_PISTONS, Team.INDIANA_PACERS, Team.MILWAUKEE_BUCKS, Team.ATLANTA_HAWKS, Team.CHARLOTTE_HORNETS, Team.MIAMI_HEAT, Team.ORLANDO_MAGIC, Team.WASHINGTON_WIZARDS, Team.DENVER_NUGGETS, Team.MINNESOTA_TIMBERWOLVES, Team.OKLAHOMA_CITY_THUNDER, Team.PORTLAND_TRAIL_BLAZERS, Team.UTAH_JAZZ, Team.GOLDEN_STATE_WARRIORS, Team.LOS_ANGELES_CLIPPERS, Team.LOS_ANGELES_LAKERS, Team.PHOENIX_SUNS, Team.SACRAMENTO_KINGS, Team.DALLAS_MAVERICKS, Team.HOUSTON_ROCKETS, Team.MEMPHIS_GRIZZLIES, Team.NEW_ORLEANS_PELICANS, Team.SAN_ANTONIO_SPURS]
     
     #it's possible that we will have to manually create the date of home games for each team for the entire season
-    schedule = client.season_schedule(season_end_year=2024)
-
+    print("Writing games for 2017-2018 season to CSV file")
+    client.season_schedule(season_end_year=2024, output_type=OutputType.CSV, output_file_path="./2023_2024_season.csv")
+    # exit()
     print("here!")
 
     for team in allTeams:
