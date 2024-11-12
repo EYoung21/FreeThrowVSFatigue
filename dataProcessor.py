@@ -32,6 +32,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
+            time.sleep(3.1)
 
 
             # print("playByPlay dara: " + str(pbp_data))
@@ -61,7 +62,6 @@ class FreeThrowAnalyzer:
     def _process_game_data(self, pbp_data: List[dict]): #we'll have to get the data by quarters, because each quarter resets at 12:00
         """Process play by play data to extract free throw attempts and player minutes."""
         player_entry_times = {}  # Track when players entered the game
-        #TODO: need to get info on starters for each game and their entry times to the above dictionary somehow
 
         playersThatSubbedOut = set()
 
@@ -227,9 +227,9 @@ def get_team_home_dates(team):
                 
                 dates.add(game_date.strftime('%Y-%m-%d'))
                 
-                print("CSV DATE: " + row[0])
-                print("Converted date: " + game_date.strftime('%Y-%m-%d'))
-                print()
+                # print("CSV DATE: " + row[0])
+                # print("Converted date: " + game_date.strftime('%Y-%m-%d'))
+                # print()
 
         
     return sorted(list(dates))
@@ -308,10 +308,9 @@ def main():
 
     #it's possible that we will have to manually create the date of home games for each team for the entire season
     print("Writing games for 2017-2018 season to CSV file")
-    # client.season_schedule(season_end_year=2024, output_type=OutputType.CSV, output_file_path="./2023_2024_season.csv")
-    # exit()
-
-    # print("here!")
+    # endYear = 2024
+    # client.season_schedule(season_end_year=endYear, output_type=OutputType.CSV, output_file_path=f"./{endYear-1}_{endYear}_season.csv")
+    # time.sleep(3.1)
 
     for key in allTeams:
         # below, "team" should be in this format: "Team.BOSTON_CELTICS"
