@@ -160,6 +160,8 @@ class FreeThrowAnalyzer:
         try:
             # Case-insensitive search for the player
             player_row = df[df['Player'].str.lower() == player_name.lower()]
+
+            print(str(player_row))
             
             if len(player_row) == 0:
                 return None
@@ -212,15 +214,13 @@ class FreeThrowAnalyzer:
             df = df[df['Player'].notna()]  # Remove any rows without player names
             df = df[['Player', 'FT', 'FTA']]  # Keep only player name, FT made, and FT attempts
             
-            # Format player names to first initial + period + last name
+            # Format player names to first initial + period + first continuous string after
             def format_player_name(name):
-                # Split the name into parts
                 parts = name.split()
                 if len(parts) >= 2:
-                    # Take first letter of first name + period + rest of name
                     first_initial = parts[0][0]
-                    last_name = ' '.join(parts[1:])  # Join all parts after first name
-                    return f"{first_initial}. {last_name}"
+                    second_part = parts[1]  # Just take the first word after the first name
+                    return f"{first_initial}. {second_part}"
                 return name
             
             # Apply the name formatting
