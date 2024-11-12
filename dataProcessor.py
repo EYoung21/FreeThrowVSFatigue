@@ -1,4 +1,6 @@
 from basketball_reference_web_scraper import client
+import time
+import requests
 from basketball_reference_web_scraper.data import Team, OutputType
 from datetime import datetime
 from typing import Dict, List, Set
@@ -26,14 +28,31 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            print("playByPlay dara: " + str(pbp_data))
+
+
+            # print("playByPlay dara: " + str(pbp_data))
             
             # game_id = f"{year}{month:02d}{day:02d}_{team}"
             # if game_id not in self.processed_games:
             self._process_game_data(pbp_data)
             # self.processed_games.add(game_id)
-        except Exception as e:
-            print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    return self.process_team_games(team, year, month, day)
+                else:
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    return self.process_team_games(team, year, month, day)
+            else:
+                print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
+                raise
     
     def _process_game_data(self, pbp_data: List[dict]): #we'll have to get the data by quarters, because each quarter resets at 12:00
         """Process play by play data to extract free throw attempts and player minutes."""
@@ -132,13 +151,32 @@ class FreeThrowAnalyzer:
         
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
     def calculateMinuteAndYearlyAverages(self):
-        print("minutes: " + str(self.minutes))
+        # print("minutes: " + str(self.minutes))
         #this didn't print anything ??
 
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        season_stats = client.players_season_totals(season_end_year=2024)
+        try:
+            season_stats = client.players_season_totals(season_end_year=2024)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    season_stats = client.players_season_totals(season_end_year=2024)
+                else:
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    season_stats = client.players_season_totals(season_end_year=2024)
+            else:
+                # Re-raise if it's a different HTTP error
+                raise
+
 
         for i in range(len(self.minutes)): #minute would be i (index + 1)
             minuteAverage = self.minutes[i+1][0] / self.minutes[i+1][0] + self.minutes[i+1][1]  #total made / total made + total missed
@@ -212,6 +250,11 @@ def main():
         arrHomeDates = get_team_home_dates(team, schedule)
         print("currTeam: " + str(team))
         print("homedates: " + str(arrHomeDates))
+        print()
+        print("Year:" + str(arrHomeDates[0].year))
+        print("Month: " + str(arrHomeDates[0].month))
+        print("Day: " + str(arrHomeDates[0].day))
+
         for date in arrHomeDates:
             analyzer.process_team_games(team, date.year, date.month, date.day) #team, year, month, day
 
@@ -219,16 +262,16 @@ def main():
 
 
     # minuteAverages = calculateMinuteAverages()
-
+    
     ansArr = analyzer.calculateMinuteAndYearlyAverages()
     
     minuteAveragesDict = ansArr[0]
 
     minuteYearlyAveragesDict = ansArr[1]
 
-    print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
+    # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
-    print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+    # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
     plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict)
 
@@ -236,55 +279,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-#testing verison of main below to test rate limits
-
-
-
-# import time
-# from requests.exceptions import HTTPError
-
-# def test_single_game():
-#     print("Testing access to a single game...")
-#     try:
-#         # Try with a 2022 game instead (older data might be more accessible)
-#         game = client.play_by_play(
-#             home_team=Team.BOSTON_CELTICS,
-#             year=2023,
-#             month=10,
-#             day=27
-#         )
-        
-#         print("Successfully accessed game!")
-#         print("\nFirst 5 plays:")
-#         for play in game[:5]:
-#             print(play)
-            
-#     except HTTPError as e:
-#         if "429" in str(e):
-#             print("Rate limit hit. Need to wait longer between requests")
-#             print("Trying again in 60 seconds...")
-#             time.sleep(60)
-#             try:
-#                 client.play_by_play(
-#                     home_team=Team.BOSTON_CELTICS, 
-#                     year=2023, month=10, day=27, 
-#                     output_type=OutputType.JSON
-#                 )
-#                 print("Success on second attempt!")
-#             except Exception as e2:
-#                 print(f"Second attempt failed: {e2}")
-#         else:
-#             print(f"Error: {e}")
-
-# def main():
-#     test_single_game()
-
-# if __name__ == '__main__':
-#     main()
