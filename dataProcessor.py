@@ -319,6 +319,7 @@ def main():
         print("homedates: " + str(arrHomeDates))
 
         for date in arrHomeDates:
+            print("here!")
             curr_date = date.split("-")
             analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
 
