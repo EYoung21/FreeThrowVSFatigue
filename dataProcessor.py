@@ -3,15 +3,13 @@ from basketball_reference_web_scraper.data import Team, OutputType
 from datetime import datetime
 from typing import Dict, List, Set
 import math
-from basketball_reference_web_scraper import client
-from basketball_reference_web_scraper import client
 from basketball_reference_web_scraper.data import Team, Location
 import matplotlib.pyplot as plt
 import numpy as np
 
 class FreeThrowAnalyzer:
     def __init__(self):
-        self.processed_games: Set[str] = set()
+        # self.processed_games: Set[str] = set()
         self.minutes:Set[int] = set()
         #each minute should have a total made and total missed
         #AND a an average of each player's yearly ft % that is included in the above
@@ -30,18 +28,17 @@ class FreeThrowAnalyzer:
             )
             print("playByPlay dara: " + str(pbp_data))
             
-            game_id = f"{year}{month:02d}{day:02d}_{team}"
-            if game_id not in self.processed_games:
-                self._process_game_data(pbp_data, game_id)
-                self.processed_games.add(game_id)
+            # game_id = f"{year}{month:02d}{day:02d}_{team}"
+            # if game_id not in self.processed_games:
+            self._process_game_data(pbp_data)
+            # self.processed_games.add(game_id)
         except Exception as e:
             print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
     
-    def _process_game_data(self, pbp_data: List[dict]):
+    def _process_game_data(self, pbp_data: List[dict]): #we'll have to get the data by quarters, because each quarter resets at 12:00
         """Process play by play data to extract free throw attempts and player minutes."""
         player_entry_times = {}  # Track when players entered the game
         #TODO: need to get info on starters for each game and their entry times to the above dictionary somehow
-
 
         playersThatSubbedOut = set()
 
@@ -54,8 +51,9 @@ class FreeThrowAnalyzer:
                 desParsed2 = desParsed.split('for ')
 
                 playersThatSubbedOut.add(desParsed2[1])
-
-                player_entry_times[player_in] = play.get('time_seconds')
+                
+                player_entry_times[player_in] = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
+                #calculateConvertedIGT will convert from remaining seconds in period + quarter to current minute in game
                         
             # Track free throws
             if 'FREE THROW' in str(play.get('description', '')):
@@ -63,10 +61,13 @@ class FreeThrowAnalyzer:
 
                 if player in playersThatSubbedOut:
                     continue #we only want to track the first stretch of playing time
+                
+                if player not in player_entry_times: #they were a starter
+                    player_entry_times[player] = "0" #they came into the game at 0 minutes
 
                 entry_time = player_entry_times.get(player)
 
-                minutes_played = (entry_time - play.get('time_seconds', 0)) / 60
+                minutes_played = (entry_time - self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')))
                 
                 curr_minute = math.floor(minutes_played)
 
@@ -85,14 +86,49 @@ class FreeThrowAnalyzer:
                         self.minutes[curr_minute][1] += 1 #adds a miss
                         self.minutes[curr_minute][2].add(player)
 
-    def get_player_ft_pct(self, player_name, season_stats):
-        for player in season_stats:
+    def calculateConvertedIGT(self, remainingSecondsInQuarter, quarter): #remaining seconds, quarter (1, 2, 3, 4)
+        remainingMinutes = remainingSecondsInQuarter / 60
+        minutesPlayedInQuarter = 12 - remainingMinutes
+
+        if quarter == "1":
+            return minutesPlayedInQuarter
+        elif quarter == "2":
+            return 12 + minutesPlayedInQuarter
+        elif quarter == "3":
+            return 24 + minutesPlayedInQuarter
+        elif quarter == "4":
+            return 36 + minutesPlayedInQuarter
+
+
+
+    def get_player_ft_pct(self, player_name, season_stats): 
+        #number_repeated represents how many consequetive times a player's ft average comes from another team
+        
+        for i in range(len(season_stats)):
+            player = season_stats[i]
             if player['name'] == player_name:
                 # Calculate FT%
                 if player['free_throws_attempted'] > 0:  # avoid division by zero
-                    ft_pct = (player['free_throws_made'] / player['free_throws_attempted']) * 100
-                    return ft_pct
-        return None
+                    made = player['free_throws_made']
+                    missed = player['free_throws_attempted']
+                    if season_stats[i+1]['name'] != player_name:
+                        return (made / (made+missed)) * 100 #calculates average
+                    else: #handles case where player played on different teams in a year (got traded?)
+                        indicesToCheck = []
+                        j = i+1
+                        while j < len(season_stats):
+                            if season_stats[j]['name'] == player_name:
+                                indicesToCheck.append(j)
+                            j += 1
+
+                        for k in range(len(indicesToCheck)):
+                            if season_stats[k]['free_throws_attempted'] > 0:
+                                made += season_stats[k]['free_throws_made']
+                                missed += season_stats[k]['free_throws_attempted']
+
+                        return (made / (made+missed)) * 100
+
+        return None #if player requested wasn't in season stats
         
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
     def calculateMinuteAndYearlyAverages(self):
@@ -106,13 +142,13 @@ class FreeThrowAnalyzer:
 
         for i in range(len(self.minutes)): #minute would be i (index + 1)
             minuteAverage = self.minutes[i+1][0] / self.minutes[i+1][0] + self.minutes[i+1][1]  #total made / total made + total missed
-            atMinuteAverages[i+1] = minuteAverage
+            atMinuteAverages[i+1] = minuteAverage * 100 #to get percentage
 
             totalPercentage = 0
             totalPlayers = len(self.minutes[i+1][2])
             for i in range(totalPlayers): #looping through set of players that shot fts at each minute
                 currPlayerName = self.minutes[i+1][2][i] #curr player
-                totalPercentage += self.get_player_ft_pct(self, currPlayerName, season_stats)
+                totalPercentage += self.get_player_ft_pct(self, currPlayerName, season_stats, False)
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalPlayers
 
@@ -159,43 +195,47 @@ def plot_ft_percentages(minute_averages, yearly_averages):
     plt.savefig('ft_percentage_analysis.png')
     plt.show()
 
-# def main():
-#     analyzer = FreeThrowAnalyzer()
+def main():
+    analyzer = FreeThrowAnalyzer()
 
-#     #now, for every team loop from 
+    #now, for every team loop from 
 
-#     allTeams = ["Celtics", "Nets", "Knicks", "76ers", "Raptors", "Bulls", "Cavaliers", "Pistons", "Pacers", "Bucks", "Hawks", "Hornets", "Heat", "Magic", "Wizards", "Nuggets", "Timberwolves", "Thunder", "Trail Blazers", "Jazz", "Warriors", "Clippers", "Lakers", "Suns", "Kings", "Mavericks", "Rockets", "Grizzlies", "Pelicans", "Spurs"]
+    allTeams = [Team.BOSTON_CELTICS, Team.NEW_JERSEY_NETS, Team.NEW_YORK_KNICKS, Team.PHILADELPHIA_76ERS, Team.TORONTO_RAPTORS, Team.CHICAGO_BULLS, Team.CLEVELAND_CAVALIERS, Team.DETROIT_PISTONS, Team.INDIANA_PACERS, Team.MILWAUKEE_BUCKS, Team.ATLANTA_HAWKS, Team.CHARLOTTE_HORNETS, Team.MIAMI_HEAT, Team.ORLANDO_MAGIC, Team.WASHINGTON_WIZARDS, Team.DENVER_NUGGETS, Team.MINNESOTA_TIMBERWOLVES, Team.OKLAHOMA_CITY_THUNDER, Team.PORTLAND_TRAIL_BLAZERS, Team.UTAH_JAZZ, Team.GOLDEN_STATE_WARRIORS, Team.LOS_ANGELES_CLIPPERS, Team.LOS_ANGELES_LAKERS, Team.PHOENIX_SUNS, Team.SACRAMENTO_KINGS, Team.DALLAS_MAVERICKS, Team.HOUSTON_ROCKETS, Team.MEMPHIS_GRIZZLIES, Team.NEW_ORLEANS_PELICANS, Team.SAN_ANTONIO_SPURS]
     
-#     #it's possible that we will have to manually create the date of home games for each team for the entire season
-#     schedule = client.season_schedule(season_end_year=2024)
+    #it's possible that we will have to manually create the date of home games for each team for the entire season
+    schedule = client.season_schedule(season_end_year=2024)
 
-#     print("here!")
+    print("here!")
 
-#     for team in allTeams:
-            #below, "team" should be in this format: "Team.BOSTON_CELTICS"
-#         arrHomeDates = get_team_home_dates(team, schedule)
-#         print("homedates: " + str(arrHomeDates))
-#         for date in arrHomeDates:
-#             dateArr = date.split("-") #YYYY-MM-DD
-#             print("calling origin func")
-#             analyzer.process_team_games(team, dateArr[0], dateArr[1], dateArr[2]) #team, year, month, day
+    for team in allTeams:
+        # below, "team" should be in this format: "Team.BOSTON_CELTICS"
+        arrHomeDates = get_team_home_dates(team, schedule)
+        print("currTeam: " + str(team))
+        print("homedates: " + str(arrHomeDates))
+        for date in arrHomeDates:
+            analyzer.process_team_games(team, date.year, date.month, date.day) #team, year, month, day
 
-#     ansArr = analyzer.calculateMinuteAndYearlyAverages()
+            #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
+
+
+    # minuteAverages = calculateMinuteAverages()
+
+    ansArr = analyzer.calculateMinuteAndYearlyAverages()
     
-#     minuteAveragesDict = ansArr[0]
+    minuteAveragesDict = ansArr[0]
 
-#     minuteYearlyAveragesDict = ansArr[1]
+    minuteYearlyAveragesDict = ansArr[1]
 
-#     print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
+    print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
-#     print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+    print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-#     plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict)
+    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict)
 
-#     exit()
+    exit()
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
 
 
 
@@ -207,44 +247,44 @@ def plot_ft_percentages(minute_averages, yearly_averages):
 
 
 
-import time
-from requests.exceptions import HTTPError
+# import time
+# from requests.exceptions import HTTPError
 
-def test_single_game():
-    print("Testing access to a single game...")
-    try:
-        # Try with a 2022 game instead (older data might be more accessible)
-        game = client.play_by_play(
-            home_team=Team.BOSTON_CELTICS,
-            year=2023,
-            month=10,
-            day=27
-        )
+# def test_single_game():
+#     print("Testing access to a single game...")
+#     try:
+#         # Try with a 2022 game instead (older data might be more accessible)
+#         game = client.play_by_play(
+#             home_team=Team.BOSTON_CELTICS,
+#             year=2023,
+#             month=10,
+#             day=27
+#         )
         
-        print("Successfully accessed game!")
-        print("\nFirst 5 plays:")
-        for play in game[:5]:
-            print(play)
+#         print("Successfully accessed game!")
+#         print("\nFirst 5 plays:")
+#         for play in game[:5]:
+#             print(play)
             
-    except HTTPError as e:
-        if "429" in str(e):
-            print("Rate limit hit. Need to wait longer between requests")
-            print("Trying again in 60 seconds...")
-            time.sleep(60)
-            try:
-                client.play_by_play(
-                    home_team=Team.BOSTON_CELTICS, 
-                    year=2023, month=10, day=27, 
-                    output_type=OutputType.JSON
-                )
-                print("Success on second attempt!")
-            except Exception as e2:
-                print(f"Second attempt failed: {e2}")
-        else:
-            print(f"Error: {e}")
+#     except HTTPError as e:
+#         if "429" in str(e):
+#             print("Rate limit hit. Need to wait longer between requests")
+#             print("Trying again in 60 seconds...")
+#             time.sleep(60)
+#             try:
+#                 client.play_by_play(
+#                     home_team=Team.BOSTON_CELTICS, 
+#                     year=2023, month=10, day=27, 
+#                     output_type=OutputType.JSON
+#                 )
+#                 print("Success on second attempt!")
+#             except Exception as e2:
+#                 print(f"Second attempt failed: {e2}")
+#         else:
+#             print(f"Error: {e}")
 
-def main():
-    test_single_game()
+# def main():
+#     test_single_game()
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
