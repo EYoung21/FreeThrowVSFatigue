@@ -34,7 +34,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(3.1)
+            time.sleep(1)
 
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -64,30 +64,34 @@ class FreeThrowAnalyzer:
                 print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict]): #we'll have to get the data by quarters, because each quarter resets at 12:00
-        """Process play by play data to extract free throw attempts and player minutes."""
-        player_entry_times = {}  # Track when players entered the game
-
+    def _process_game_data(self, pbp_data: List[dict]):
+        player_entry_times = {}
         playersThatSubbedOut = set()
 
+        # Debug: Print the full game timeline
+        # print("\n=== Game Timeline ===")
+        # for play in pbp_data:
+        #     print(f"Period: {play.get('period')}, Remaining Seconds: {play.get('remaining_seconds_in_period')}, Description: {play.get('description')}")
+
         for play in pbp_data:
-            # print(play.get('description', ''))
+            # print(str(play))
             # continue
-            # exit()
-            # Track substitutions
             if 'enters' in str(play.get('description', '')):
                 desParsed = play['description'].split(' enters')
-                # print(str(desParsed))
-                # exit()
                 player_in = desParsed[0]
                 desParsed2 = desParsed[1].split('for ')
-
                 playersThatSubbedOut.add(desParsed2[1])
                 
-                player_entry_times[player_in] = float(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period')))
-                #calculateConvertedIGT will convert from remaining seconds in period + quarter to current minute in game
-                        
-            # Track free throws
+                # Debug: Print substitution details
+                converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
+                # print(f"\n=== Substitution ===")
+                # print(f"Player entering: {player_in}")
+                # print(f"Period: {play.get('period')}")
+                # print(f"Remaining seconds: {play.get('remaining_seconds_in_period')}")
+                # print(f"Converted time: {converted_time}")
+                
+                player_entry_times[player_in] = converted_time
+
             if 'free throw' in str(play.get('description', '')):
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
@@ -95,35 +99,62 @@ class FreeThrowAnalyzer:
                     player = play['description'].split(' misses')[0]
 
                 if player in playersThatSubbedOut:
-                    continue #we only want to track the first stretch of playing time
+                    continue
+
+                # Debug: Print free throw details
+                # print(f"\n=== Free Throw ===")
+                # print(f"Player: {player}")
+                # print(f"Period: {play.get('period')}")
+                # print(f"Remaining seconds: {play.get('remaining_seconds_in_period')}")
                 
-                if player not in player_entry_times: #they were a starter
-                    player_entry_times[player] = float(0) #they came into the game at 0 minutes
+                if player not in player_entry_times:
+                    print(f"Starter detected: {player}")
+                    player_entry_times[player] = float(0.0)
 
-                entry_time = float(player_entry_times.get(player))
-
-                print("entry time: " + str(entry_time))
-
-                print("Converted time at freethrow: " + str(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))))
-
-                # exit()
-
-                minutes_played = float((float(self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))) - float(entry_time)))
+                entry_time = player_entry_times.get(player)
+                current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
                 
+                print(f"Entry time seconds: {entry_time}")
+                print(f"Current time seconds: {current_time}")
+                
+                seconds_played = current_time - entry_time
+                
+                # print(f"Seconds played: {seconds_played}")
+                
+                minutes_played = seconds_played / 60
+
+                print(f"Minutes played: {minutes_played}")
+
+                if minutes_played < 0:
+                    print(f"WARNING: Negative minutes detected at {minutes_played}!")
+                    # print(f"Full play data: {play}")
+                    continue
+
                 curr_minute = int(math.floor(minutes_played))
 
+                print("minute played: " + str(curr_minute))
+
+                print()
                 if curr_minute not in self.minutes:
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                        print(str(player))
+                        print("make")
                         self.minutes[curr_minute] = [1, 0, set()] #total made, total missed, players at this minute
                         self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
+                        print(str(player))
+                        print("miss")
                         self.minutes[curr_minute] = [0, 1, set()] #they're 0 for 1
                         self.minutes[curr_minute][2].add(player)
                 else: #the minute already was instantiated
-                    if 'misses' in play['description']: #the player made the freethrow, they're now 1 for 1
+                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                        print(str(player))
+                        print("make")
                         self.minutes[curr_minute][0] += 1 #adds a make
                         self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
+                        print(str(player))
+                        print("miss")
                         self.minutes[curr_minute][1] += 1 #adds a miss
                         self.minutes[curr_minute][2].add(player)
             # exit()
@@ -134,160 +165,140 @@ class FreeThrowAnalyzer:
         # print("quarter: " + str(quarter))
         # exit()
         
-        remainingMinutes = remainingSecondsInQuarter / 60
-        minutesPlayedInQuarter = 12 - remainingMinutes
+        return (quarter * 12 * 60) - remainingSecondsInQuarter #returns seconds elapses so far
 
-        if str(quarter) == "1":
-            return float(minutesPlayedInQuarter)
-        elif str(quarter) == "2":
-            return float(12 + minutesPlayedInQuarter)
-        elif str(quarter) == "3":
-            return float(24 + minutesPlayedInQuarter)
-        elif str(quarter) == "4":
-            return float(36 + minutesPlayedInQuarter)
+        # remainingMinutes = remainingSecondsInQuarter / 60
+        # minutesPlayedInQuarter = 12 - remainingMinutes
 
+        # if str(quarter) == "1":
+        #     return minutesPlayedInQuarter
+        # elif str(quarter) == "2":
+        #     return 12 + minutesPlayedInQuarter
+        # elif str(quarter) == "3":
+        #     return 24 + minutesPlayedInQuarter
+        # elif str(quarter) == "4":
+        #     return 36 + minutesPlayedInQuarter
 
-
-    def get_player_ft_pct(self, df, player_name):
-        """
-        Look up a player's free throw percentage from the DataFrame.
-        
-        Parameters:
-        df (pandas.DataFrame): DataFrame containing player stats
-        player_name (str): Name of the player to look up
-        
-        Returns:
-        float: Player's FT percentage, or None if player not found
-        """
-        try:
-            # Case-insensitive search for the player
-            player_row = df[df['Player'].str.lower() == player_name.lower()]
-
-            print(str(player_row))
-            
-            if len(player_row) == 0:
-                return None
-                
-            ft_percentage = player_row['FT%'].iloc[0]
-            return ft_percentage
-            
-        except Exception as e:
-            print(f"Error looking up player: {e}")
-            return None
-
-    # Example usage:
-    # ft_percent = get_player_ft_percentage(df, "Colin Castleton")
-    # print(f"FT%: {ft_percent}%")
 
     
-    def get_ft_percentages(self, year):
-        """
-        Scrapes Basketball Reference for current season FT percentages.
+    def get_player_ft_pct(self, player_name): 
+        #number_repeated represents how many consequetive times a player's ft average comes from another team
         
-        Args:
-            year (int): The season end year (e.g., 2024 for 2023-24 season)
-            
-        Returns:
-            pandas.DataFrame: DataFrame with player names and FT percentages
-        """
-        # URL for the current season's totals
-        url = f"https://www.basketball-reference.com/leagues/NBA_{year}_totals.html"
-        
-        try:
-            # Add headers to mimic a browser request
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-            }
-            
-            # Make the request
-            response = requests.get(url, headers=headers)
-            response.raise_for_status()
-            
-            # Parse the HTML
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Find the main stats table
-            table = soup.find('table', id='totals_stats')
-            
-            # Convert to pandas DataFrame
-            df = pd.read_html(str(table))[0]
-            
-            # Clean up the data
-            df = df[df['Player'].notna()]  # Remove any rows without player names
-            df = df[['Player', 'FT', 'FTA']]  # Keep only player name, FT made, and FT attempts
-            
-            # Format player names to first initial + period + first continuous string after
-            def format_player_name(name):
-                parts = name.split()
-                if len(parts) >= 2:
-                    first_initial = parts[0][0]
-                    second_part = parts[1]  # Just take the first word after the first name
-                    return f"{first_initial}. {second_part}"
-                return name
-            
-            # Apply the name formatting
-            df['Player'] = df['Player'].apply(format_player_name)
-            
-            # Remove rows where FTA is 0
-            df = df[df['FTA'] > 0]
-            
-            # Group by player and sum their FT stats
-            grouped_df = df.groupby('Player').agg({
-                'FT': 'sum',
-                'FTA': 'sum'
-            }).reset_index()
-            
-            # Calculate FT% after combining stats
-            grouped_df['FT%'] = (grouped_df['FT'] / grouped_df['FTA'] * 100).round(1)
-            
-            # Sort by FT% descending
-            grouped_df = grouped_df.sort_values('FT%', ascending=False)
-            
-            # Reset index
-            grouped_df = grouped_df.reset_index(drop=True)
-            
-            return grouped_df
-            
-        except requests.exceptions.RequestException as e:
-            print(f"Error fetching data: {e}")
-            return pd.DataFrame()
-        except Exception as e:
-            print(f"Error processing data: {e}")
-            return pd.DataFrame()
+        def changeToFirst(word):
+            stringArr = word.split(" ")
+            firstString = stringArr[0][0] + "." #gets first letter of first name
+            secondString = stringArr[1] #gets second string
+            fullString = firstString + " " + secondString
+            return fullString
+
+
+
+        with open("./2023_2024_player_season_totals.csv") as file:
+            reader = csv.reader(file, delimiter=',')
+            # Skip the header row
+            next(reader)
+            rows = list(reader)
+            #indcies 12 and 13 are made and attempted respectively
+            for i, row in enumerate(rows):
+                # player_row = row[0]
+                fullString = changeToFirst(row[1])
+                # print(fullString)
+                # exit()
+
+                if fullString == player_name:
+                    if int(row[13]) > 0: # avoid division by zero
+                        made = row[12]
+                        attempted = row[13]
+                        if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
+                            # print("player only appeared once")
+                            return float((int(made) / int(attempted))) * 100 #calculates average
+                        else:
+                            indicesToCheck = []
+                            j = i+1
+                            while j < len(rows):
+                                if changeToFirst(rows[j][1]) == player_name:
+                                    indicesToCheck.append(j)
+                                j += 1
+
+                            for k in range(len(indicesToCheck)):
+                                if int(rows[k][13]) > 0:
+                                    made += rows[k][12]
+                                    attempted += rows[k][13]
+                            # print("player was traded mid season")
+                            return float((int(made) / int(attempted))) * 100
+            return None #if player requested wasn't in season stats
+
+        # for i in range(len(season_stats)):
+        #     player = season_stats[i]
+        #     if player['name'] == player_name:
+        #         # Calculate FT%
+        #         if player['free_throws_attempted'] > 0:  # avoid division by zero
+        #             made = player['free_throws_made']
+        #             missed = player['free_throws_attempted']
+        #             if season_stats[i+1]['name'] != player_name:
+        #                 return (made / (made+missed)) * 100 #calculates average
+        #             else: #handles case where player played on different teams in a year (got traded?)
+        #                 indicesToCheck = []
+        #                 j = i+1
+        #                 while j < len(season_stats):
+        #                     if season_stats[j]['name'] == player_name:
+        #                         indicesToCheck.append(j)
+        #                     j += 1
+
+        #                 for k in range(len(indicesToCheck)):
+        #                     if season_stats[k]['free_throws_attempted'] > 0:
+        #                         made += season_stats[k]['free_throws_made']
+        #                         missed += season_stats[k]['free_throws_attempted']
+
+        #                 return (made / (made+missed)) * 100
+
+        # return None #if player requested wasn't in season stats
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
     def calculateMinuteAndYearlyAverages(self):
         # print("minutes: " + str(self.minutes))
         #this didn't print anything ??
-        year = 2024
-        data = self.get_ft_percentages(year)
-
-        # print(str(data))
+        # year = 2024
 
         # exit()
 
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        # try:
-        #     season_stats = client.players_season_totals(season_end_year=2024)
-        # except requests.exceptions.HTTPError as e:
-        #     if e.response.status_code == 429:
-        #         # Get the Retry-After header, if available
-        #         retry_after = e.response.headers.get("Retry-After")
-        #         if retry_after:
-        #             # If Retry-After is in seconds, wait that long
-        #             print(f"Rate limited. Retrying after {retry_after} seconds.")
-        #             time.sleep(int(retry_after))
-        #             # Retry the request
-        #             season_stats = client.players_season_totals(season_end_year=2024)
-        #         else:
-        #             print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-        #             time.sleep(60)  # Default wait time if Retry-After header is missing
-        #             season_stats = client.players_season_totals(season_end_year=2024)
-        #     else:
-        #         # Re-raise if it's a different HTTP error
-        #         raise
+        try:
+            client.players_season_totals(
+                season_end_year=2024, 
+                output_type=OutputType.CSV, 
+                output_file_path="./2023_2024_player_season_totals.csv"
+            )
+            time.sleep(1)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    client.players_season_totals(
+                        season_end_year=2024, 
+                        output_type=OutputType.CSV, 
+                        output_file_path="./2023_2024_player_season_totals.csv"
+                    )
+                else:
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    client.players_season_totals(
+                        season_end_year=2024, 
+                        output_type=OutputType.CSV, 
+                        output_file_path="./2023_2024_player_season_totals.csv"
+                    )
+            else:
+                # Re-raise if it's a different HTTP error
+                raise
+
+        # exit()
 
         # print("seasonstats: " + str(season_stats))
 
@@ -305,11 +316,12 @@ class FreeThrowAnalyzer:
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
                 currPlayerName = players[i] #curr player
-                print("|" + str(currPlayerName) + "|")
+                # print("|" + str(currPlayerName) + "|")
                 # print(str(data))
                 # print(str(self.get_player_ft_pct(data, "Joel Embid")))
                 # exit()
-                totalPercentage += float(self.get_player_ft_pct(data, currPlayerName))
+                # print("looking for: " + str(currPlayerName))
+                totalPercentage += float(self.get_player_ft_pct(currPlayerName))
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
@@ -356,6 +368,8 @@ def get_team_home_dates(team):
 def plot_ft_percentages(minute_averages, yearly_averages):
     # Get all minutes (x-axis)
     minutes = sorted(minute_averages.keys())
+
+    print(minutes)
     
     # Get corresponding values for each line
     ft_percentages = [minute_averages[m] for m in minutes]
@@ -435,42 +449,46 @@ def main():
     }
 
     #it's possible that we will have to manually create the date of home games for each team for the entire season
-    print("Writing games for 2017-2018 season to CSV file")
+    # print("Writing games for 2017-2018 season to CSV file")
     # endYear = 2024
     # client.season_schedule(season_end_year=endYear, output_type=OutputType.CSV, output_file_path=f"./{endYear-1}_{endYear}_season.csv")
     # time.sleep(3.1)
 
 
 
-    #commented for a sec for testing
-    # for key in allTeams:
-    #     # below, "team" should be in this format: "Team.BOSTON_CELTICS"
-    #     arrHomeDates = get_team_home_dates(key)
-    #     print("currTeam: " + str(key))
-    #     print("homedates: " + str(arrHomeDates))
+    # commented for a sec for testing
+    for key in allTeams:
+        # below, "team" should be in this format: "Team.BOSTON_CELTICS"
+        arrHomeDates = get_team_home_dates(key)
+        print("currTeam: " + str(key))
+        # print("homedates: " + str(arrHomeDates))
 
-    #     for date in arrHomeDates:
-    #         # print("here!")
-    #         curr_date = date.split("-")
-    #         analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
-    #         print("minutes: " + str(analyzer.minutes))
-
+        for date in arrHomeDates:
+            # print("here!")
+            curr_date = date.split("-")
+            analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+            # print("minutes: " + str(analyzer.minutes))
+            print("processed game")
+        # break
+    print("minutesDict: " + str(analyzer.minutes))
         
         
     #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
 
 
     # minuteAverages = calculateMinuteAverages()
-    analyzer.minutes = {2: [11, 30, {'W. Matthews', 'T. Young', 'C. Braun', 'A. Burks', 'Z. Williams', 'M. Turner', 'D. Sharpe', 'O. Okongwu', 'N. Batum', 'M. Bagley', 'J. Johnson', 'M. Robinson', 'M. Morris', 'D. Barlow', 'D. Mitchell', 'P. Reed', 'D. Smith', 'J. Smith', 'S. Lundy', 'J. Embiid', 'B. Bogdanović', 'S. Bey'}], 3: [4, 21, {'W. Matthews', 'T. Young', 'L. Walker', 'S. Lundy', 'R. Barrett', 'C. Capela', 'J. Embiid', 'N. Claxton', 'S. Gilgeous-Alexander', 'M. Bridges', 'B. Bogdanović', 'D. House', 'S. Bey', 'D. Sharpe'}], 6: [4, 16, {'B. Wesley', 'R. Barrett', 'O. Toppin', 'T. Lyles', 'O. Okongwu', 'D. Hunter', 'B. Bogdanović', 'T. Maxey', 'S. Dinwiddie', 'N. Alexander-Walker', 'S. Bey', 'B. Mathurin'}], 8: [4, 12, {'K. Kuzma', 'C. Capela', 'J. Embiid', 'D. Murray', 'B. Bogdanović', 'C. Cunningham', 'S. Bey'}], 0: [5, 14, {'W. Matthews', 'D. Smith', 'B. Fernando', 'O. Okongwu', 'P. Baldwin', 'D. Hunter', 'S. Gilgeous-Alexander', 'D. Barlow', 'D. House', 'I. Hartenstein', 'J. Williams'}], 9: [4, 6, {'K. Lowry', 'J. Randle', 'B. Bogdanović', 'P. Banchero', 'S. Bey'}], 1: [7, 19, {'W. Matthews', 'J. Smith', 'B. Fernando', 'K. Caldwell-Pope', 'J. Embiid', 'O. Okongwu', 'C. Capela', 'R. Gobert', 'M. Bridges', 'C. Porter', 'J. Johnson'}], 4: [7, 15, {'E. Omoruyi', 'P. Beverley', 'C. Capela', 'O. Okongwu', 'J. Richardson', 'D. Murray', 'B. Bogdanović', 'M. Bridges', 'M. Turner', 'J. Williams', 'G. Mathews', 'Z. Nnaji'}], 5: [5, 17, {'O. Toppin', 'H. Highsmith', 'C. Capela', 'R. Rollins', 'O. Okongwu', 'B. Bogdanović', 'K. Oubre', 'A. Nesmith', 'K. Johnson', 'S. Bey', 'J. Johnson'}], 13: [0, 2, {'B. Bogdanović', 'A. Edwards'}], 7: [4, 18, {'J. Ivey', 'B. Coulibaly', 'J. Embiid', 'O. Okongwu', 'D. Hunter', 'S. Gilgeous-Alexander', 'M. Bridges', 'S. Merrill', 'S. Bey'}], 11: [2, 7, {'J. Randle', 'M. Monk', 'B. Bogdanović', 'M. Bridges', 'S. Bey'}], 15: [1, 1, {'S. Gilgeous-Alexander', 'J. Randle'}], 17: [1, 0, {'J. Embiid'}], 10: [3, 9, {'O. Okongwu', 'S. Gilgeous-Alexander', 'B. Bogdanović', 'M. Bridges', 'B. Mathurin'}], -29: [1, 1, {'M. Bridges'}], 16: [1, 1, {'S. Gilgeous-Alexander'}]}
+    # analyzer.minutes = {2: [57, 15, {'D. Hunter', 'J. Embiid', 'S. Bey', 'D. Mitchell', 'T. Young', 'D. Sharpe', 'O. Okongwu', 'S. Barnes', 'J. Johnson', 'M. Robinson', 'C. Braun', 'M. Flynn', 'Z. Williams', 'C. Capela', 'P. Reed', 'W. Matthews', 'A. Pokusevski', 'N. Batum', 'S. Lundy', 'J. Tatum', 'D. Smith', 'G. Mathews', 'M. Bagley', 'M. Turner', 'A. Reaves', 'D. Bertāns', 'A. Burks', 'P. Pritchard', 'M. Morris', 'D. Barlow', 'T. Horton-Tucker', 'J. Smith', 'B. Bogdanović'}], 3: [50, 7, {'J. Embiid', 'B. Podziemski', 'S. Bey', 'T. Young', 'D. House', 'D. Sharpe', 'O. Okongwu', 'L. Walker', 'C. Metu', 'N. Claxton', 'M. Flynn', 'R. Barrett', 'S. Gilgeous-Alexander', 'L. James', 'C. Capela', 'M. Plumlee', 'W. Matthews', 'D. Booker', 'S. Lundy', 'G. Mathews', 'M. Bridges', 'T. Forrest', 'J. Brown', 'B. Bogdanović', 'D. Murray'}], 6: [31, 8, {'D. Hunter', 'B. Mathurin', 'N. Alexander-Walker', 'S. Bey', 'O. Toppin', 'B. Wesley', 'O. Okongwu', 'J. Butler', 'R. Rupert', 'M. Flynn', 'R. Barrett', 'J. Ivey', 'T. Maxey', 'K. Leonard', 'T. Lyles', 'S. Dinwiddie', 'T. Horton-Tucker', 'B. Bogdanović', 'G. Santos', 'D. White', 'C. Anthony'}], 8: [26, 9, {'J. Embiid', 'J. Porter', 'M. Brown', 'S. Bey', 'C. Cunningham', 'J. Allen', 'B. Fernando', 'C. Boucher', 'N. Richards', 'B. Bogdanović', 'K. Kuzma', 'B. Miller', 'D. Murray', 'C. Capela'}], 0: [24, 10, {'D. Hunter', 'W. Matthews', 'J. Landale', 'O. Okongwu', 'D. Barlow', 'J. Isaac', 'D. Smith', 'J. Johnson', 'B. Fernando', 'T. Mann', 'D. House', 'B. Bogdanović', 'J. Williams', 'K. Leonard', 'B. Lopez', 'I. Hartenstein', 'S. Gilgeous-Alexander', 'P. Baldwin'}], 9: [13, 5, {'D. Booker', 'P. Banchero', 'S. Bey', 'K. Lowry', 'B. Fernando', 'B. Bogdanović', 'J. Randle', 'M. Flynn', 'R. Hachimura'}], 1: [35, 15, {'D. Hunter', 'J. Embiid', 'O. Okongwu', 'J. Johnson', 'Z. Williamson', 'L. James', 'C. Capela', 'A. Pokusevski', 'W. Matthews', 'M. Bridges', 'L. Kornet', 'C. Porter', 'B. Fernando', 'J. Nurkić', 'J. Smith', 'K. Caldwell-Pope', 'J. Hood-Schifino', 'D. Murray', 'R. Gobert'}], 4: [29, 11, {'D. Hunter', 'J. Porter', 'M. Brown', 'S. Bey', 'P. Beverley', 'T. Young', 'D. Wade', 'O. Okongwu', 'S. Curry', 'C. Capela', 'N. Powell', 'G. Mathews', 'M. Turner', 'J. Richardson', 'Z. Nnaji', 'E. Omoruyi', 'M. Bridges', 'B. Bogdanović', 'J. Williams', 'D. Murray'}], 5: [29, 9, {'D. Hunter', 'S. Bey', 'O. Toppin', 'A. Nesmith', 'K. Oubre', 'O. Okongwu', 'J. Johnson', 'R. Rollins', 'C. Capela', 'J. Tatum', 'A. Reaves', 'K. Leonard', 'K. Bufkin', 'B. Fernando', 'T. Horton-Tucker', 'K. Johnson', 'H. Highsmith', 'B. Bogdanović', 'D. Murray'}], 13: [1, 1, {'A. Edwards', 'B. Bogdanović'}], 7: [31, 7, {'D. Hunter', 'J. Embiid', 'O. Okongwu', 'C. Capela', 'G. Dick', 'S. Bey', 'S. Merrill', 'D. Murray', 'J. Ivey', 'K. Porziņģis', 'B. Fernando', 'J. Duren', 'B. Coulibaly', 'S. Gilgeous-Alexander', 'M. Bridges', 'F. Wagner'}], 11: [15, 1, {'D. Hunter', 'S. Bey', 'D. Murray', 'B. Fernando', 'B. Bogdanović', 'J. Randle', 'M. Monk', 'M. Bridges'}], 15: [2, 0, {'S. Gilgeous-Alexander', 'J. Randle'}], 17: [1, 0, {'J. Embiid'}], 10: [16, 4, {'B. Mathurin', 'O. Okongwu', 'G. Dick', 'S. Bey', 'J. Butler', 'B. Bogdanović', 'S. Gilgeous-Alexander', 'M. Bridges'}], -29: [2, 0, {'M. Bridges'}], 16: [6, 1, {'D. Booker', 'D. Murray', 'S. Gilgeous-Alexander', 'K. Leonard'}], 14: [1, 0, {'D. Booker'}], 18: [0, 1, {'M. Bridges'}], 37: [2, 0, {'W. Matthews'}]}
     ansArr = analyzer.calculateMinuteAndYearlyAverages()
     
     minuteAveragesDict = ansArr[0]
 
     minuteYearlyAveragesDict = ansArr[1]
 
-    # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
+    print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
-    # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+    print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+
+    print()
 
     plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict)
 

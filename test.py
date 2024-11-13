@@ -164,9 +164,63 @@
 
 
 
+# from basketball_reference_web_scraper import client
+
+# # Try a recent completed season
+# season_stats = client.players_season_totals(season_end_year=2015)
+
+# print(str(season_stats))
+
+
+
+import csv
 from basketball_reference_web_scraper import client
+import time
+import requests
+from basketball_reference_web_scraper.data import Team, OutputType
+from datetime import datetime
+from typing import Dict, List, Set
+import math
+from basketball_reference_web_scraper.data import Team, Location
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime, timedelta
+import csv
+import pytz
+import pandas as pd
+from bs4 import BeautifulSoup
+def get_player_ft_pct(player_name): 
+        #number_repeated represents how many consequetive times a player's ft average comes from another team
+        
+        with open("./2023_2024_player_season_totals.csv") as file:
+            reader = csv.reader(file, delimiter=',')
+            # Skip the header row
+            next(reader)
+            #indcies 12 and 13 are made and attempted respectively
+            for i, row in enumerate(reader):
+                # player_row = row[0]
+                if row[0] == player_name:
+                    if row[13] > 0:# avoid division by zero
+                        made = row[12]
+                        attempted = row[13]
+                        if reader[i+1][0] != player_name:
+                            print("player only appeared once")
+                            return (made / attempted) * 100 #calculates average
+                        else:
+                            indicesToCheck = []
+                            j = i+1
+                            while j < len(reader):
+                                if reader[j][0] == player_name:
+                                    indicesToCheck.append(j)
+                                j += 1
 
-# Try a recent completed season
-season_stats = client.players_season_totals(season_end_year=2015)
+                            for k in range(len(indicesToCheck)):
+                                if reader[k][13] > 0:
+                                    made += reader[k][12]
+                                    attempted += reader[k][13]
+                            print("player was traded mid season")
+                            return (made / attempted) * 100
+            return None #if player requested wasn't in season stats
 
-print(str(season_stats))
+
+print(get_player_ft_pct("Giannis Antetokounmpo"))
