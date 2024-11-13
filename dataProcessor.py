@@ -460,10 +460,11 @@ def main():
     for key in allTeams:
         # below, "team" should be in this format: "Team.BOSTON_CELTICS"
         arrHomeDates = get_team_home_dates(key)
-        print("currTeam: " + str(key))
+        print(f"Starting: {key}")
         # print("homedates: " + str(arrHomeDates))
 
         for date in arrHomeDates:
+            print("Team: " + str(key))
             # print("here!")
             curr_date = date.split("-")
             analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
