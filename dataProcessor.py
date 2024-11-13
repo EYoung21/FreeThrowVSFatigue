@@ -34,7 +34,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(1)
+            time.sleep(2)
 
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -44,7 +44,7 @@ class FreeThrowAnalyzer:
             
             # game_id = f"{year}{month:02d}{day:02d}_{team}"
             # if game_id not in self.processed_games:
-            self._process_game_data(pbp_data)
+            self._process_game_data(pbp_data, team)
             # self.processed_games.add(game_id)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
@@ -64,7 +64,7 @@ class FreeThrowAnalyzer:
                 print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict]):
+    def _process_game_data(self, pbp_data: List[dict], team):
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -100,7 +100,7 @@ class FreeThrowAnalyzer:
 
                 if player in playersThatSubbedOut:
                     continue
-
+                print("Curr team: " + team)
                 # Debug: Print free throw details
                 # print(f"\n=== Free Throw ===")
                 # print(f"Player: {player}")
@@ -271,7 +271,7 @@ class FreeThrowAnalyzer:
                 output_type=OutputType.CSV, 
                 output_file_path="./2023_2024_player_season_totals.csv"
             )
-            time.sleep(1)
+            time.sleep(2)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
