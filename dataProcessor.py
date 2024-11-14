@@ -27,6 +27,7 @@ class FreeThrowAnalyzer:
     def process_team_games(self, team: Team, year: int, month: int, day: int):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
+        total_neg = 0
         try:
             pbp_data = client.play_by_play(
                 home_team=team,
@@ -44,7 +45,7 @@ class FreeThrowAnalyzer:
             
             # game_id = f"{year}{month:02d}{day:02d}_{team}"
             # if game_id not in self.processed_games:
-            self._process_game_data(pbp_data, team)
+            total_neg += self._process_game_data(pbp_data, team)
             # self.processed_games.add(game_id)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
@@ -63,6 +64,7 @@ class FreeThrowAnalyzer:
             else:
                 print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
                 raise
+        return total_neg
     
     def _process_game_data(self, pbp_data: List[dict], team):
         player_entry_times = {}
@@ -124,10 +126,12 @@ class FreeThrowAnalyzer:
                 minutes_played = seconds_played / 60
 
                 print(f"Minutes played: {minutes_played}")
-
+                
+                total_negative_minites = 0
                 if minutes_played < 0:
                     print(f"WARNING: Negative minutes detected at {minutes_played}!")
                     # print(f"Full play data: {play}")
+                    total_negative_minites += 1
                     continue
 
                 curr_minute = int(math.floor(minutes_played))
@@ -157,6 +161,7 @@ class FreeThrowAnalyzer:
                         print("miss")
                         self.minutes[curr_minute][1] += 1 #adds a miss
                         self.minutes[curr_minute][2].add(player)
+        return total_negative_minites
             # exit()
             
 
@@ -494,7 +499,7 @@ def main():
     # commented for a sec for testing
 
     #VITAL
-
+    #total_neg = 0
     # for key in allTeams:
     #     # below, "team" should be in this format: "Team.BOSTON_CELTICS"
     #     arrHomeDates = get_team_home_dates(key)
@@ -505,7 +510,7 @@ def main():
     #         print("Team: " + str(key))
     #         # print("here!")
     #         curr_date = date.split("-")
-    #         analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+    #         total_neg += analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
     #         # print("minutes: " + str(analyzer.minutes))
     #         print("processed game")
 
@@ -540,9 +545,11 @@ def main():
 
     minuteYearlyAveragesDict = ansArr[1]
 
-    print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
+    # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
-    print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+    # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
+
+    # print(total_neg)
 
     print()
 
