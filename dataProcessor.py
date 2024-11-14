@@ -26,11 +26,11 @@ class FreeThrowAnalyzer:
         #      - and also then calculating the whole average after we're done parsing data (Made / made + missed)
         self.total_attempted = 0
         self.total_made = 0
+        self.total_negative_minutes = 0
             
-    def process_team_games(self, team: Team, year: int, month: int, day: int):
+    def process_team_games(self, team: Team, year: int, month: int, day: int, yearAnalyzer):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
-        total_neg = 0
         try:
             pbp_data = client.play_by_play(
                 home_team=team,
@@ -39,7 +39,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(1.8)
-            total_neg += self._process_game_data(pbp_data, team)
+            self._process_game_data(pbp_data, team, yearAnalyzer)
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -65,7 +65,7 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.8)
-                    total_neg += self._process_game_data(pbp_data, team)
+                    self._process_game_data(pbp_data, team, yearAnalyzer)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -76,13 +76,12 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.8)
-                    total_neg += self._process_game_data(pbp_data, team)
+                    self._process_game_data(pbp_data, team, yearAnalyzer)
             else:
-                print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
+                print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
-        return total_neg
     
-    def _process_game_data(self, pbp_data: List[dict], team):
+    def _process_game_data(self, pbp_data: List[dict], team, yearAnalyzer):
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -112,9 +111,11 @@ class FreeThrowAnalyzer:
 
             if 'free throw' in str(play.get('description', '')):
                 self.total_attempted += 1
+                yearAnalyzer.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
                     self.total_made += 1
+                    yearAnalyzer.total_made += 1
                 if 'misses' in play['description']:
                     player = play['description'].split(' misses')[0]
 
@@ -145,11 +146,11 @@ class FreeThrowAnalyzer:
 
                 print(f"Minutes played: {minutes_played}")
                 
-                total_negative_minites = 0
                 if minutes_played < 0:
                     print(f"WARNING: Negative minutes detected at {minutes_played}!")
                     # print(f"Full play data: {play}")
-                    total_negative_minites += 1
+                    self.total_negative_minutes += 1
+                    yearAnalyzer.total_negative_minutes += 1
                     continue
 
                 curr_minute = int(math.floor(minutes_played))
@@ -179,8 +180,29 @@ class FreeThrowAnalyzer:
                         print("miss")
                         self.minutes[curr_minute][1] += 1 #adds a miss
                         self.minutes[curr_minute][2].add(player)
-        return total_negative_minites
-            # exit()
+                
+                if curr_minute not in yearAnalyzer.minutes:
+                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                        # print(str(player))
+                        # print("make")
+                        yearAnalyzer.minutes[curr_minute] = [1, 0, set()] #total made, total missed, players at this minute
+                        yearAnalyzer.minutes[curr_minute][2].add(player) #adds player to set if not already in it
+                    else: #the freethrow was missed
+                        # print(str(player))
+                        # print("miss")
+                        yearAnalyzer.minutes[curr_minute] = [0, 1, set()] #they're 0 for 1
+                        self.minutes[curr_minute][2].add(player)
+                else: #the minute already was instantiated
+                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                        # print(str(player))
+                        # print("make")
+                        yearAnalyzer.minutes[curr_minute][0] += 1 #adds a make
+                        yearAnalyzer.minutes[curr_minute][2].add(player) #adds player to set if not already in it
+                    else: #the freethrow was missed
+                        # print(str(player))
+                        # print("miss")
+                        yearAnalyzer.minutes[curr_minute][1] += 1 #adds a miss
+                        yearAnalyzer.minutes[curr_minute][2].add(player)
             
 
     def calculateConvertedIGT(self, remainingSecondsInQuarter, quarter): #remaining seconds, quarter (1, 2, 3, 4)
@@ -204,7 +226,7 @@ class FreeThrowAnalyzer:
 
 
     
-    def get_player_ft_pct(self, player_name): 
+    def get_player_ft_pct(self, player_name, year): 
         #number_repeated represents how many consequetive times a player's ft average comes from another team
         # print("playername: " + player_name)
         def changeToFirst(word):
@@ -222,9 +244,42 @@ class FreeThrowAnalyzer:
 
             return fullString
 
-        
+        try:
+            client.players_season_totals(
+                season_end_year=year, 
+                output_type=OutputType.CSV, 
+                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+            )
+            time.sleep(1.8)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    client.players_season_totals(
+                        season_end_year=year, 
+                        output_type=OutputType.CSV, 
+                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    )
+                    time.sleep(1.8)
+                else:
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    client.players_season_totals(
+                        season_end_year=year, 
+                        output_type=OutputType.CSV, 
+                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    )
+                    time.sleep(1.8)
+            else:
+                # Re-raise if it's a different HTTP error
+                raise
 
-        with open("./2023_2024_player_season_totals.csv") as file:
+        with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
             reader = csv.reader(file, delimiter=',')
             # Skip the header row
             next(reader)
@@ -234,11 +289,11 @@ class FreeThrowAnalyzer:
             for i, row in enumerate(rows):
                 # player_row = row[0]
                 # print("Player from row: " + row[1])
-                # print("name from rows: " + row[1])
+                print("name from rows: " + row[1])
                 fullString = changeToFirst(row[1])
                 # print("changed: " + fullString)
                 # exit()
-                # print("Player from row changed name: " + fullString)
+                print("Player from row changed name: " + fullString)
 
                 if fullString == player_name:
                     print("Player from row: " + row[1])
@@ -265,84 +320,10 @@ class FreeThrowAnalyzer:
                     return "No free throws"
             return None #if player requested wasn't in season stats
 
-        # for i in range(len(season_stats)):
-        #     player = season_stats[i]
-        #     if player['name'] == player_name:
-        #         # Calculate FT%
-        #         if player['free_throws_attempted'] > 0:  # avoid division by zero
-        #             made = player['free_throws_made']
-        #             missed = player['free_throws_attempted']
-        #             if season_stats[i+1]['name'] != player_name:
-        #                 return (made / (made+missed)) * 100 #calculates average
-        #             else: #handles case where player played on different teams in a year (got traded?)
-        #                 indicesToCheck = []
-        #                 j = i+1
-        #                 while j < len(season_stats):
-        #                     if season_stats[j]['name'] == player_name:
-        #                         indicesToCheck.append(j)
-        #                     j += 1
-
-        #                 for k in range(len(indicesToCheck)):
-        #                     if season_stats[k]['free_throws_attempted'] > 0:
-        #                         made += season_stats[k]['free_throws_made']
-        #                         missed += season_stats[k]['free_throws_attempted']
-
-        #                 return (made / (made+missed)) * 100
-
-        # return None #if player requested wasn't in season stats
-
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
-    def calculateMinuteAndYearlyAverages(self):
-        # print("minutes: " + str(self.minutes))
-        #this didn't print anything ??
-        # year = 2024
-
-        # exit()
-
+    def calculateMinuteAndYearlyAverages(self, year):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
-
-        #only if season csv hasn't been generated yet
-
-        # try:
-        #     client.players_season_totals(
-        #         season_end_year=2024, 
-        #         output_type=OutputType.CSV, 
-        #         output_file_path="./2023_2024_player_season_totals.csv"
-        #     )
-        #     time.sleep(1.7)
-        # except requests.exceptions.HTTPError as e:
-        #     if e.response.status_code == 429:
-        #         # Get the Retry-After header, if available
-        #         retry_after = e.response.headers.get("Retry-After")
-        #         if retry_after:
-        #             # If Retry-After is in seconds, wait that long
-        #             print(f"Rate limited. Retrying after {retry_after} seconds.")
-        #             time.sleep(int(retry_after))
-        #             # Retry the request
-        #             client.players_season_totals(
-        #                 season_end_year=2024, 
-        #                 output_type=OutputType.CSV, 
-        #                 output_file_path="./2023_2024_player_season_totals.csv"
-        #             )
-        #         else:
-        #             print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-        #             time.sleep(60)  # Default wait time if Retry-After header is missing
-        #             client.players_season_totals(
-        #                 season_end_year=2024, 
-        #                 output_type=OutputType.CSV, 
-        #                 output_file_path="./2023_2024_player_season_totals.csv"
-        #             )
-        #     else:
-        #         # Re-raise if it's a different HTTP error
-        #         raise
-
-        # exit()
-
-        # print("seasonstats: " + str(season_stats))
-
-        #https://www.basketball-reference.com/leagues/NBA_2024_totals.html
-        #could maybe parse the above url to get seaosn stats (more specifically yearly ft % for specific players in 2023-24)
 
 
         for key in self.minutes: #minute would be i (index + 1)
@@ -360,10 +341,10 @@ class FreeThrowAnalyzer:
                 # print(str(self.get_player_ft_pct(data, "Joel Embid")))
                 # exit()
                 # print("looking for: " + str(currPlayerName))
-                returned = self.get_player_ft_pct(currPlayerName)
+                returned = self.get_player_ft_pct(currPlayerName, year)
                 if returned != "No free throws":
                     # print("returned: " + str(returned))
-                    totalPercentage += float(self.get_player_ft_pct(currPlayerName))
+                    totalPercentage += float(returned)
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
@@ -376,10 +357,10 @@ class FreeThrowAnalyzer:
 def get_team_home_dates(team, year):
     # Open the file and create the reader
     try:
-        client.players_season_totals(
+        client.season_schedule(
             season_end_year=year, 
             output_type=OutputType.CSV, 
-            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+            output_file_path=f"./{year-1}_{year}_season.csv"
         )
         time.sleep(1.8)
     except requests.exceptions.HTTPError as e:
@@ -391,23 +372,23 @@ def get_team_home_dates(team, year):
                 print(f"Rate limited. Retrying after {retry_after} seconds.")
                 time.sleep(int(retry_after))
                 # Retry the request
-                client.players_season_totals(
+                client.season_schedule(
                     season_end_year=year, 
                     output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    output_file_path=f"./{year-1}_{year}_season.csv"
                 )
                 time.sleep(1.8)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
-                client.players_season_totals(
+                client.season_schedule(
                     season_end_year=year, 
                     output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    output_file_path=f"./{year-1}_{year}_season.csv"
                 )
                 time.sleep(1.8)
         else:
-            print(f"Error processing game {team} on {year}-{month}-{day}: {e}")
+            print(f"Error getting players season totals for {year}")
             raise
 
 
@@ -561,10 +542,9 @@ def main():
 
 
     #VITAL, only commented for a sec for testing
-    total_neg = 0
     for year in range(2000, 2025): 
         yearAnalyzer = FreeThrowAnalyzer()
-        total_neg_year = 0
+
         #we can also make a graph for each year, I will do this after this one is done!
         for key in allTeams:
             # below, "team" should be in this format: "Team.BOSTON_CELTICS"
@@ -575,16 +555,18 @@ def main():
             for date in arrHomeDates:
                 print("Team: " + str(key))
                 # print("here!")
-                print("Year: " + year)
+                print("Year: " + str(year))
+                print("Date: " + date)
                 curr_date = date.split("-")
-                total_neg += analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
-                total_neg_year += yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
+                analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
+                #we pass another instance of analyzer for each year in it
+                # total_neg_year += yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
                 # print("minutes: " + str(analyzer.minutes))
                 print("processed game")
-        print(f"Total neg at {year}:" + total_neg_year)
+        print(f"Total neg at {year}:" + yearAnalyzer.total_negative_minutes)
         print(f"Totl made at {year}" + yearAnalyzer.total_made)
         print(f"Totl attempted at {year}" + yearAnalyzer.total_attempted)
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
+        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year)
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
@@ -596,7 +578,8 @@ def main():
 
     # analyzer.minutes = {2: [1564, 435, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'S. Aldama', 'P. Connaughton', 'J. Landale', 'A. Coffey', 'E. Mobley', 'D. Terry', 'A. Fudge', 'J. Isaac', 'D. Jordan', 'B. Williams', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'G. Brown', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'D. Bane', 'P. Banchero', 'D. Lillard', 'P. Watson', 'J. Cain', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'N. Little', 'J. Morant', 'M. Bagley', 'D. Schröder', 'T. Thompson', 'O. Toppin', 'D. Sabonis', 'J. Freeman-Liberty', 'F. Ntilikina', 'T. Lyles', 'I. Okoro', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'L. Waters', 'S. Milton', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'T. Camara', 'D. Green', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'H. Barnes', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'S. Barnes', 'C. LeVert', 'J. Murray', 'R. Jackson', 'T. Vukcevic', 'S. Sharpe', 'J. Crowder', 'T. Craig', 'Z. Williams', 'J. Nwora', 'D. Rose', 'J. Tatum', 'J. Collins', 'D. Roddy', 'I. Jackson', 'L. Walker', 'M. Moody', 'K. Thompson', 'A. Nembhard', 'J. Konchar', 'J. McGee', 'D. Exum', 'C. Joseph', 'C. Cunningham', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'A. Black', 'T. Maxey', 'J. Jaquez', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'L. Shamet', 'D. Šarić', 'D. Booker', 'S. Lee', 'J. Nowell', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'G. Niang', 'S. Henderson', 'K. George', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'U. Garuba', 'O. Anunoby', 'I. Quickley', 'K. Hayes', 'D. Hunter', 'P. Washington', 'C. Gillespie', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'J. Rhoden', 'Z. Williamson', 'G. Dick', 'D. Banton', 'J. Bernard', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'D. Vassell', 'Y. Watanabe', 'F. Korkmaz', 'D. Garland', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'C. Sexton', 'K. Martin', 'M. Flynn', 'T. Rozier', 'M. Robinson', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'J. Randle', 'R. Williams', 'S. Pippen ', 'J. Davis', 'N. Batum', 'J. Clarkson', 'G. Mathews', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'O. Okongwu', 'L. Stevens', 'S. Mays', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'C. Reddish', 'N. Richards', 'J. Giddey', 'B. Brown', 'J. Vanderbilt', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'B. Hyland', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'G. Harris', 'K. Oubre', 'M. Fultz', 'B. Lopez', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'M. Diabaté', 'K. Caldwell-Pope', 'N. Clowney', 'L. Garza', 'I. Badji', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'B. Biyombo', 'M. Bridges', 'N. Marshall', 'K. Olynyk', 'D. Daniels', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Zeller', 'C. Holmgren', 'C. Swider', 'D. Melton', 'M. Diakite', 'B. Marjanović', 'J. Wilson', 'A. Gill', 'R. Gobert', 'M. Plumlee', 'K. Huerter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'T. Smith', 'J. Strawther', 'K. Porziņģis', 'K. Knox', 'A. Lawson', 'B. Key', 'K. Anderson', 'J. Minott', 'M. Strus', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'D. Nix', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'A. Len', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'F. VanVleet', 'R. Lopez', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'T. Mann', 'J. Brunson', 'R. Rupert', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Conley', 'L. Miller', 'C. Boucher', 'K. Love', 'C. Okeke', 'D. Robinson', 'A. Davis', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'D. Jeffries', 'B. McGowens', 'B. Fernando', 'D. Bertāns', 'L. Black', 'L. Dončić', 'J. Hardy', 'S. Lundy', 'K. Kuzma'}], 3: [1589, 423, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'P. Connaughton', 'J. Landale', 'A. Sanogo', 'A. Coffey', 'D. Terry', 'E. Mobley', 'J. Isaac', 'D. Jordan', 'B. Williams', 'I. Livers', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'S. Umude', 'D. Bane', 'P. Banchero', 'H. Giles', 'D. Lillard', 'P. Watson', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'M. Bagley', 'D. Schröder', 'R. Rollins', 'J. Holiday', 'F. Petrušev', 'O. Toppin', 'D. Sabonis', 'T. Lyles', 'I. Okoro', 'L. Dort', 'J. Goodwin', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'O. Tshiebwe', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'C. LeVert', 'J. Murray', 'R. Jackson', 'S. Sharpe', 'J. Richardson', 'T. Craig', 'B. Beal', 'J. Nwora', 'T. Warren', 'J. Tatum', 'J. Collins', 'D. Roddy', 'D. Murray', 'L. Walker', 'M. Moody', 'I. Jackson', 'K. Thompson', 'A. Nembhard', 'J. McGee', 'D. Exum', 'P. Baldwin', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'T. Maxey', 'J. Jaquez', 'K. Ellis', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'D. Šarić', 'D. Booker', 'L. Shamet', 'J. Hart', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'S. Henderson', 'K. George', 'M. Nowell', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'I. Quickley', 'D. Hunter', 'P. Washington', 'P. Mills', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'Z. Williamson', 'G. Dick', 'A. Simons', 'D. Banton', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'F. Korkmaz', 'N. Queta', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'J. Springer', 'C. Sexton', 'W. Kessler', 'K. Martin', 'M. Flynn', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'A. Nesmith', 'J. Randle', 'H. Highsmith', 'R. Williams', 'S. Pippen ', 'J. Davis', 'J. Clarkson', 'G. Mathews', 'T. Prince', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'S. Hauser', 'O. Okongwu', 'S. Mays', 'L. Stevens', 'K. Dunn', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'J. McLaughlin', 'J. Hood-Schifino', 'N. Richards', 'B. Brown', 'C. Payne', 'D. McDermott', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'K. Oubre', 'M. Fultz', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Fontecchio', 'O. Dieng', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'D. House', 'K. Caldwell-Pope', 'L. Garza', 'I. Badji', 'T. Forrest', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'N. Hinton', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'M. Bridges', 'C. Castleton', 'N. Marshall', 'K. Olynyk', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'L. Kennard', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Holmgren', 'B. Marjanović', 'G. Temple', 'J. Phillips', 'B. Sheppard', "R. O'Neale", 'A. Gill', 'M. Plumlee', 'R. Gobert', 'T. Bryant', 'J. Porter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'M. Muscala', 'J. Strawther', 'K. Lewis', 'K. Porziņģis', 'L. Šamanić', 'K. Anderson', 'A. Horford', 'A. Holiday', 'A. Hagans', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'J. Champagnie', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'B. Boeheim', 'I. Wainright', 'T. Mann', 'J. Brunson', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Pereira', 'C. Boucher', 'K. Love', 'D. Robinson', 'A. Davis', 'A. Caruso', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'M. Smart', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'B. McGowens', 'B. Fernando', 'L. Black', 'G. Santos', 'L. Dončić', 'C. Houstan', 'J. Hardy', 'S. Lundy', 'K. Looney', 'K. Kuzma'}]}
 
-    ansArr = analyzer.calculateMinuteAndYearlyAverages()
+    ansArr = analyzer.calculateMinuteAndYearlyAverages() 
+    #will have to be career ft shots for each player, or could be the yearly averages for every year they played
     
     minuteAveragesDict = ansArr[0]
 
@@ -606,7 +589,7 @@ def main():
 
     # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-    print("Total neg from 2000-2024: " + total_neg)
+    print("Total neg from 2000-2024: " + analyzer.total_negative_minutes)
     print("Total made from 2000-2024:" + analyzer.total_made)
     print("Totl made from 2000-2024" + analyzer.total_attempted)
 
