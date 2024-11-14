@@ -14,6 +14,7 @@ import csv
 import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
+import ast
 
 class FreeThrowAnalyzer:
     def __init__(self):
@@ -35,7 +36,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(1.7)
+            time.sleep(1.8)
 
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -355,9 +356,17 @@ class FreeThrowAnalyzer:
     
 
 
-def get_team_home_dates(team):
+def get_team_home_dates(team, year):
     # Open the file and create the reader
-    with open("./2023_2024_season.csv") as file:
+
+    client.players_season_totals(
+        season_end_year=year, 
+        output_type=OutputType.CSV, 
+        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+    )
+    time.sleep(1.8)
+
+    with open(f"./{year-1}_{year}_season.csv") as file:
         reader = csv.reader(file, delimiter=',')
         # Skip the header row
         next(reader)
@@ -450,6 +459,22 @@ def plot_ft_percentages(minute_averages, yearly_averages):
    plt.savefig('ft_percentage_analysis.png')
    plt.show()
 
+ #this function would parse a printed txt file of 
+def parse_data_file(file_path):
+    # Open and read the file content
+    with open(file_path, 'r') as file:
+        content = file.read()
+
+    # Parse the data from string to Python dictionary
+    # Assuming the data format in the file is a valid Python dictionary structure
+    try:
+        data = ast.literal_eval(content)
+    except (SyntaxError, ValueError) as e:
+        print("Error parsing file:", e)
+        return None
+
+    return data
+
 def main():
     analyzer = FreeThrowAnalyzer()
 
@@ -488,51 +513,29 @@ def main():
         "WASHINGTON WIZARDS": Team.WASHINGTON_WIZARDS
     }
 
-    #it's possible that we will have to manually create the date of home games for each team for the entire season
-    # print("Writing games for 2017-2018 season to CSV file")
-    # endYear = 2024
-    # client.season_schedule(season_end_year=endYear, output_type=OutputType.CSV, output_file_path=f"./{endYear-1}_{endYear}_season.csv")
-    # time.sleep(3.1)
 
 
+    #VITAL, only commented for a sec for testing
+    total_neg = 0
+    for year in range(2000, 2024): 
+        #2024 already done, so we loop to 2023, this will make one giant graph with 23 years of data
+        #we can also make a graph for each year, I will do this after this one is done!
+        for key in allTeams:
+            # below, "team" should be in this format: "Team.BOSTON_CELTICS"
+            arrHomeDates = get_team_home_dates(key, year)
+            print(f"Starting: {key}")
+            # print("homedates: " + str(arrHomeDates))
 
-    # commented for a sec for testing
+            for date in arrHomeDates:
+                print("Team: " + str(key))
+                # print("here!")
+                print("Year: " + year)
+                curr_date = date.split("-")
+                total_neg += analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+                # print("minutes: " + str(analyzer.minutes))
+                print("processed game")
 
-    #VITAL
-    #total_neg = 0
-    # for key in allTeams:
-    #     # below, "team" should be in this format: "Team.BOSTON_CELTICS"
-    #     arrHomeDates = get_team_home_dates(key)
-    #     print(f"Starting: {key}")
-    #     # print("homedates: " + str(arrHomeDates))
-
-    #     for date in arrHomeDates:
-    #         print("Team: " + str(key))
-    #         # print("here!")
-    #         curr_date = date.split("-")
-    #         total_neg += analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
-    #         # print("minutes: " + str(analyzer.minutes))
-    #         print("processed game")
-
-
-    #this function would parse a printed txt file of 
-    import ast
-    def parse_data_file(file_path):
-        # Open and read the file content
-        with open(file_path, 'r') as file:
-            content = file.read()
-
-        # Parse the data from string to Python dictionary
-        # Assuming the data format in the file is a valid Python dictionary structure
-        try:
-            data = ast.literal_eval(content)
-        except (SyntaxError, ValueError) as e:
-            print("Error parsing file:", e)
-            return None
-
-        return data
-
-    analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
+    # analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
 
     #this will print the dictionary
     # print("minutesDict: " + str(analyzer.minutes))
