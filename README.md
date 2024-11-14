@@ -1,73 +1,64 @@
 # FatigueVSFreethrow
 
-### Description
-A data analysis project investigating how consecutive minutes played affects NBA players' free throw shooting percentage.
+## Project Overview
+FatigueVSFreethrow is a data analysis tool designed to investigate how consecutive playing minutes impact NBA players' free throw shooting percentages. This project gathers minute-by-minute player data to analyze free throw success as fatigue increases.
 
-### Installation
+## Installation
 ```bash
-# Create virtual environment 
+# Set up a virtual environment
 python3 -m venv myenv
 
-# Activate virtual environment
+# Activate the virtual environment
 source myenv/bin/activate  # On Unix/macOS
 .\myenv\Scripts\activate   # On Windows
 
-# Install required packages
+# Install necessary packages
 pip install basketball_reference_web_scraper matplotlib numpy
+
+
 ```
 
-### Usage
-```python
-# Run test version first to validate API access
+## Usage
+```bash
+# Run a test version to check API access and data retrieval
 python main.py --test
 
-# Run full analysis
+# Run the complete data analysis
 python main.py
 ```
 
-### Core Components
-- **FreeThrowAnalyzer**: Main class handling data collection and analysis
-- **Data Processing**: Tracks player minutes and free throw attempts
-- **Visualization**: Creates plots comparing performance vs fatigue
-- **Rate Limiting**: Handles Basketball Reference API restrictions
+## Core Components
 
-### Project Structure
-```
-FatigueVSFreethrow/
-├── main.py              # Main script
-├── requirements.txt     # Package dependencies
-├── README.md           # Documentation
-└── output/             # Generated visualizations
-```
+FreeThrowAnalyzer: Primary class for collecting, processing, and analyzing free throw data.
+Data Processing: Tracks player minutes and free throw attempts to examine changes over time.
+Visualization: Generates graphs comparing free throw percentage as a function of playing time.
+API Rate Management: Includes mechanisms for handling Basketball Reference's API limits.
 
-### Data Collection
-- Sources data from Basketball Reference API
-- Collects play-by-play data for NBA games
-- Tracks:
-  - Player substitutions
-  - Minutes played
-  - Free throw attempts
-  - Season averages
+## Data Collection Details
+Sources data from Basketball Reference API
+Focuses on game-by-game player performance, tracking:
+Substitution timings
+Minutes played
+Free throw attempts and makes
+Yearly performance averages for context
 
-### Output
-- Generates 'ft_percentage_analysis.png'
-- Shows:
-  - Free throw % by minute played
-  - Season average comparison
-  - Performance difference
+## Output and Visualization
+Generates ft_percentage_analysis.png to visualize:
+Free throw percentage based on playing minutes
+Comparison to season averages
+Performance differential over time to highlight fatigue effects
 
-### Known Limitations
-- Only processes first playing stint (to reduce bias), subject to change
-- May be subject to API rate limits
-- Manual schedule handling may be needed pending rate limit troubleshooting
-- One season data only (ex 2023-24)
+## Known Limitations
+Current analysis focuses only on the initial playing stint to reduce potential bias.
+API rate limits may require manual schedule adjustments.
+Designed for analysis of one season (e.g., 2023-24) at a time (will be updated to include all seasons from 2000 - present, later).
 
 ### Contributing
-1. Fork the repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+Fork the repository
+Create a feature branch
+Commit your changes
+Push the branch to your fork
+Open a Pull Request for review
 
-### License
-GNU
+## License
+This project is licensed under the GNU General Public License v3.0. See the LICENSE file for more details.
