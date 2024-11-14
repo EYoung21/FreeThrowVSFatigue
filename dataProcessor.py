@@ -398,7 +398,7 @@ def get_team_home_dates(team, year):
         
     return sorted(list(dates))
 
-def plot_ft_percentages(minute_averages, yearly_averages):
+def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear):
    import numpy as np
    from scipy import stats
 
@@ -417,7 +417,7 @@ def plot_ft_percentages(minute_averages, yearly_averages):
        'Season_Average_FT%': yearly_percentages,
        'Difference': differences
    })
-   df.to_csv('ft_percentage_data.csv', index=False)
+   df.to_csv(f'{startYear}-{endYear}_ft_percentage_data.csv', index=False)
    
    # Create the plot
    plt.figure(figsize=(12, 8))
@@ -443,7 +443,7 @@ def plot_ft_percentages(minute_averages, yearly_averages):
    plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
    
    # Customize the plot
-   plt.title('Free Throw Percentage by Minutes Played', fontsize=14)
+   plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season', fontsize=14)
    plt.xlabel('Minutes Played', fontsize=12)
    plt.ylabel('Free Throw Percentage', fontsize=12)
    plt.grid(True, linestyle='--', alpha=0.7)
@@ -517,8 +517,9 @@ def main():
 
     #VITAL, only commented for a sec for testing
     total_neg = 0
-    for year in range(2000, 2024): 
-        #2024 already done, so we loop to 2023, this will make one giant graph with 23 years of data
+    for year in range(2000, 2025): 
+        yearAnalyzer = FreeThrowAnalyzer()
+        total_neg_year = 0
         #we can also make a graph for each year, I will do this after this one is done!
         for key in allTeams:
             # below, "team" should be in this format: "Team.BOSTON_CELTICS"
@@ -532,8 +533,14 @@ def main():
                 print("Year: " + year)
                 curr_date = date.split("-")
                 total_neg += analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+                total_neg_year += yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
                 # print("minutes: " + str(analyzer.minutes))
                 print("processed game")
+        print(f"Total neg at {year}:" + total_neg_year)
+        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
+        yearlyMinuteAveragesDict = yearlyAnsArr[0]
+        yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
+        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year)
 
     # analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
 
@@ -552,11 +559,11 @@ def main():
 
     # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-    # print(total_neg)
+    print("2000-2024" + total_neg)
 
     print()
 
-    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict)
+    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict, 2000, 2024)
 
     exit()
 
