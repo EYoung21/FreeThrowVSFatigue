@@ -24,6 +24,8 @@ class FreeThrowAnalyzer:
         #AND a an average of each player's yearly ft % that is included in the above
         #      - we can accomplish this by keeping a set of players that show freethrows during this consequetive minute
         #      - and also then calculating the whole average after we're done parsing data (Made / made + missed)
+        self.total_attempted = 0
+        self.total_made = 0
             
     def process_team_games(self, team: Team, year: int, month: int, day: int):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
@@ -96,8 +98,10 @@ class FreeThrowAnalyzer:
                 player_entry_times[player_in] = converted_time
 
             if 'free throw' in str(play.get('description', '')):
+                self.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
+                    self.total_made += 1
                 if 'misses' in play['description']:
                     player = play['description'].split(' misses')[0]
 
@@ -398,7 +402,7 @@ def get_team_home_dates(team, year):
         
     return sorted(list(dates))
 
-def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear):
+def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
    import numpy as np
    from scipy import stats
 
@@ -443,7 +447,7 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear):
    plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
    
    # Customize the plot
-   plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season', fontsize=14)
+   plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season | FTA: {totalAttempted}, FTs Made: {totalMade}, %: {round((totalMade/totalAttempted), 2)}', fontsize=14)
    plt.xlabel('Minutes Played', fontsize=12)
    plt.ylabel('Free Throw Percentage', fontsize=12)
    plt.grid(True, linestyle='--', alpha=0.7)
@@ -537,10 +541,12 @@ def main():
                 # print("minutes: " + str(analyzer.minutes))
                 print("processed game")
         print(f"Total neg at {year}:" + total_neg_year)
+        print(f"Totl made at {year}" + yearAnalyzer.total_made)
+        print(f"Totl attempted at {year}" + yearAnalyzer.total_attempted)
         yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
-        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year)
+        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
 
     # analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
 
@@ -559,11 +565,13 @@ def main():
 
     # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-    print("2000-2024" + total_neg)
+    print("Total neg from 2000-2024: " + total_neg)
+    print("Total made from 2000-2024:" + analyzer.total_made)
+    print("Totl made from 2000-2024" + analyzer.total_attempted)
 
     print()
 
-    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict, 2000, 2024)
+    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict, 2000, 2024, analyzer.total_made, analyzer.total_attempted)
 
     exit()
 
