@@ -34,7 +34,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(2)
+            time.sleep(1.7)
 
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -100,7 +100,7 @@ class FreeThrowAnalyzer:
 
                 if player in playersThatSubbedOut:
                     continue
-                print("Curr team: " + team)
+                print("Curr team: " + str(team))
                 # Debug: Print free throw details
                 # print(f"\n=== Free Throw ===")
                 # print(f"Player: {player}")
@@ -183,15 +183,23 @@ class FreeThrowAnalyzer:
     
     def get_player_ft_pct(self, player_name): 
         #number_repeated represents how many consequetive times a player's ft average comes from another team
-        
+        # print("playername: " + player_name)
         def changeToFirst(word):
+            if word == "Scotty Pippen Jr.": #edge case with scotty pippen Jr.
+                return "S. Pippen "
+            if word == "Sasha Vezenkov":
+                return "A. Vezenkov"
+            if word == "Dariq Whitehead":
+                return "D. Miller-Whitehead"
+            # print("word: " + word)
             stringArr = word.split(" ")
             firstString = stringArr[0][0] + "." #gets first letter of first name
             secondString = stringArr[1] #gets second string
             fullString = firstString + " " + secondString
+
             return fullString
 
-
+        
 
         with open("./2023_2024_player_season_totals.csv") as file:
             reader = csv.reader(file, delimiter=',')
@@ -199,13 +207,18 @@ class FreeThrowAnalyzer:
             next(reader)
             rows = list(reader)
             #indcies 12 and 13 are made and attempted respectively
+            rows = rows[:-1] #skip last row, league averages
             for i, row in enumerate(rows):
                 # player_row = row[0]
+                # print("Player from row: " + row[1])
+                # print("name from rows: " + row[1])
                 fullString = changeToFirst(row[1])
-                # print(fullString)
+                # print("changed: " + fullString)
                 # exit()
+                # print("Player from row changed name: " + fullString)
 
                 if fullString == player_name:
+                    print("Player from row: " + row[1])
                     if int(row[13]) > 0: # avoid division by zero
                         made = row[12]
                         attempted = row[13]
@@ -226,6 +239,7 @@ class FreeThrowAnalyzer:
                                     attempted += rows[k][13]
                             # print("player was traded mid season")
                             return float((int(made) / int(attempted))) * 100
+                    return "No free throws"
             return None #if player requested wasn't in season stats
 
         # for i in range(len(season_stats)):
@@ -265,38 +279,40 @@ class FreeThrowAnalyzer:
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        try:
-            client.players_season_totals(
-                season_end_year=2024, 
-                output_type=OutputType.CSV, 
-                output_file_path="./2023_2024_player_season_totals.csv"
-            )
-            time.sleep(2)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                # Get the Retry-After header, if available
-                retry_after = e.response.headers.get("Retry-After")
-                if retry_after:
-                    # If Retry-After is in seconds, wait that long
-                    print(f"Rate limited. Retrying after {retry_after} seconds.")
-                    time.sleep(int(retry_after))
-                    # Retry the request
-                    client.players_season_totals(
-                        season_end_year=2024, 
-                        output_type=OutputType.CSV, 
-                        output_file_path="./2023_2024_player_season_totals.csv"
-                    )
-                else:
-                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-                    time.sleep(60)  # Default wait time if Retry-After header is missing
-                    client.players_season_totals(
-                        season_end_year=2024, 
-                        output_type=OutputType.CSV, 
-                        output_file_path="./2023_2024_player_season_totals.csv"
-                    )
-            else:
-                # Re-raise if it's a different HTTP error
-                raise
+        #only if season csv hasn't been generated yet
+
+        # try:
+        #     client.players_season_totals(
+        #         season_end_year=2024, 
+        #         output_type=OutputType.CSV, 
+        #         output_file_path="./2023_2024_player_season_totals.csv"
+        #     )
+        #     time.sleep(1.7)
+        # except requests.exceptions.HTTPError as e:
+        #     if e.response.status_code == 429:
+        #         # Get the Retry-After header, if available
+        #         retry_after = e.response.headers.get("Retry-After")
+        #         if retry_after:
+        #             # If Retry-After is in seconds, wait that long
+        #             print(f"Rate limited. Retrying after {retry_after} seconds.")
+        #             time.sleep(int(retry_after))
+        #             # Retry the request
+        #             client.players_season_totals(
+        #                 season_end_year=2024, 
+        #                 output_type=OutputType.CSV, 
+        #                 output_file_path="./2023_2024_player_season_totals.csv"
+        #             )
+        #         else:
+        #             print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+        #             time.sleep(60)  # Default wait time if Retry-After header is missing
+        #             client.players_season_totals(
+        #                 season_end_year=2024, 
+        #                 output_type=OutputType.CSV, 
+        #                 output_file_path="./2023_2024_player_season_totals.csv"
+        #             )
+        #     else:
+        #         # Re-raise if it's a different HTTP error
+        #         raise
 
         # exit()
 
@@ -316,12 +332,15 @@ class FreeThrowAnalyzer:
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
                 currPlayerName = players[i] #curr player
-                # print("|" + str(currPlayerName) + "|")
+                print("Looking for: " + "|" + str(currPlayerName) + "|")
                 # print(str(data))
                 # print(str(self.get_player_ft_pct(data, "Joel Embid")))
                 # exit()
                 # print("looking for: " + str(currPlayerName))
-                totalPercentage += float(self.get_player_ft_pct(currPlayerName))
+                returned = self.get_player_ft_pct(currPlayerName)
+                if returned != "No free throws":
+                    # print("returned: " + str(returned))
+                    totalPercentage += float(self.get_player_ft_pct(currPlayerName))
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
@@ -366,49 +385,65 @@ def get_team_home_dates(team):
     return sorted(list(dates))
 
 def plot_ft_percentages(minute_averages, yearly_averages):
-    # Get all minutes (x-axis)
-    minutes = sorted(minute_averages.keys())
+   import numpy as np
+   from scipy import stats
 
-    print(minutes)
-    
-    # Get corresponding values for each line
-    ft_percentages = [minute_averages[m] for m in minutes]
-    yearly_percentages = [yearly_averages[m] for m in minutes]
-    differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
-    
-    # Create DataFrame and save to CSV
-    df = pd.DataFrame({
-        'Minute': minutes,
-        'Minute_Average_FT%': ft_percentages,
-        'Season_Average_FT%': yearly_percentages,
-        'Difference': differences
-    })
-    df.to_csv('ft_percentage_data.csv', index=False)
-    
-    # Create the plot
-    plt.figure(figsize=(12, 8))
-    
-    # Plot each line
-    plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
-    plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
-    plt.plot(minutes, differences, 'r--', label='Difference', linewidth=2)
-    
-    # Customize the plot
-    plt.title('Free Throw Percentage by Minutes Played', fontsize=14)
-    plt.xlabel('Minutes Played', fontsize=12)
-    plt.ylabel('Free Throw Percentage', fontsize=12)
-    plt.grid(True, linestyle='--', alpha=0.7)
-    plt.legend(fontsize=10)
-    
-    # Add a horizontal line at y=0 for reference in difference
-    plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
-    
-    # Format y-axis as percentage
-    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
-    
-    # Save the plot
-    plt.savefig('ft_percentage_analysis.png')
-    plt.show()
+   # Get all minutes (x-axis)
+   minutes = sorted(minute_averages.keys())
+   
+   # Get corresponding values for each line
+   ft_percentages = [minute_averages[m] for m in minutes]
+   yearly_percentages = [yearly_averages[m] for m in minutes]
+   differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
+   
+   # Create DataFrame and save to CSV
+   df = pd.DataFrame({
+       'Minute': minutes,
+       'Minute_Average_FT%': ft_percentages,
+       'Season_Average_FT%': yearly_percentages,
+       'Difference': differences
+   })
+   df.to_csv('ft_percentage_data.csv', index=False)
+   
+   # Create the plot
+   plt.figure(figsize=(12, 8))
+   
+   # Calculate trendlines
+   slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
+   line_ft = slope_ft * np.array(minutes) + intercept_ft
+   
+   slope_yearly, intercept_yearly, r_value_yearly, p_value_yearly, std_err_yearly = stats.linregress(minutes, yearly_percentages)
+   line_yearly = slope_yearly * np.array(minutes) + intercept_yearly
+   
+   slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
+   line_diff = slope_diff * np.array(minutes) + intercept_diff
+   
+   # Plot original lines
+   plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
+   plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
+   plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
+   
+   # Plot trendlines
+   plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
+   plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
+   plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+   
+   # Customize the plot
+   plt.title('Free Throw Percentage by Minutes Played', fontsize=14)
+   plt.xlabel('Minutes Played', fontsize=12)
+   plt.ylabel('Free Throw Percentage', fontsize=12)
+   plt.grid(True, linestyle='--', alpha=0.7)
+   plt.legend(fontsize=10)
+   
+   # Add a horizontal line at y=0 for reference in difference
+   plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
+   
+   # Format y-axis as percentage
+   plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
+   
+   # Save the plot
+   plt.savefig('ft_percentage_analysis.png')
+   plt.show()
 
 def main():
     analyzer = FreeThrowAnalyzer()
@@ -457,28 +492,48 @@ def main():
 
 
     # commented for a sec for testing
-    for key in allTeams:
-        # below, "team" should be in this format: "Team.BOSTON_CELTICS"
-        arrHomeDates = get_team_home_dates(key)
-        print(f"Starting: {key}")
-        # print("homedates: " + str(arrHomeDates))
 
-        for date in arrHomeDates:
-            print("Team: " + str(key))
-            # print("here!")
-            curr_date = date.split("-")
-            analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
-            # print("minutes: " + str(analyzer.minutes))
-            print("processed game")
-        # break
-    print("minutesDict: " + str(analyzer.minutes))
-        
-        
-    #set default value (to wait between calls to avoid rate limits) and then google exponetial backoff
+    #VITAL
+
+    # for key in allTeams:
+    #     # below, "team" should be in this format: "Team.BOSTON_CELTICS"
+    #     arrHomeDates = get_team_home_dates(key)
+    #     print(f"Starting: {key}")
+    #     # print("homedates: " + str(arrHomeDates))
+
+    #     for date in arrHomeDates:
+    #         print("Team: " + str(key))
+    #         # print("here!")
+    #         curr_date = date.split("-")
+    #         analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2]) #team, year, month, day
+    #         # print("minutes: " + str(analyzer.minutes))
+    #         print("processed game")
 
 
-    # minuteAverages = calculateMinuteAverages()
-    # analyzer.minutes = {2: [57, 15, {'D. Hunter', 'J. Embiid', 'S. Bey', 'D. Mitchell', 'T. Young', 'D. Sharpe', 'O. Okongwu', 'S. Barnes', 'J. Johnson', 'M. Robinson', 'C. Braun', 'M. Flynn', 'Z. Williams', 'C. Capela', 'P. Reed', 'W. Matthews', 'A. Pokusevski', 'N. Batum', 'S. Lundy', 'J. Tatum', 'D. Smith', 'G. Mathews', 'M. Bagley', 'M. Turner', 'A. Reaves', 'D. Bertāns', 'A. Burks', 'P. Pritchard', 'M. Morris', 'D. Barlow', 'T. Horton-Tucker', 'J. Smith', 'B. Bogdanović'}], 3: [50, 7, {'J. Embiid', 'B. Podziemski', 'S. Bey', 'T. Young', 'D. House', 'D. Sharpe', 'O. Okongwu', 'L. Walker', 'C. Metu', 'N. Claxton', 'M. Flynn', 'R. Barrett', 'S. Gilgeous-Alexander', 'L. James', 'C. Capela', 'M. Plumlee', 'W. Matthews', 'D. Booker', 'S. Lundy', 'G. Mathews', 'M. Bridges', 'T. Forrest', 'J. Brown', 'B. Bogdanović', 'D. Murray'}], 6: [31, 8, {'D. Hunter', 'B. Mathurin', 'N. Alexander-Walker', 'S. Bey', 'O. Toppin', 'B. Wesley', 'O. Okongwu', 'J. Butler', 'R. Rupert', 'M. Flynn', 'R. Barrett', 'J. Ivey', 'T. Maxey', 'K. Leonard', 'T. Lyles', 'S. Dinwiddie', 'T. Horton-Tucker', 'B. Bogdanović', 'G. Santos', 'D. White', 'C. Anthony'}], 8: [26, 9, {'J. Embiid', 'J. Porter', 'M. Brown', 'S. Bey', 'C. Cunningham', 'J. Allen', 'B. Fernando', 'C. Boucher', 'N. Richards', 'B. Bogdanović', 'K. Kuzma', 'B. Miller', 'D. Murray', 'C. Capela'}], 0: [24, 10, {'D. Hunter', 'W. Matthews', 'J. Landale', 'O. Okongwu', 'D. Barlow', 'J. Isaac', 'D. Smith', 'J. Johnson', 'B. Fernando', 'T. Mann', 'D. House', 'B. Bogdanović', 'J. Williams', 'K. Leonard', 'B. Lopez', 'I. Hartenstein', 'S. Gilgeous-Alexander', 'P. Baldwin'}], 9: [13, 5, {'D. Booker', 'P. Banchero', 'S. Bey', 'K. Lowry', 'B. Fernando', 'B. Bogdanović', 'J. Randle', 'M. Flynn', 'R. Hachimura'}], 1: [35, 15, {'D. Hunter', 'J. Embiid', 'O. Okongwu', 'J. Johnson', 'Z. Williamson', 'L. James', 'C. Capela', 'A. Pokusevski', 'W. Matthews', 'M. Bridges', 'L. Kornet', 'C. Porter', 'B. Fernando', 'J. Nurkić', 'J. Smith', 'K. Caldwell-Pope', 'J. Hood-Schifino', 'D. Murray', 'R. Gobert'}], 4: [29, 11, {'D. Hunter', 'J. Porter', 'M. Brown', 'S. Bey', 'P. Beverley', 'T. Young', 'D. Wade', 'O. Okongwu', 'S. Curry', 'C. Capela', 'N. Powell', 'G. Mathews', 'M. Turner', 'J. Richardson', 'Z. Nnaji', 'E. Omoruyi', 'M. Bridges', 'B. Bogdanović', 'J. Williams', 'D. Murray'}], 5: [29, 9, {'D. Hunter', 'S. Bey', 'O. Toppin', 'A. Nesmith', 'K. Oubre', 'O. Okongwu', 'J. Johnson', 'R. Rollins', 'C. Capela', 'J. Tatum', 'A. Reaves', 'K. Leonard', 'K. Bufkin', 'B. Fernando', 'T. Horton-Tucker', 'K. Johnson', 'H. Highsmith', 'B. Bogdanović', 'D. Murray'}], 13: [1, 1, {'A. Edwards', 'B. Bogdanović'}], 7: [31, 7, {'D. Hunter', 'J. Embiid', 'O. Okongwu', 'C. Capela', 'G. Dick', 'S. Bey', 'S. Merrill', 'D. Murray', 'J. Ivey', 'K. Porziņģis', 'B. Fernando', 'J. Duren', 'B. Coulibaly', 'S. Gilgeous-Alexander', 'M. Bridges', 'F. Wagner'}], 11: [15, 1, {'D. Hunter', 'S. Bey', 'D. Murray', 'B. Fernando', 'B. Bogdanović', 'J. Randle', 'M. Monk', 'M. Bridges'}], 15: [2, 0, {'S. Gilgeous-Alexander', 'J. Randle'}], 17: [1, 0, {'J. Embiid'}], 10: [16, 4, {'B. Mathurin', 'O. Okongwu', 'G. Dick', 'S. Bey', 'J. Butler', 'B. Bogdanović', 'S. Gilgeous-Alexander', 'M. Bridges'}], -29: [2, 0, {'M. Bridges'}], 16: [6, 1, {'D. Booker', 'D. Murray', 'S. Gilgeous-Alexander', 'K. Leonard'}], 14: [1, 0, {'D. Booker'}], 18: [0, 1, {'M. Bridges'}], 37: [2, 0, {'W. Matthews'}]}
+    #this function would parse a printed txt file of 
+    import ast
+    def parse_data_file(file_path):
+        # Open and read the file content
+        with open(file_path, 'r') as file:
+            content = file.read()
+
+        # Parse the data from string to Python dictionary
+        # Assuming the data format in the file is a valid Python dictionary structure
+        try:
+            data = ast.literal_eval(content)
+        except (SyntaxError, ValueError) as e:
+            print("Error parsing file:", e)
+            return None
+
+        return data
+
+    analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
+
+    #this will print the dictionary
+    # print("minutesDict: " + str(analyzer.minutes))
+
+    # analyzer.minutes = {2: [1564, 435, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'S. Aldama', 'P. Connaughton', 'J. Landale', 'A. Coffey', 'E. Mobley', 'D. Terry', 'A. Fudge', 'J. Isaac', 'D. Jordan', 'B. Williams', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'G. Brown', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'D. Bane', 'P. Banchero', 'D. Lillard', 'P. Watson', 'J. Cain', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'N. Little', 'J. Morant', 'M. Bagley', 'D. Schröder', 'T. Thompson', 'O. Toppin', 'D. Sabonis', 'J. Freeman-Liberty', 'F. Ntilikina', 'T. Lyles', 'I. Okoro', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'L. Waters', 'S. Milton', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'T. Camara', 'D. Green', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'H. Barnes', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'S. Barnes', 'C. LeVert', 'J. Murray', 'R. Jackson', 'T. Vukcevic', 'S. Sharpe', 'J. Crowder', 'T. Craig', 'Z. Williams', 'J. Nwora', 'D. Rose', 'J. Tatum', 'J. Collins', 'D. Roddy', 'I. Jackson', 'L. Walker', 'M. Moody', 'K. Thompson', 'A. Nembhard', 'J. Konchar', 'J. McGee', 'D. Exum', 'C. Joseph', 'C. Cunningham', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'A. Black', 'T. Maxey', 'J. Jaquez', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'L. Shamet', 'D. Šarić', 'D. Booker', 'S. Lee', 'J. Nowell', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'G. Niang', 'S. Henderson', 'K. George', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'U. Garuba', 'O. Anunoby', 'I. Quickley', 'K. Hayes', 'D. Hunter', 'P. Washington', 'C. Gillespie', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'J. Rhoden', 'Z. Williamson', 'G. Dick', 'D. Banton', 'J. Bernard', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'D. Vassell', 'Y. Watanabe', 'F. Korkmaz', 'D. Garland', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'C. Sexton', 'K. Martin', 'M. Flynn', 'T. Rozier', 'M. Robinson', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'J. Randle', 'R. Williams', 'S. Pippen ', 'J. Davis', 'N. Batum', 'J. Clarkson', 'G. Mathews', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'O. Okongwu', 'L. Stevens', 'S. Mays', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'C. Reddish', 'N. Richards', 'J. Giddey', 'B. Brown', 'J. Vanderbilt', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'B. Hyland', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'G. Harris', 'K. Oubre', 'M. Fultz', 'B. Lopez', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'M. Diabaté', 'K. Caldwell-Pope', 'N. Clowney', 'L. Garza', 'I. Badji', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'B. Biyombo', 'M. Bridges', 'N. Marshall', 'K. Olynyk', 'D. Daniels', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Zeller', 'C. Holmgren', 'C. Swider', 'D. Melton', 'M. Diakite', 'B. Marjanović', 'J. Wilson', 'A. Gill', 'R. Gobert', 'M. Plumlee', 'K. Huerter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'T. Smith', 'J. Strawther', 'K. Porziņģis', 'K. Knox', 'A. Lawson', 'B. Key', 'K. Anderson', 'J. Minott', 'M. Strus', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'D. Nix', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'A. Len', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'F. VanVleet', 'R. Lopez', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'T. Mann', 'J. Brunson', 'R. Rupert', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Conley', 'L. Miller', 'C. Boucher', 'K. Love', 'C. Okeke', 'D. Robinson', 'A. Davis', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'D. Jeffries', 'B. McGowens', 'B. Fernando', 'D. Bertāns', 'L. Black', 'L. Dončić', 'J. Hardy', 'S. Lundy', 'K. Kuzma'}], 3: [1589, 423, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'P. Connaughton', 'J. Landale', 'A. Sanogo', 'A. Coffey', 'D. Terry', 'E. Mobley', 'J. Isaac', 'D. Jordan', 'B. Williams', 'I. Livers', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'S. Umude', 'D. Bane', 'P. Banchero', 'H. Giles', 'D. Lillard', 'P. Watson', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'M. Bagley', 'D. Schröder', 'R. Rollins', 'J. Holiday', 'F. Petrušev', 'O. Toppin', 'D. Sabonis', 'T. Lyles', 'I. Okoro', 'L. Dort', 'J. Goodwin', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'O. Tshiebwe', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'C. LeVert', 'J. Murray', 'R. Jackson', 'S. Sharpe', 'J. Richardson', 'T. Craig', 'B. Beal', 'J. Nwora', 'T. Warren', 'J. Tatum', 'J. Collins', 'D. Roddy', 'D. Murray', 'L. Walker', 'M. Moody', 'I. Jackson', 'K. Thompson', 'A. Nembhard', 'J. McGee', 'D. Exum', 'P. Baldwin', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'T. Maxey', 'J. Jaquez', 'K. Ellis', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'D. Šarić', 'D. Booker', 'L. Shamet', 'J. Hart', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'S. Henderson', 'K. George', 'M. Nowell', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'I. Quickley', 'D. Hunter', 'P. Washington', 'P. Mills', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'Z. Williamson', 'G. Dick', 'A. Simons', 'D. Banton', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'F. Korkmaz', 'N. Queta', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'J. Springer', 'C. Sexton', 'W. Kessler', 'K. Martin', 'M. Flynn', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'A. Nesmith', 'J. Randle', 'H. Highsmith', 'R. Williams', 'S. Pippen ', 'J. Davis', 'J. Clarkson', 'G. Mathews', 'T. Prince', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'S. Hauser', 'O. Okongwu', 'S. Mays', 'L. Stevens', 'K. Dunn', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'J. McLaughlin', 'J. Hood-Schifino', 'N. Richards', 'B. Brown', 'C. Payne', 'D. McDermott', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'K. Oubre', 'M. Fultz', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Fontecchio', 'O. Dieng', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'D. House', 'K. Caldwell-Pope', 'L. Garza', 'I. Badji', 'T. Forrest', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'N. Hinton', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'M. Bridges', 'C. Castleton', 'N. Marshall', 'K. Olynyk', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'L. Kennard', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Holmgren', 'B. Marjanović', 'G. Temple', 'J. Phillips', 'B. Sheppard', "R. O'Neale", 'A. Gill', 'M. Plumlee', 'R. Gobert', 'T. Bryant', 'J. Porter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'M. Muscala', 'J. Strawther', 'K. Lewis', 'K. Porziņģis', 'L. Šamanić', 'K. Anderson', 'A. Horford', 'A. Holiday', 'A. Hagans', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'J. Champagnie', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'B. Boeheim', 'I. Wainright', 'T. Mann', 'J. Brunson', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Pereira', 'C. Boucher', 'K. Love', 'D. Robinson', 'A. Davis', 'A. Caruso', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'M. Smart', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'B. McGowens', 'B. Fernando', 'L. Black', 'G. Santos', 'L. Dončić', 'C. Houstan', 'J. Hardy', 'S. Lundy', 'K. Looney', 'K. Kuzma'}]}
+
     ansArr = analyzer.calculateMinuteAndYearlyAverages()
     
     minuteAveragesDict = ansArr[0]
