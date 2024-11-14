@@ -456,7 +456,7 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear):
    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
    
    # Save the plot
-   plt.savefig('ft_percentage_analysis.png')
+   plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png')
    plt.show()
 
  #this function would parse a printed txt file of 
