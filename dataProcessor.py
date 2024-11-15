@@ -34,6 +34,7 @@ class FreeThrowAnalyzer:
         self.total_attempted = 0
         self.total_made = 0
         self.total_negative_minutes = 0
+        self.ftNameToActualName = dict()
             
     def process_team_games(self, team: Team, year: int, month: int, day: int, yearAnalyzer):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
@@ -233,6 +234,142 @@ class FreeThrowAnalyzer:
 
 
     
+    def year_get_player_ft_pct(self, player_name, year, originAnalyzer): 
+        #number_repeated represents how many consequetive times a player's ft average comes from another team
+        # print("playername: " + player_name)
+        def changeToFirst(word):
+            if word == "Scotty Pippen Jr.": #edge case with scotty pippen Jr.
+                originAnalyzer.ftNameToActualName["S. Pippen "] = "Scotty Pippen Jr."
+                return "S. Pippen "
+            if word == "Sasha Vezenkov":
+                originAnalyzer.ftNameToActualName["A. Vezenkov"] = "Sasha Vezenkov"
+                return "A. Vezenkov"
+            if word == "Dariq Whitehead":
+                originAnalyzer.ftNameToActualName["D. Miller-Whitehead"] = "Dariq Whitehead"
+                return "D. Miller-Whitehead"
+            # print("word: " + word)
+            stringArr = word.split(" ")
+            firstString = stringArr[0][0] + "." #gets first letter of first name
+            secondString = stringArr[1] #gets second string
+            fullString = firstString + " " + secondString
+
+            return fullString
+
+        try:
+            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                client.players_season_totals(
+                    season_end_year=year, 
+                    output_type=OutputType.CSV, 
+                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                )
+                time.sleep(2.2)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(2.2)
+                else:
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(2.2)
+            else:
+                # Re-raise if it's a different HTTP error
+                raise
+
+        with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
+            reader = csv.reader(file, delimiter=',')
+            # Skip the header row
+            next(reader)
+            rows = list(reader)
+            #indcies 12 and 13 are made and attempted respectively
+            rows = rows[:-1] #skip last row, league averages
+            for i, row in enumerate(rows):
+                # player_row = row[0]
+                # print("Player from row: " + row[1])
+                print("name from rows: " + row[1])
+                fullString = changeToFirst(row[1])
+                # print("changed: " + fullString)
+                # exit()
+                print("Player from row changed name: " + fullString)
+
+                if fullString == player_name:
+                    originAnalyzer.ftNameToActualName[player_name] = row[1] #converts from ftname to full name, stores in dictionary
+                    print("Player from row: " + row[1])
+                    if int(row[13]) > 0: # avoid division by zero
+                        made = row[12]
+                        attempted = row[13]
+                        if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
+                            # print("player only appeared once")
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
+                        else:
+                            indicesToCheck = []
+                            j = i+1
+                            while j < len(rows):
+                                if changeToFirst(rows[j][1]) == player_name:
+                                    indicesToCheck.append(j)
+                                j += 1
+
+                            for k in range(len(indicesToCheck)):
+                                if int(rows[k][13]) > 0:
+                                    made += rows[k][12]
+                                    attempted += rows[k][13]
+                            # print("player was traded mid season")
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
+                    return "No free throws"
+            return None #if player requested wasn't in season stats
+
+        #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
+    def calculateMinuteAndYearlyAverages(self, year, originAnalyzer):
+        atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
+        atMinuteYearlyAverages = dict()
+
+        for key in self.minutes:
+            total_made = 0
+            total_attempted = 0
+            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
+            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
+
+            totalPercentage = float(0)
+            players = list(self.minutes[key][2])
+            totalNumberPlayers = len(players)
+            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
+                currPlayerName = players[i] #curr player
+                print("Looking for: " + "|" + str(currPlayerName) + "|")
+                # print(str(data))
+                # print(str(self.get_player_ft_pct(data, "Joel Embid")))
+                # exit()
+                # print("looking for: " + str(currPlayerName))
+                madeAttemptedArr = self.year_get_player_ft_pct(currPlayerName, year, originAnalyzer)
+                if madeAttemptedArr != "No free throws":
+                    # print("returned: " + str(returned))
+                    total_made += madeAttemptedArr[0]
+                    total_attempted += madeAttemptedArr[1]
+
+            # averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
+
+            atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
+        
+        return [atMinuteAverages, atMinuteYearlyAverages]
+    
     def get_player_ft_pct(self, player_name, year): 
         #number_repeated represents how many consequetive times a player's ft average comes from another team
         # print("playername: " + player_name)
@@ -252,12 +389,13 @@ class FreeThrowAnalyzer:
             return fullString
 
         try:
-            client.players_season_totals(
-                season_end_year=year, 
-                output_type=OutputType.CSV, 
-                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-            )
-            time.sleep(2.2)
+            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                client.players_season_totals(
+                    season_end_year=year, 
+                    output_type=OutputType.CSV, 
+                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                )
+                time.sleep(2.2)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
@@ -267,21 +405,23 @@ class FreeThrowAnalyzer:
                     print(f"Rate limited. Retrying after {retry_after} seconds.")
                     time.sleep(int(retry_after))
                     # Retry the request
-                    client.players_season_totals(
-                        season_end_year=year, 
-                        output_type=OutputType.CSV, 
-                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                    )
-                    time.sleep(2.2)
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(2.2)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
-                    client.players_season_totals(
-                        season_end_year=year, 
-                        output_type=OutputType.CSV, 
-                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                    )
-                    time.sleep(2.2)
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(2.2)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
@@ -328,35 +468,55 @@ class FreeThrowAnalyzer:
                             #returns array of number made in first bucket and number attempted in second bucket
                     return "No free throws"
             return None #if player requested wasn't in season stats
-
-        #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
-    def calculateMinuteAndYearlyAverages(self, year):
+    
+    def calculateLargeMinuteAndYearlyAverages(self):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
+        
 
         for key in self.minutes:
-            total_made = 0
-            total_attempted = 0
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
             atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
-            totalPercentage = float(0)
+            # totalPercentage = float(0)
             players = list(self.minutes[key][2])
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-                currPlayerName = players[i] #curr player
-                print("Looking for: " + "|" + str(currPlayerName) + "|")
-                # print(str(data))
-                # print(str(self.get_player_ft_pct(data, "Joel Embid")))
-                # exit()
-                # print("looking for: " + str(currPlayerName))
-                madeAttemptedArr = self.get_player_ft_pct(currPlayerName, year)
-                if madeAttemptedArr != "No free throws":
-                    # print("returned: " + str(returned))
-                    total_made += madeAttemptedArr[0]
-                    total_attempted += madeAttemptedArr[1]
+                #TODO:here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
+                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/endpoints/commonplayerinfo.md
 
-            # averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
+                #may have to get player id with:
+                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/static/players.md
+
+                currPlayerName = players[i] #curr player
+                actualName = self.ftNameToActualName[currPlayerName] 
+                #to convert from ftname to actual name, which we kept track of during original loop through all seasons by passing originalAnalyzer to individual calculateMinuteAndYearlyAverages func
+                nbaapiPlayer = get_player_career_span(actualName)
+                
+                print(str(get_player_career_span(actualName)))
+
+                firstYear = nbaapiPlayer['rookie_year']
+                lastYear = nbaapiPlayer['last_year']
+
+
+                # exit()
+                # break
+
+                for year in range(firstYear, lastYear + 1): #to hit their last season, range is exclusive of upper bound
+                    print("Looking for: " + "|" + str(currPlayerName) + "|")
+                    # print(str(data))
+                    # print(str(self.get_player_ft_pct(data, "Joel Embid"))) #need to write new version of this function but for multiple names
+                    # exit()
+                    # print("looking for: " + str(currPlayerName))
+                    madeAttemptedArr = self.get_player_ft_pct(currPlayerName, year)
+                    if madeAttemptedArr != "No free throws":
+                        total_made = madeAttemptedArr[0]
+                        total_attempted = madeAttemptedArr[1]
+                    
+                    # if (returned is None): #the player 
+                    #     continue
+
+            # averageFTPercentageForAllPlayersAtMinute = (total_made / total_attempted) * 100
 
             atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
         
@@ -388,46 +548,6 @@ def get_player_career_span(player_name):
        'seasons_played': common_info['SEASON_EXP'],
        'is_active': player['is_active']
    }
-
-def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
-        atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
-        atMinuteYearlyAverages = dict()
-        
-
-        for key in self.minutes:
-            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
-            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
-
-            totalPercentage = float(0)
-            players = list(self.minutes[key][2])
-            totalNumberPlayers = len(players)
-            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-                #TODO:here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
-                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/endpoints/commonplayerinfo.md
-
-                #may have to get player id with:
-                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/static/players.md
-                for year in range(startYear, endYear):
-
-                    currPlayerName = players[i] #curr player
-                    print("Looking for: " + "|" + str(currPlayerName) + "|")
-                    # print(str(data))
-                    # print(str(self.get_player_ft_pct(data, "Joel Embid")))
-                    # exit()
-                    # print("looking for: " + str(currPlayerName))
-                    returned = self.get_player_ft_pct(currPlayerName, year)
-                    if returned != "No free throws":
-                        # print("returned: " + str(returned))
-                        totalPercentage += float(returned)
-                    
-                    # if (returned is None): #the player 
-                    #     continue
-
-            averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
-
-            atMinuteYearlyAverages[key] = averageFTPercentageForAllPlayersAtMinute
-        
-        return [atMinuteAverages, atMinuteYearlyAverages]
 
 def get_team_home_dates(team, year):
     # Open the file and create the reader
@@ -503,65 +623,69 @@ def get_team_home_dates(team, year):
     return sorted(list(dates))
 
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
-   import numpy as np
-   from scipy import stats
+    import numpy as np
+    from scipy import stats
 
-   # Get all minutes (x-axis)
-   minutes = sorted(minute_averages.keys())
-   
-   # Get corresponding values for each line
-   ft_percentages = [minute_averages[m] for m in minutes]
-   yearly_percentages = [yearly_averages[m] for m in minutes]
-   differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
-   
-   # Create DataFrame and save to CSV
-   df = pd.DataFrame({
-       'Minute': minutes,
-       'Minute_Average_FT%': ft_percentages,
-       'Season_Average_FT%': yearly_percentages,
-       'Difference': differences
-   })
-   df.to_csv(f'{startYear}-{endYear}_ft_percentage_data.csv', index=False)
-   
-   # Create the plot
-   plt.figure(figsize=(12, 8))
-   
-   # Calculate trendlines
-   slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
-   line_ft = slope_ft * np.array(minutes) + intercept_ft
-   
-   slope_yearly, intercept_yearly, r_value_yearly, p_value_yearly, std_err_yearly = stats.linregress(minutes, yearly_percentages)
-   line_yearly = slope_yearly * np.array(minutes) + intercept_yearly
-   
-   slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
-   line_diff = slope_diff * np.array(minutes) + intercept_diff
-   
-   # Plot original lines
-   plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
-   plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
-   plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
-   
-   # Plot trendlines
-   plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
-   plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
-   plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
-   
-   # Customize the plot
-   plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season | FTA: {totalAttempted}, FTs Made: {totalMade}, %: {round((totalMade/totalAttempted), 2)}', fontsize=14)
-   plt.xlabel('Minutes Played', fontsize=12)
-   plt.ylabel('Free Throw Percentage', fontsize=12)
-   plt.grid(True, linestyle='--', alpha=0.7)
-   plt.legend(fontsize=10)
-   
-   # Add a horizontal line at y=0 for reference in difference
-   plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
-   
-   # Format y-axis as percentage
-   plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
-   
-   # Save the plot
-   plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png')
-   plt.show()
+    # Get all minutes (x-axis)
+    minutes = sorted(minute_averages.keys())
+
+    # Get corresponding values for each line
+    ft_percentages = [minute_averages[m] for m in minutes]
+    yearly_percentages = [yearly_averages[m] for m in minutes]
+    differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
+
+    # Create DataFrame and save to CSV
+    df = pd.DataFrame({
+        'Minute': minutes,
+        'Minute_Average_FT%': ft_percentages,
+        'Season_Average_FT%': yearly_percentages,
+        'Difference': differences
+    })
+    df.to_csv(f'{startYear}-{endYear}_ft_percentage_data.csv', index=False)
+
+    # Create the plot
+    plt.figure(figsize=(12, 8))
+
+    # Calculate trendlines
+    slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
+    line_ft = slope_ft * np.array(minutes) + intercept_ft
+
+    slope_yearly, intercept_yearly, r_value_yearly, p_value_yearly, std_err_yearly = stats.linregress(minutes, yearly_percentages)
+    line_yearly = slope_yearly * np.array(minutes) + intercept_yearly
+
+    slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
+    line_diff = slope_diff * np.array(minutes) + intercept_diff
+
+    # Plot original lines
+    plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
+    plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
+    plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
+
+    # Plot trendlines
+    plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
+    plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
+    plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+
+    # Customize the plot
+    if totalAttempted > 0:
+        percentage = round(totalMade/totalAttempted, 2)
+    else:
+        percentage = ""
+    plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season | FTA: {totalAttempted}, FTs Made: {totalMade}, %: {percentage}', fontsize=14)
+    plt.xlabel('Minutes Played', fontsize=12)
+    plt.ylabel('Free Throw Percentage', fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(fontsize=10)
+
+    # Add a horizontal line at y=0 for reference in difference
+    plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
+
+    # Format y-axis as percentage
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
+
+    # Save the plot
+    plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png')
+    plt.show()
 
  #this function would parse a printed txt file of 
 def parse_data_file(file_path):
@@ -640,18 +764,26 @@ def main():
                 analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
                 # except:
                 #     continue
-                #we pass another instance of analyzer for each year in it
-                # total_neg_year += yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
-                # print("minutes: " + str(analyzer.minutes))
                 print("processed game")
         print(f"Total neg at {year}:" + yearAnalyzer.total_negative_minutes)
         print(f"Totl made at {year}" + yearAnalyzer.total_made)
         print(f"Totl attempted at {year}" + yearAnalyzer.total_attempted)
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year)
+        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year, analyzer)
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
+        
+        #stop after one year to check large
+        # break
 
+
+
+
+
+
+
+    
+    #for 2023-24 season
     # analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
 
     #this will print the dictionary
@@ -680,9 +812,9 @@ def main():
 
     # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-    print("Total neg from 2000-2024: " + analyzer.total_negative_minutes)
-    print("Total made from 2000-2024:" + analyzer.total_made)
-    print("Totl made from 2000-2024" + analyzer.total_attempted)
+    print("Total neg from 2000-2024: " + str(analyzer.total_negative_minutes))
+    print("Total made from 2000-2024:" + str(analyzer.total_made))
+    print("Total made from 2000-2024" + str(analyzer.total_attempted))
 
     print()
 
