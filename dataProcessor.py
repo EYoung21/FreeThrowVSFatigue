@@ -1,3 +1,5 @@
+# do for wnba after?
+
 import csv
 from basketball_reference_web_scraper import client
 import time
@@ -15,6 +17,11 @@ import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
 import ast
+import os
+#import this
+from nba_api.stats.static import players
+from nba_api.stats.endpoints import commonplayerinfo
+
 
 class FreeThrowAnalyzer:
     def __init__(self):
@@ -354,11 +361,38 @@ class FreeThrowAnalyzer:
             atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
         
         return [atMinuteAverages, atMinuteYearlyAverages]
-    
+
+def get_player_career_span(player_name):
+   # Search for the player
+   player_matches = players.find_players_by_full_name(player_name)
+   
+   if not player_matches:
+       return f"No player found with name '{player_name}'"
+   
+   if len(player_matches) > 1:
+       # If multiple matches, show all options
+       return "Multiple players found:\n" + "\n".join(
+           f"- {p['full_name']} (ID: {p['id']})" for p in player_matches
+       )
+   
+   # Get the player's ID and info
+   player = player_matches[0]
+   player_info = commonplayerinfo.CommonPlayerInfo(player_id=player['id'])
+   common_info = player_info.get_normalized_dict()['CommonPlayerInfo'][0]
+   
+   # Return formatted career information
+   return {
+       'name': common_info['DISPLAY_FIRST_LAST'],
+       'rookie_year': common_info['FROM_YEAR'],
+       'last_year': common_info['TO_YEAR'],
+       'seasons_played': common_info['SEASON_EXP'],
+       'is_active': player['is_active']
+   }
+
 def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
-
+        
 
         for key in self.minutes:
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
@@ -369,6 +403,10 @@ def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
                 #TODO:here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
+                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/endpoints/commonplayerinfo.md
+
+                #may have to get player id with:
+                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/static/players.md
                 for year in range(startYear, endYear):
 
                     currPlayerName = players[i] #curr player
@@ -394,12 +432,13 @@ def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
 def get_team_home_dates(team, year):
     # Open the file and create the reader
     try:
-        client.season_schedule(
-            season_end_year=year, 
-            output_type=OutputType.CSV, 
-            output_file_path=f"./{year-1}_{year}_season.csv"
-        )
-        time.sleep(2.2)
+        if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+            client.season_schedule(
+                season_end_year=year,
+                output_type=OutputType.CSV,
+                output_file_path=f"./{year-1}_{year}_season.csv"
+            )
+            time.sleep(2.2)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             # Get the Retry-After header, if available
@@ -409,21 +448,23 @@ def get_team_home_dates(team, year):
                 print(f"Rate limited. Retrying after {retry_after} seconds.")
                 time.sleep(int(retry_after))
                 # Retry the request
-                client.season_schedule(
-                    season_end_year=year, 
-                    output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_season.csv"
-                )
-                time.sleep(2.2)
+                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                    client.season_schedule(
+                        season_end_year=year,
+                        output_type=OutputType.CSV,
+                        output_file_path=f"./{year-1}_{year}_season.csv"
+                    )
+                    time.sleep(2.2)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
-                client.season_schedule(
-                    season_end_year=year, 
-                    output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_season.csv"
-                )
-                time.sleep(2.2)
+                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                    client.season_schedule(
+                        season_end_year=year,
+                        output_type=OutputType.CSV,
+                        output_file_path=f"./{year-1}_{year}_season.csv"
+                    )
+                    time.sleep(2.2)
         else:
             print(f"Error getting players season totals for {year}")
             raise
