@@ -595,10 +595,10 @@ def main():
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
-                try: #to find error
-                    analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
-                except:
-                    continue
+                # try: #to find error
+                analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
+                # except:
+                #     continue
                 #we pass another instance of analyzer for each year in it
                 # total_neg_year += yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
                 # print("minutes: " + str(analyzer.minutes))
@@ -622,7 +622,7 @@ def main():
 
 
     # ansArr = analyzer.calculateLargeMinuteAndYearlyAverages() 
-    ansArr = analyzer.calculateMinuteAndYearlyAverages() 
+    ansArr = analyzer.calculateLargeMinuteAndYearlyAverages() 
 
 
 
