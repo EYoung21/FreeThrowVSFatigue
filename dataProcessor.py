@@ -302,7 +302,8 @@ class FreeThrowAnalyzer:
                         attempted = row[13]
                         if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
                             # print("player only appeared once")
-                            return float((int(made) / int(attempted))) * 100 #calculates average
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
                         else:
                             indicesToCheck = []
                             j = i+1
@@ -316,7 +317,8 @@ class FreeThrowAnalyzer:
                                     made += rows[k][12]
                                     attempted += rows[k][13]
                             # print("player was traded mid season")
-                            return float((int(made) / int(attempted))) * 100
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
                     return "No free throws"
             return None #if player requested wasn't in season stats
 
@@ -328,6 +330,8 @@ class FreeThrowAnalyzer:
 
         for key in self.minutes: #minute would be i (index + 1)
             #self.minutes[i+1] may not be the first minute, ex if 1 was not in it, TODO: need to change this
+            total_made = 0
+            total_attempted = 0
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
             atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
@@ -341,18 +345,54 @@ class FreeThrowAnalyzer:
                 # print(str(self.get_player_ft_pct(data, "Joel Embid")))
                 # exit()
                 # print("looking for: " + str(currPlayerName))
-                returned = self.get_player_ft_pct(currPlayerName, year)
-                if returned != "No free throws":
+                madeAttemptedArr = self.get_player_ft_pct(currPlayerName, year)
+                if madeAttemptedArr != "No free throws":
                     # print("returned: " + str(returned))
-                    totalPercentage += float(returned)
+                    total_made += madeAttemptedArr[0]
+                    total_attempted += madeAttemptedArr[1]
+
+            # averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
+
+            atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
+        
+        return [atMinuteAverages, atMinuteYearlyAverages]
+    
+def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
+        atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
+        atMinuteYearlyAverages = dict()
+
+
+        for key in self.minutes: #minute would be i (index + 1)
+            #self.minutes[i+1] may not be the first minute, ex if 1 was not in it, TODO: need to change this
+            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
+            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
+
+            totalPercentage = float(0)
+            players = list(self.minutes[key][2])
+            totalNumberPlayers = len(players)
+            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
+                #here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
+                for year in range(startYear, endYear):
+
+                    currPlayerName = players[i] #curr player
+                    print("Looking for: " + "|" + str(currPlayerName) + "|")
+                    # print(str(data))
+                    # print(str(self.get_player_ft_pct(data, "Joel Embid")))
+                    # exit()
+                    # print("looking for: " + str(currPlayerName))
+                    returned = self.get_player_ft_pct(currPlayerName, year)
+                    if returned != "No free throws":
+                        # print("returned: " + str(returned))
+                        totalPercentage += float(returned)
+                    
+                    # if (returned is None): #the player 
+                    #     continue
 
             averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
             atMinuteYearlyAverages[key] = averageFTPercentageForAllPlayersAtMinute
         
         return [atMinuteAverages, atMinuteYearlyAverages]
-    
-
 
 def get_team_home_dates(team, year):
     # Open the file and create the reader
