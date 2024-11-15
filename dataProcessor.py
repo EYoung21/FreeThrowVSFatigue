@@ -760,10 +760,10 @@ def main():
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
-                # try: #to find error
-                analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
-                # except:
-                #     continue
+                try: #handles random errors in API's play-by-play parsing (ex. too old of a game / rare invalid date)
+                    analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer) #team, year, month, day
+                except:
+                    continue
                 print("processed game")
         print(f"Total neg at {year}:" + yearAnalyzer.total_negative_minutes)
         print(f"Totl made at {year}" + yearAnalyzer.total_made)
