@@ -362,8 +362,7 @@ def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
         atMinuteYearlyAverages = dict()
 
 
-        for key in self.minutes: #minute would be i (index + 1)
-            #self.minutes[i+1] may not be the first minute, ex if 1 was not in it, TODO: need to change this
+        for key in self.minutes:
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
             atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
@@ -371,7 +370,7 @@ def calculateLargeMinuteAndYearlyAverages(self, startYear, endYear):
             players = list(self.minutes[key][2])
             totalNumberPlayers = len(players)
             for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-                #here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
+                #TODO:here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
                 for year in range(startYear, endYear):
 
                     currPlayerName = players[i] #curr player
