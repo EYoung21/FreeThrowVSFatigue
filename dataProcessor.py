@@ -327,9 +327,7 @@ class FreeThrowAnalyzer:
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-
-        for key in self.minutes: #minute would be i (index + 1)
-            #self.minutes[i+1] may not be the first minute, ex if 1 was not in it, TODO: need to change this
+        for key in self.minutes:
             total_made = 0
             total_attempted = 0
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
