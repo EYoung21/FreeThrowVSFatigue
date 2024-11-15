@@ -37,6 +37,15 @@ class FreeThrowAnalyzer:
         self.total_made = 0
         self.total_negative_minutes = 0
         self.ftNameToActualName = dict()
+        
+        #dictionary of dictionaries
+        self.actualNameToSeasonAverages = dict()
+        #maps from "actual_name" to a dictionary of years mapped to arrays of [total_made, total_attempted] //should eliminate having to reparse seaosn averages
+
+        self.dictionary_error_counter = 0
+
+        self.play_by_play_error_counter = 0
+
             
     def process_team_games(self, team: Team, year: int, month: int, day: int, yearAnalyzer):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
@@ -48,7 +57,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(2.21)
+            time.sleep(2.22)
             self._process_game_data(pbp_data, team, yearAnalyzer)
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -74,7 +83,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(2.21)
+                    time.sleep(2.22)
                     self._process_game_data(pbp_data, team, yearAnalyzer)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
@@ -85,7 +94,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(2.21)
+                    time.sleep(2.22)
                     self._process_game_data(pbp_data, team, yearAnalyzer)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
@@ -264,7 +273,7 @@ class FreeThrowAnalyzer:
                     output_type=OutputType.CSV, 
                     output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                 )
-                time.sleep(2.21)
+                time.sleep(2.22)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
@@ -280,7 +289,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(2.21)
+                        time.sleep(2.22)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -290,7 +299,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(2.21)
+                        time.sleep(2.22)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
@@ -334,6 +343,12 @@ class FreeThrowAnalyzer:
                                     made += rows[k][12]
                                     attempted += rows[k][13]
                             # print("player was traded mid season")
+                            if row[1] not in originAnalyzer.actualNameToSeasonAverages:
+                                originAnalyzer.actualNameToSeasonAverages[row[1]] = {year : [int(made), int(attempted)]}
+                            else: #actualName was already in actualNameToSeasonAverages
+                                originAnalyzer.actualNameToSeasonAverages[row[1]][year][0] += int(made)
+                                originAnalyzer.actualNameToSeasonAverages[row[1]][year][1] += int(attempted)
+
                             return [int(made), int(attempted)] 
                             #returns array of number made in first bucket and number attempted in second bucket
                     return "No free throws"
@@ -372,16 +387,10 @@ class FreeThrowAnalyzer:
         
         return [atMinuteAverages, atMinuteYearlyAverages]
     
-    def get_player_ft_pct(self, player_name, year): 
+    def __get_player_ft_pct(self, player_name, year): 
         #number_repeated represents how many consequetive times a player's ft average comes from another team
         # print("playername: " + player_name)
         def changeToFirst(word):
-            if word == "Scotty Pippen Jr.": #edge case with scotty pippen Jr.
-                return "S. Pippen "
-            if word == "Sasha Vezenkov":
-                return "A. Vezenkov"
-            if word == "Dariq Whitehead":
-                return "D. Miller-Whitehead"
             # print("word: " + word)
             stringArr = word.split(" ")
             firstString = stringArr[0][0] + "." #gets first letter of first name
@@ -389,87 +398,116 @@ class FreeThrowAnalyzer:
             fullString = firstString + " " + secondString
 
             return fullString
-
-        try:
-            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                client.players_season_totals(
-                    season_end_year=year, 
-                    output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                )
-                time.sleep(2.21)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                # Get the Retry-After header, if available
-                retry_after = e.response.headers.get("Retry-After")
-                if retry_after:
-                    # If Retry-After is in seconds, wait that long
-                    print(f"Rate limited. Retrying after {retry_after} seconds.")
-                    time.sleep(int(retry_after))
-                    # Retry the request
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                        client.players_season_totals(
-                            season_end_year=year, 
-                            output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                        )
-                        time.sleep(2.21)
+        
+        if year in self.actualNameToSeasonAverages[player_name]:
+            #if year is in already existing parsed ft% for given player for given year, we don't have to do all of the above (it was done for us in a previously)
+            try:
+                made = self.actualNameToSeasonAverages[player_name][year][0]
+                attempted = self.actualNameToSeasonAverages[player_name][year][1]
+                return [int(made), int(attempted)]
+            except Exception as e:
+                self.dictionary_error_counter += 1
+                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                
+                error_msg = f"""
+            ERROR {self.dictionary_error_counter}:
+            Time: {timestamp}
+            Player: {player_name}
+            Year: {year}
+            Error: {str(e)}
+            Traceback: {traceback.format_exc()}
+            Dictionary State: {self.actualNameToSeasonAverages.get(player_name, 'Player not found')}
+            ----------------------------------------
+            """
+                
+                with open('dictionaryErrors.txt', 'a') as f:
+                    f.write(error_msg)
+                
+                # You might want to return some default value here instead of None
+                return [0, 0]  # or whatever default makes sense for your application
+        else:#
+            try:
+                if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                    client.players_season_totals(
+                        season_end_year=year, 
+                        output_type=OutputType.CSV, 
+                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    )
+                    time.sleep(2.22)
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 429:
+                    # Get the Retry-After header, if available
+                    retry_after = e.response.headers.get("Retry-After")
+                    if retry_after:
+                        # If Retry-After is in seconds, wait that long
+                        print(f"Rate limited. Retrying after {retry_after} seconds.")
+                        time.sleep(int(retry_after))
+                        # Retry the request
+                        if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                            client.players_season_totals(
+                                season_end_year=year, 
+                                output_type=OutputType.CSV, 
+                                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                            )
+                            time.sleep(2.22)
+                    else:
+                        print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                        time.sleep(60)  # Default wait time if Retry-After header is missing
+                        if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                            client.players_season_totals(
+                                season_end_year=year, 
+                                output_type=OutputType.CSV, 
+                                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                            )
+                            time.sleep(2.22)
                 else:
-                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-                    time.sleep(60)  # Default wait time if Retry-After header is missing
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                        client.players_season_totals(
-                            season_end_year=year, 
-                            output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                        )
-                        time.sleep(2.21)
-            else:
-                # Re-raise if it's a different HTTP error
-                raise
+                    # Re-raise if it's a different HTTP error
+                    raise
+            
+            with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
+                reader = csv.reader(file, delimiter=',')
+                # Skip the header row
+                next(reader)
+                rows = list(reader)
+                #indcies 12 and 13 are made and attempted respectively
+                rows = rows[:-1] #skip last row, league averages
+                for i, row in enumerate(rows):
+                    # player_row = row[0]
+                    # print("Player from row: " + row[1])
+                    print("name from rows: " + row[1])
+                    fullString = changeToFirst(row[1])
+                    # print("changed: " + fullString)
+                    # exit()
+                    print("Player from row changed name: " + fullString)
 
-        with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
-            reader = csv.reader(file, delimiter=',')
-            # Skip the header row
-            next(reader)
-            rows = list(reader)
-            #indcies 12 and 13 are made and attempted respectively
-            rows = rows[:-1] #skip last row, league averages
-            for i, row in enumerate(rows):
-                # player_row = row[0]
-                # print("Player from row: " + row[1])
-                print("name from rows: " + row[1])
-                fullString = changeToFirst(row[1])
-                # print("changed: " + fullString)
-                # exit()
-                print("Player from row changed name: " + fullString)
+                    if fullString == player_name:
+                        print("Player from row: " + row[1])
+                        if int(row[13]) > 0: # avoid division by zero
+                            made = row[12]
+                            attempted = row[13]
+                            if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
+                                # print("player only appeared once")
+                                return [int(made), int(attempted)] 
+                                #returns array of number made in first bucket and number attempted in second bucket
+                            else:
+                                indicesToCheck = []
+                                j = i+1
+                                while j < len(rows):
+                                    if changeToFirst(rows[j][1]) == player_name:
+                                        indicesToCheck.append(j)
+                                    j += 1
 
-                if fullString == player_name:
-                    print("Player from row: " + row[1])
-                    if int(row[13]) > 0: # avoid division by zero
-                        made = row[12]
-                        attempted = row[13]
-                        if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
-                            # print("player only appeared once")
-                            return [int(made), int(attempted)] 
-                            #returns array of number made in first bucket and number attempted in second bucket
-                        else:
-                            indicesToCheck = []
-                            j = i+1
-                            while j < len(rows):
-                                if changeToFirst(rows[j][1]) == player_name:
-                                    indicesToCheck.append(j)
-                                j += 1
+                                for k in range(len(indicesToCheck)):
+                                    if int(rows[k][13]) > 0:
+                                        made += rows[k][12]
+                                        attempted += rows[k][13]
+                                # print("player was traded mid season")
+                                return [int(made), int(attempted)] 
+                                #returns array of number made in first bucket and number attempted in second bucket
+                        return "No free throws"
+                return None #if player requested wasn't in season stats
+            
 
-                            for k in range(len(indicesToCheck)):
-                                if int(rows[k][13]) > 0:
-                                    made += rows[k][12]
-                                    attempted += rows[k][13]
-                            # print("player was traded mid season")
-                            return [int(made), int(attempted)] 
-                            #returns array of number made in first bucket and number attempted in second bucket
-                    return "No free throws"
-            return None #if player requested wasn't in season stats
     
     def calculateLargeMinuteAndYearlyAverages(self):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
@@ -510,7 +548,9 @@ class FreeThrowAnalyzer:
                     # print(str(self.get_player_ft_pct(data, "Joel Embid"))) #need to write new version of this function but for multiple names
                     # exit()
                     # print("looking for: " + str(currPlayerName))
-                    madeAttemptedArr = self.get_player_ft_pct(currPlayerName, year)
+                    madeAttemptedArr = self.__get_player_ft_pct(actualName, year)
+                    #could maybe pass in actualName here, to not have to convert from name in player_season_totals to ftName type, then you could map "actualName"
+                    #but actual name from nbaapiPlayer may differ form the names in that csv, so best to leave it as this for now
                     if madeAttemptedArr != "No free throws":
                         total_made = madeAttemptedArr[0]
                         total_attempted = madeAttemptedArr[1]
@@ -560,7 +600,7 @@ def get_team_home_dates(team, year):
                 output_type=OutputType.CSV,
                 output_file_path=f"./{year-1}_{year}_season.csv"
             )
-            time.sleep(2.21)
+            time.sleep(2.22)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             # Get the Retry-After header, if available
@@ -576,7 +616,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(2.21)
+                    time.sleep(2.22)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -586,7 +626,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(2.21)
+                    time.sleep(2.22)
         else:
             print(f"Error getting players season totals for {year}")
             raise
@@ -762,16 +802,16 @@ def main():
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
-                error_counter = 0
+                analyzer.play_by_play_error_counter = 0
 
                 try:
                     analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer)
                 except Exception as e:
-                    error_counter += 1
+                    analyzer.play_by_play_error_counter += 1
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
                     error_msg = f"""
-                ERROR {error_counter}:
+                ERROR {analyzer.play_by_play_error_counter}:
                 Time: {timestamp}
                 Team: {allTeams[key]}
                 Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
@@ -780,7 +820,7 @@ def main():
                 ----------------------------------------
                 """
                     
-                    with open('parsing_errors.txt', 'a') as f:
+                    with open('playByPlayErrors.txt', 'a') as f:
                         f.write(error_msg)
                     
                         continue
