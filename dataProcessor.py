@@ -670,6 +670,9 @@ def get_team_home_dates(team, year):
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
     import numpy as np
     from scipy import stats
+    from scipy.interpolate import make_interp_spline
+    import matplotlib.pyplot as plt
+    import pandas as pd
 
     # Get all minutes (x-axis)
     minutes = sorted(minute_averages.keys())
@@ -691,6 +694,21 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     # Create the plot
     plt.figure(figsize=(12, 8))
 
+    # Create smooth curves using spline interpolation
+    X_smooth = np.linspace(min(minutes), max(minutes), 300)
+    
+    # Spline for FT percentages
+    spl_ft = make_interp_spline(minutes, ft_percentages, k=3)
+    ft_smooth = spl_ft(X_smooth)
+    
+    # Spline for yearly averages
+    spl_yearly = make_interp_spline(minutes, yearly_percentages, k=3)
+    yearly_smooth = spl_yearly(X_smooth)
+    
+    # Spline for differences
+    spl_diff = make_interp_spline(minutes, differences, k=3)
+    diff_smooth = spl_diff(X_smooth)
+
     # Calculate trendlines
     slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
     line_ft = slope_ft * np.array(minutes) + intercept_ft
@@ -701,26 +719,32 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
     line_diff = slope_diff * np.array(minutes) + intercept_diff
 
-    # Plot original lines
-    plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
-    plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
-    plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
+    # Plot smooth curves
+    plt.plot(X_smooth, ft_smooth, 'b-', label='Actual FT% at minute', linewidth=2)
+    plt.plot(X_smooth, yearly_smooth, 'g-', label='Players\' Season Average', linewidth=2)
+    plt.plot(X_smooth, diff_smooth, 'r-', label='Difference', linewidth=2)
 
     # Plot trendlines
     plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
     plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
     plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
 
+    # Add scatter points for actual data
+    plt.scatter(minutes, ft_percentages, color='blue', alpha=0.3, s=30)
+    plt.scatter(minutes, yearly_percentages, color='green', alpha=0.3, s=30)
+    plt.scatter(minutes, differences, color='red', alpha=0.3, s=30)
+
     # Customize the plot
     if totalAttempted > 0:
-        percentage = round(totalMade/totalAttempted, 2)
+        percentage = round(totalMade/totalAttempted * 100, 2)
     else:
         percentage = ""
-    plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season | FTA: {totalAttempted}, FTs Made: {totalMade}, %: {percentage}', fontsize=14)
+    plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season\nFTA: {totalAttempted}, FTs Made: {totalMade}, %: {percentage}%', 
+              fontsize=14, pad=20)
     plt.xlabel('Minutes Played', fontsize=12)
     plt.ylabel('Free Throw Percentage', fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.7)
-    plt.legend(fontsize=10)
+    plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 
     # Add a horizontal line at y=0 for reference in difference
     plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
@@ -728,8 +752,12 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     # Format y-axis as percentage
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
 
+    # Adjust layout to prevent legend cutoff
+    plt.tight_layout()
+
     # Save the plot
-    plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png')
+    plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png', 
+                bbox_inches='tight', dpi=300)
     plt.show()
 
  #this function would parse a printed txt file of 
