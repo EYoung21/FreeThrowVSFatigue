@@ -23,6 +23,7 @@ from nba_api.stats.static import players
 from nba_api.stats.endpoints import commonplayerinfo
 import traceback
 from datetime import datetime
+import json
 
 
 class FreeThrowAnalyzer:
@@ -786,19 +787,25 @@ def main():
 
 
     #VITAL, only commented for a sec for testing
-    for year in range(2000, 2025): 
+    for year in range(2000, 2025):
+        # Check if both files already exist
+        minute_averages_file = f'minute_averages_{year}.txt'
+        yearly_averages_file = f'yearly_averages_{year}.txt'
+        
+        #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
+        if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
+            print(f"Files for year {year} already exist, skipping...")
+            continue
+            
         yearAnalyzer = FreeThrowAnalyzer()
 
-        #we can also make a graph for each year, I will do this after this one is done!
         for key in allTeams:
-            # below, "team" should be in this format: "Team.BOSTON_CELTICS"
             arrHomeDates = get_team_home_dates(key, year)
             print(f"Starting: {key}")
             print("homedates: " + str(arrHomeDates))
 
             for date in arrHomeDates:
                 print("Team: " + str(key))
-                # print("here!")
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
@@ -811,14 +818,14 @@ def main():
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
                     error_msg = f"""
-                ERROR {analyzer.play_by_play_error_counter}:
-                Time: {timestamp}
-                Team: {allTeams[key]}
-                Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
-                Error: {str(e)}
-                Traceback: {traceback.format_exc()}
-                ----------------------------------------
-                """
+                    ERROR {analyzer.play_by_play_error_counter}:
+                    Time: {timestamp}
+                    Team: {allTeams[key]}
+                    Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
+                    Error: {str(e)}
+                    Traceback: {traceback.format_exc()}
+                    ----------------------------------------
+                    """
                     
                     with open('playByPlayErrors.txt', 'a') as f:
                         f.write(error_msg)
@@ -831,6 +838,14 @@ def main():
         yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year, analyzer)
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
+
+        # Save dictionaries to text files
+        with open(minute_averages_file, 'w') as f:
+            json.dump(yearlyMinuteAveragesDict, f, indent=4)
+        
+        with open(yearly_averages_file, 'w') as f:
+            json.dump(yearlyMinuteYearlyAveragesDict, f, indent=4)
+
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
         
         #stop after one year to check large
