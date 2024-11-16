@@ -1,4 +1,5 @@
 # do for wnba after?
+#adjust for intentional misses at end of games somehow (or just drowned out by noise?)
 
 import csv
 from basketball_reference_web_scraper import client
@@ -59,7 +60,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(2.5)
-            self._process_game_data(pbp_data, team, yearAnalyzer)
+            self._process_game_data(pbp_data, team, yearAnalyzer, year) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -85,7 +86,7 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(2.5)
-                    self._process_game_data(pbp_data, team, yearAnalyzer)
+                    self._process_game_data(pbp_data, team, yearAnalyzer, year)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -96,12 +97,12 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(2.5)
-                    self._process_game_data(pbp_data, team, yearAnalyzer)
+                    self._process_game_data(pbp_data, team, yearAnalyzer, year)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict], team, yearAnalyzer):
+    def _process_game_data(self, pbp_data: List[dict], team, yearAnalyzer, year):
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -142,6 +143,7 @@ class FreeThrowAnalyzer:
                 if player in playersThatSubbedOut:
                     continue
                 print("Curr team: " + str(team))
+                print("Curr year: " + str(year))
                 # Debug: Print free throw details
                 # print(f"\n=== Free Throw ===")
                 # print(f"Player: {player}")
