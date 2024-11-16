@@ -58,7 +58,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(2.22)
+            time.sleep(2.5)
             self._process_game_data(pbp_data, team, yearAnalyzer)
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -84,7 +84,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(2.22)
+                    time.sleep(2.5)
                     self._process_game_data(pbp_data, team, yearAnalyzer)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
@@ -95,7 +95,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(2.22)
+                    time.sleep(2.5)
                     self._process_game_data(pbp_data, team, yearAnalyzer)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
@@ -274,7 +274,7 @@ class FreeThrowAnalyzer:
                     output_type=OutputType.CSV, 
                     output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                 )
-                time.sleep(2.22)
+                time.sleep(2.5)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
@@ -290,7 +290,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(2.22)
+                        time.sleep(2.5)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -300,7 +300,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(2.22)
+                        time.sleep(2.5)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
@@ -434,7 +434,7 @@ class FreeThrowAnalyzer:
                         output_type=OutputType.CSV, 
                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                     )
-                    time.sleep(2.22)
+                    time.sleep(2.5)
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code == 429:
                     # Get the Retry-After header, if available
@@ -450,7 +450,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(2.22)
+                            time.sleep(2.5)
                     else:
                         print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                         time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -460,7 +460,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(2.22)
+                            time.sleep(2.5)
                 else:
                     # Re-raise if it's a different HTTP error
                     raise
@@ -601,7 +601,7 @@ def get_team_home_dates(team, year):
                 output_type=OutputType.CSV,
                 output_file_path=f"./{year-1}_{year}_season.csv"
             )
-            time.sleep(2.22)
+            time.sleep(2.5)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             # Get the Retry-After header, if available
@@ -617,7 +617,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(2.22)
+                    time.sleep(2.5)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -627,7 +627,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(2.22)
+                    time.sleep(2.5)
         else:
             print(f"Error getting players season totals for {year}")
             raise
