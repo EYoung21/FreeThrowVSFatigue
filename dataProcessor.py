@@ -60,7 +60,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(1.9)
+            time.sleep(1.81)
             self._process_game_data(pbp_data, team, yearAnalyzer, year) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -86,7 +86,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(1.9)
+                    time.sleep(1.81)
                     self._process_game_data(pbp_data, team, yearAnalyzer, year)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
@@ -97,7 +97,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(1.9)
+                    time.sleep(1.81)
                     self._process_game_data(pbp_data, team, yearAnalyzer, year)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
@@ -277,7 +277,7 @@ class FreeThrowAnalyzer:
                     output_type=OutputType.CSV, 
                     output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                 )
-                time.sleep(1.9)
+                time.sleep(1.81)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
@@ -293,7 +293,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(1.9)
+                        time.sleep(1.81)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -303,7 +303,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(1.9)
+                        time.sleep(1.81)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
@@ -437,7 +437,7 @@ class FreeThrowAnalyzer:
                         output_type=OutputType.CSV, 
                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                     )
-                    time.sleep(1.9)
+                    time.sleep(1.81)
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code == 429:
                     # Get the Retry-After header, if available
@@ -453,7 +453,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(1.9)
+                            time.sleep(1.81)
                     else:
                         print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                         time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -463,7 +463,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(1.9)
+                            time.sleep(1.81)
                 else:
                     # Re-raise if it's a different HTTP error
                     raise
@@ -604,7 +604,7 @@ def get_team_home_dates(team, year):
                 output_type=OutputType.CSV,
                 output_file_path=f"./{year-1}_{year}_season.csv"
             )
-            time.sleep(1.9)
+            time.sleep(1.81)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             # Get the Retry-After header, if available
@@ -620,7 +620,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(1.9)
+                    time.sleep(1.81)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -630,7 +630,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(1.9)
+                    time.sleep(1.81)
         else:
             print(f"Error getting players season totals for {year}")
             raise
@@ -860,7 +860,7 @@ def main():
                     
                     with open('playByPlayErrors.txt', 'a') as f:
                         f.write(error_msg)
-                        time.sleep(1.9) #for just this one we will sleep for longer to not get rate limited
+                        time.sleep(1.81) #for just this one we will sleep for longer to not get rate limited
                         continue
                 print("processed game")
         print(f"Total neg at {year}:" + str(yearAnalyzer.total_negative_minutes))
@@ -910,9 +910,20 @@ def main():
 
     #will have to be career ft shots for each player, or could be the yearly averages for every year they played
     
-    minuteAveragesDict = ansArr[0]
+    allMinuteAveragesDict = ansArr[0]
 
-    minuteYearlyAveragesDict = ansArr[1]
+    allMinuteYearlyAveragesDict = ansArr[1]
+
+
+    all_minute_averages_file = f'all_minute_averages_2000-2024.txt'
+    all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
+
+    with open(all_minute_averages_file, 'w') as f:
+            json.dump(allMinuteAveragesDict, f, indent=4)
+        
+    with open(all_yearly_averages_file, 'w') as f:
+        json.dump(allMinuteYearlyAveragesDict, f, indent=4)
+
 
     # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
@@ -924,7 +935,7 @@ def main():
 
     print()
 
-    plot_ft_percentages(minuteAveragesDict, minuteYearlyAveragesDict, 2000, 2024, analyzer.total_made, analyzer.total_attempted)
+    plot_ft_percentages(allMinuteAveragesDict, allMinuteYearlyAveragesDict, 2000, 2024, analyzer.total_made, analyzer.total_attempted)
 
     exit()
 
