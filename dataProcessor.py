@@ -26,10 +26,6 @@ from nba_api.stats.endpoints import commonplayerinfo
 import traceback
 from datetime import datetime
 import json
-import numpy as np
-from scipy import stats
-import matplotlib.pyplot as plt
-import pandas as pd
 
 
 class FreeThrowAnalyzer:
@@ -64,7 +60,7 @@ class FreeThrowAnalyzer:
                 month=month,
                 day=day
             )
-            time.sleep(1.84)
+            time.sleep(1.85)
             self._process_game_data(pbp_data, team, yearAnalyzer, year) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
@@ -90,7 +86,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(1.84)
+                    time.sleep(1.85)
                     self._process_game_data(pbp_data, team, yearAnalyzer, year)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
@@ -101,7 +97,7 @@ class FreeThrowAnalyzer:
                         month=month,
                         day=day
                     )
-                    time.sleep(1.84)
+                    time.sleep(1.85)
                     self._process_game_data(pbp_data, team, yearAnalyzer, year)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
@@ -281,7 +277,7 @@ class FreeThrowAnalyzer:
                     output_type=OutputType.CSV, 
                     output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                 )
-                time.sleep(1.84)
+                time.sleep(1.85)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
                 # Get the Retry-After header, if available
@@ -297,7 +293,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(1.84)
+                        time.sleep(1.85)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -307,7 +303,7 @@ class FreeThrowAnalyzer:
                             output_type=OutputType.CSV, 
                             output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                         )
-                        time.sleep(1.84)
+                        time.sleep(1.85)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
@@ -441,7 +437,7 @@ class FreeThrowAnalyzer:
                         output_type=OutputType.CSV, 
                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                     )
-                    time.sleep(1.84)
+                    time.sleep(1.85)
             except requests.exceptions.HTTPError as e:
                 if e.response.status_code == 429:
                     # Get the Retry-After header, if available
@@ -457,7 +453,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(1.84)
+                            time.sleep(1.85)
                     else:
                         print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                         time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -467,7 +463,7 @@ class FreeThrowAnalyzer:
                                 output_type=OutputType.CSV, 
                                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
                             )
-                            time.sleep(1.84)
+                            time.sleep(1.85)
                 else:
                     # Re-raise if it's a different HTTP error
                     raise
@@ -608,7 +604,7 @@ def get_team_home_dates(team, year):
                 output_type=OutputType.CSV,
                 output_file_path=f"./{year-1}_{year}_season.csv"
             )
-            time.sleep(1.84)
+            time.sleep(1.85)
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 429:
             # Get the Retry-After header, if available
@@ -624,7 +620,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(1.84)
+                    time.sleep(1.85)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -634,7 +630,7 @@ def get_team_home_dates(team, year):
                         output_type=OutputType.CSV,
                         output_file_path=f"./{year-1}_{year}_season.csv"
                     )
-                    time.sleep(1.84)
+                    time.sleep(1.85)
         else:
             print(f"Error getting players season totals for {year}")
             raise
@@ -673,6 +669,12 @@ def get_team_home_dates(team, year):
     return sorted(list(dates))
 
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
+    import numpy as np
+    from scipy import stats
+    from scipy.interpolate import make_interp_spline
+    import matplotlib.pyplot as plt
+    import pandas as pd
+
     # Get all minutes (x-axis)
     minutes = sorted(minute_averages.keys())
 
@@ -693,6 +695,21 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     # Create the plot
     plt.figure(figsize=(12, 8))
 
+    # Create smooth curves using spline interpolation
+    X_smooth = np.linspace(min(minutes), max(minutes), 300)
+    
+    # Spline for FT percentages
+    spl_ft = make_interp_spline(minutes, ft_percentages, k=3)
+    ft_smooth = spl_ft(X_smooth)
+    
+    # Spline for yearly averages
+    spl_yearly = make_interp_spline(minutes, yearly_percentages, k=3)
+    yearly_smooth = spl_yearly(X_smooth)
+    
+    # Spline for differences
+    spl_diff = make_interp_spline(minutes, differences, k=3)
+    diff_smooth = spl_diff(X_smooth)
+
     # Calculate trendlines
     slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
     line_ft = slope_ft * np.array(minutes) + intercept_ft
@@ -703,15 +720,20 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
     line_diff = slope_diff * np.array(minutes) + intercept_diff
 
-    # Plot original lines
-    plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
-    plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
-    plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
+    # Plot smooth curves
+    plt.plot(X_smooth, ft_smooth, 'b-', label='Actual FT% at minute', linewidth=2)
+    plt.plot(X_smooth, yearly_smooth, 'g-', label='Players\' Season Average', linewidth=2)
+    plt.plot(X_smooth, diff_smooth, 'r-', label='Difference', linewidth=2)
 
     # Plot trendlines
     plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
     plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
     plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+
+    # Add scatter points for actual data
+    plt.scatter(minutes, ft_percentages, color='blue', alpha=0.3, s=30)
+    plt.scatter(minutes, yearly_percentages, color='green', alpha=0.3, s=30)
+    plt.scatter(minutes, differences, color='red', alpha=0.3, s=30)
 
     # Customize the plot
     if totalAttempted > 0:
@@ -737,7 +759,7 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     # Save the plot
     plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png', 
                 bbox_inches='tight', dpi=300)
-    # plt.show()
+    plt.show()
 
  #this function would parse a printed txt file of 
 def parse_data_file(file_path):
@@ -798,14 +820,12 @@ def main():
     #VITAL, only commented for a sec for testing
     for year in range(2000, 2025):
         # Check if both files already exist
-        minute_averages_file = f'minute_averages_{year-1}-{year}.txt'
-        yearly_averages_file = f'yearly_averages_{year-1}-{year}.txt'
-
-        minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
+        minute_averages_file = f'minute_averages_{year}.txt'
+        yearly_averages_file = f'yearly_averages_{year}.txt'
         
         #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
         if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
-            print(f"Files for {year-1}-{year} already exist, skipping...")
+            print(f"Files for year {year} already exist, skipping...")
             continue
             
         yearAnalyzer = FreeThrowAnalyzer()
@@ -840,7 +860,7 @@ def main():
                     
                     with open('playByPlayErrors.txt', 'a') as f:
                         f.write(error_msg)
-                        time.sleep(1.85) #for just this one we will sleep for longer to not get rate limited
+                        time.sleep(1.86) #for just this one we will sleep for longer to not get rate limited
                         continue
                 print("processed game")
         print(f"Total neg at {year}:" + str(yearAnalyzer.total_negative_minutes))
@@ -856,9 +876,6 @@ def main():
         
         with open(yearly_averages_file, 'w') as f:
             json.dump(yearlyMinuteYearlyAveragesDict, f, indent=4)
-
-        with open(minute_total_dict_file, 'w') as f:
-            json.dump(yearAnalyzer.minutes, f, indent=4)
 
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
         
@@ -901,16 +918,11 @@ def main():
     all_minute_averages_file = f'all_minute_averages_2000-2024.txt'
     all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
 
-    all_minute_total_dict_file = f"all_minute_total_dict_file_2000-2024"
-
     with open(all_minute_averages_file, 'w') as f:
             json.dump(allMinuteAveragesDict, f, indent=4)
         
     with open(all_yearly_averages_file, 'w') as f:
         json.dump(allMinuteYearlyAveragesDict, f, indent=4)
-
-    with open(all_minute_total_dict_file, 'w') as f:
-            json.dump(analyzer.minutes, f, indent=4)
 
 
     # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
