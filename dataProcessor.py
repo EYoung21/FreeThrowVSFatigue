@@ -34,11 +34,26 @@ import pandas as pd
 
 # Look for? / do we maybe need to handle?:
 
-# Technical fouls where players aren't actually subbed
-# Start of quarters where players "enter" but aren't substituting
-# Injuries where players leave without a substitution
-# Overtime periods?
-# Time resets due to replay reviews or corrections?
+# Technical fouls where players aren't actually subbed   ----  handled by substitutions, ex:
+# Technical foul by B. Portis	 	16-17	 	 
+# 5:01.0	Technical foul by B. Portis	 	16-17	 	 
+# 5:01.0	 	 	16-17	 	Technical foul by A. Nembhard
+# 5:01.0	B. Portis ejected from game	 	16-17	 	 
+# 5:01.0	 	 	16-18	+1	T. Haliburton makes technical free throw
+# 5:01.0	P. Connaughton enters the game for P. Beverley	 	16-18	 	 
+# 5:01.0	A. Jackson enters the game for B. Portis
+
+# Start of quarters where players "enter" but aren't substituting --- handled already!
+
+# Injuries where players leave without a substitution 
+# When there's injuries, it displays as a substitution: ex:Nov 17, 2024
+	# J. Wells enters the game for V. Williams
+
+# Overtime periods? -- handled
+# Play off games? -- I tested, they're included
+
+# Time resets due to replay reviews or corrections? -- shouldn't be a problem, I would assume is accurately updated in nba
+
 
 
 
@@ -121,7 +136,7 @@ class FreeThrowAnalyzer:
         player_entry_times = {}
         playersThatSubbedOut = set()
 
-        self.technical_foul_counter = {}  # Tracks technicals per player
+        # self.technical_foul_counter = {}  # Tracks technicals per player
 
         # Debug: Print the full game timeline
         # print("\n=== Game Timeline ===")
@@ -132,22 +147,6 @@ class FreeThrowAnalyzer:
             # print(str(play))
             # continue
 
-            # In game processing
-            if 'technical foul' in play.get('description', ''):
-                # Get player who committed technical
-                technical_player = play['description'].split('by ')[1]  # Example parsing
-                
-                # Initialize or increment technical count
-                if technical_player not in self.technical_foul_counter:
-                    self.technical_foul_counter[technical_player] = 1
-                else:
-                    self.technical_foul_counter[technical_player] += 1
-                    
-                # If player has 2 technicals, they're ejected
-                if self.technical_foul_counter[technical_player] >= 2:
-                    playersThatSubbedOut.add(technical_player)
-                    print(f"Player ejected: {technical_player}")  # Debug logging
-
             if 'enters' in str(play.get('description', '')):
                 desParsed = play['description'].split(' enters')
                 player_in = desParsed[0]
@@ -155,7 +154,7 @@ class FreeThrowAnalyzer:
                 playersThatSubbedOut.add(desParsed2[1])
                 
                 # Debug: Print substitution details
-                converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
+                converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
                 # print(f"\n=== Substitution ===")
                 # print(f"Player entering: {player_in}")
                 # print(f"Period: {play.get('period')}")
@@ -279,12 +278,14 @@ class FreeThrowAnalyzer:
                         yearAnalyzer.minutes[curr_minute][2].add(player)
             
 
-    def calculateConvertedIGT(self, remainingSecondsInQuarter, quarter): #remaining seconds, quarter (1, 2, 3, 4)
+    def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, type): #remaining seconds, quarter (1, 2, 3, 4)
         # print("remaining seconds: " + str(remainingSecondsInQuarter))
         # print("quarter: " + str(quarter))
         # exit()
-        
-        return (quarter * 12 * 60) - remainingSecondsInQuarter #returns seconds elapses so far
+        if type != "OVERTIME":
+            return (quarter * 12 * 60) - remainingSecondsInPeriod #returns seconds elapses so far
+        else:
+            return (4*12*60) + (quarter*5*60) - remainingSecondsInPeriod
 
         # remainingMinutes = remainingSecondsInQuarter / 60
         # minutesPlayedInQuarter = 12 - remainingMinutes

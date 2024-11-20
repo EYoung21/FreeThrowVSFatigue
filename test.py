@@ -226,19 +226,150 @@
 # print(get_player_ft_pct("Giannis Antetokounmpo"))
 
 
-def changeToFirst(word):
-            if word == "Scotty Pippen Jr.": #edge case with scotty pippen Jr.
-                return "S. Pippen "
-            if word == "Sasha Vezenkov":
-                return "A. Vezenkov"
-            if word == "Dariq Whitehead":
-                return "D. Miller-Whitehead"
+# def changeToFirst(word):
+#             if word == "Scotty Pippen Jr.": #edge case with scotty pippen Jr.
+#                 return "S. Pippen "
+#             if word == "Sasha Vezenkov":
+#                 return "A. Vezenkov"
+#             if word == "Dariq Whitehead":
+#                 return "D. Miller-Whitehead"
 
-            stringArr = word.split(" ")
-            firstString = stringArr[0][0] + "." #gets first letter of first name
-            secondString = stringArr[1] #gets second string
-            fullString = firstString + " " + secondString
+#             stringArr = word.split(" ")
+#             firstString = stringArr[0][0] + "." #gets first letter of first name
+#             secondString = stringArr[1] #gets second string
+#             fullString = firstString + " " + secondString
 
-            return fullString
+#             return fullString
 
-print(changeToFirst("Hunter Tyson"))
+# print(changeToFirst("Hunter Tyson"))
+
+import csv
+from basketball_reference_web_scraper import client
+import time
+import requests
+from basketball_reference_web_scraper.data import Team, OutputType
+from datetime import datetime
+from typing import Dict, List, Set
+import math
+from basketball_reference_web_scraper.data import Team, Location
+import matplotlib.pyplot as plt
+import numpy as np
+from datetime import datetime, timedelta
+import csv
+import pytz
+import pandas as pd
+from bs4 import BeautifulSoup
+import ast
+import os
+#import this
+from nba_api.stats.static import players
+from nba_api.stats.endpoints import commonplayerinfo
+import traceback
+from datetime import datetime
+import json
+import numpy as np
+from scipy import stats
+import matplotlib.pyplot as plt
+import pandas as pd
+
+
+
+# game = client.play_by_play(
+#             home_team=Team.ATLANTA_HAWKS,
+#             year=2019,
+#             month=3,
+#             day=1
+#         )
+
+# for i in range(len(game)):
+#     print(game[i])
+
+
+def get_team_home_dates(team, year):
+    # Open the file and create the reader
+    try:
+        if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+            client.season_schedule(
+                season_end_year=year,
+                output_type=OutputType.CSV,
+                output_file_path=f"./{year-1}_{year}_season.csv"
+            )
+            time.sleep(1.85)
+    except requests.exceptions.HTTPError as e:
+        if e.response.status_code == 429:
+            # Get the Retry-After header, if available
+            retry_after = e.response.headers.get("Retry-After")
+            if retry_after:
+                # If Retry-After is in seconds, wait that long
+                print(f"Rate limited. Retrying after {retry_after} seconds.")
+                time.sleep(int(retry_after))
+                # Retry the request
+                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                    client.season_schedule(
+                        season_end_year=year,
+                        output_type=OutputType.CSV,
+                        output_file_path=f"./{year-1}_{year}_season.csv"
+                    )
+                    time.sleep(1.85)
+            else:
+                print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                time.sleep(60)  # Default wait time if Retry-After header is missing
+                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                    client.season_schedule(
+                        season_end_year=year,
+                        output_type=OutputType.CSV,
+                        output_file_path=f"./{year-1}_{year}_season.csv"
+                    )
+                    time.sleep(1.85)
+        else:
+            print(f"Error getting players season totals for {year}")
+            raise
+
+
+    with open(f"./{year-1}_{year}_season.csv") as file:
+        reader = csv.reader(file, delimiter=',')
+        # Skip the header row
+        next(reader)
+        
+        # Initialize the dates set
+        dates = set()
+        
+        # Create timezone objects
+        utc = pytz.UTC
+        et = pytz.timezone('US/Eastern')  # NBA typically uses Eastern Time
+        
+        for row in reader:
+            if row[3] == team:  # If this is a home game
+                # Parse the UTC timestamp
+                utc_time = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S%z')
+                
+                # Convert to Eastern Time
+                et_time = utc_time.astimezone(et)
+                
+                # Get just the date part in ET
+                game_date = et_time.date()
+                
+                dates.add(game_date.strftime('%Y-%m-%d'))
+                
+                # print("CSV DATE: " + row[0])
+                # print("Converted date: " + game_date.strftime('%Y-%m-%d'))
+                # print()
+
+        
+    return sorted(list(dates))
+
+
+arrHomeDates = get_team_home_dates("PORTLAND TRAIL BLAZERS", 2019)
+
+print(str(arrHomeDates))
+
+
+game = client.play_by_play(
+            home_team=Team.PORTLAND_TRAIL_BLAZERS,
+            year=2019,
+            month=5,
+            day=3
+        )
+
+for i in range(len(game)):
+    print(game[i])
