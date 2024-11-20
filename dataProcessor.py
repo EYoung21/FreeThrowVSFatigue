@@ -33,6 +33,7 @@ import pandas as pd
 
 
 # Look for? / do we maybe need to handle?:
+
 # Technical fouls where players aren't actually subbed
 # Start of quarters where players "enter" but aren't substituting
 # Injuries where players leave without a substitution
@@ -120,6 +121,8 @@ class FreeThrowAnalyzer:
         player_entry_times = {}
         playersThatSubbedOut = set()
 
+        self.technical_foul_counter = {}  # Tracks technicals per player
+
         # Debug: Print the full game timeline
         # print("\n=== Game Timeline ===")
         # for play in pbp_data:
@@ -128,6 +131,23 @@ class FreeThrowAnalyzer:
         for play in pbp_data:
             # print(str(play))
             # continue
+
+            # In game processing
+            if 'technical foul' in play.get('description', ''):
+                # Get player who committed technical
+                technical_player = play['description'].split('by ')[1]  # Example parsing
+                
+                # Initialize or increment technical count
+                if technical_player not in self.technical_foul_counter:
+                    self.technical_foul_counter[technical_player] = 1
+                else:
+                    self.technical_foul_counter[technical_player] += 1
+                    
+                # If player has 2 technicals, they're ejected
+                if self.technical_foul_counter[technical_player] >= 2:
+                    playersThatSubbedOut.add(technical_player)
+                    print(f"Player ejected: {technical_player}")  # Debug logging
+
             if 'enters' in str(play.get('description', '')):
                 desParsed = play['description'].split(' enters')
                 player_in = desParsed[0]
