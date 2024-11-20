@@ -49,7 +49,7 @@ import pandas as pd
 # When there's injuries, it displays as a substitution: ex:Nov 17, 2024
 	# J. Wells enters the game for V. Williams
 
-# Overtime periods? -- handled
+# Overtime periods? -- handled, i think this is what was causing the negative minutes glitch, it's fixed now
 # Play off games? -- I tested, they're included
 
 # Time resets due to replay reviews or corrections? -- shouldn't be a problem, I would assume is accurately updated in nba
