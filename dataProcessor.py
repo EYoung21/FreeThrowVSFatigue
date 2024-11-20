@@ -90,7 +90,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(1.85)
-            self._process_game_data(pbp_data, team, yearAnalyzer, year) #passing year so I can print it
+            self._process_game_data(pbp_data, team, yearAnalyzer, year, month, day) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -127,7 +127,7 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.85)
-                    self._process_game_data(pbp_data, team, yearAnalyzer, year)
+                    self._process_game_data(pbp_data, team, yearAnalyzer, year, month, day)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
@@ -188,7 +188,7 @@ class FreeThrowAnalyzer:
                     player_entry_times[player] = float(0.0)
 
                 entry_time = player_entry_times.get(player)
-                current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'))
+                current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
                 
                 print(f"Entry time seconds: {entry_time}")
                 print(f"Current time seconds: {current_time}")
