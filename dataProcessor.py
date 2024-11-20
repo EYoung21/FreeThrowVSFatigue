@@ -871,7 +871,7 @@ def main():
                     
                     with open('playByPlayErrors.txt', 'a') as f:
                         f.write(error_msg)
-                        time.sleep(1.87) #for just this one we will sleep for longer to not get rate limited
+                        time.sleep(1.88) #for just this one we will sleep for longer to not get rate limited
                         continue
                 print("processed game")
         print(f"Total neg at {year}:" + str(yearAnalyzer.total_negative_minutes))
