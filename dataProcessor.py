@@ -940,9 +940,21 @@ def main():
     with open(all_yearly_averages_file, 'w') as f:
         json.dump(allMinuteYearlyAveragesDict, f, indent=4)
 
-    with open(all_minute_total_dict_file, 'w') as f:
-            json.dump(analyzer.minutes, f, indent=4)
+    def set_default(obj):
+        if isinstance(obj, set):
+            return list(obj)
+        raise TypeError
 
+    # This will convert each set() in the lists to a list while preserving the structure
+    with open(all_minute_total_dict_file, 'w') as f:
+        json.dump(analyzer.minutes, f, indent=4, default=set_default)
+
+
+    #if need to convert back to set:
+    # with open(all_minute_total_dict_file, 'r') as f:
+    # loaded_minutes = json.load(f)
+    # # Convert the third element back to a set
+    # minutes = {k: [v[0], v[1], set(v[2])] for k, v in loaded_minutes.items()}
 
     # print("minuteAvg: " + str(minuteAveragesDict)) #empty for some reason?
 
