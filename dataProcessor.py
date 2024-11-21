@@ -889,7 +889,7 @@ def main():
             json.dump(yearlyMinuteYearlyAveragesDict, f, indent=4)
 
         with open(minute_total_dict_file, 'w') as f:
-            json.dump(yearAnalyzer.minutes, f, indent=4)
+            json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
 
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
         
