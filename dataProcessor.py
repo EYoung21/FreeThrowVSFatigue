@@ -824,7 +824,10 @@ def main():
         "WASHINGTON WIZARDS": Team.WASHINGTON_WIZARDS
     }
 
-
+    def set_default(obj):
+        if isinstance(obj, set):
+            return list(obj)
+        raise TypeError
 
     #VITAL, only commented for a sec for testing
     for year in range(2000, 2025):
@@ -939,11 +942,6 @@ def main():
         
     with open(all_yearly_averages_file, 'w') as f:
         json.dump(allMinuteYearlyAveragesDict, f, indent=4)
-
-    def set_default(obj):
-        if isinstance(obj, set):
-            return list(obj)
-        raise TypeError
 
     # This will convert each set() in the lists to a list while preserving the structure
     with open(all_minute_total_dict_file, 'w') as f:
