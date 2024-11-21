@@ -835,9 +835,9 @@ def main():
         minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
         
         #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
-        if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
-            print(f"Files for {year-1}-{year} already exist, skipping...")
-            continue
+        # if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
+        #     print(f"Files for {year-1}-{year} already exist, skipping...")
+        #     continue
             
         yearAnalyzer = FreeThrowAnalyzer()
 
