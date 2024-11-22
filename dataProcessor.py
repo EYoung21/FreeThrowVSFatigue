@@ -61,6 +61,15 @@ class FreeThrowAnalyzer:
     def __init__(self):
         # self.processed_games: Set[str] = set()
         self.minutes = dict()
+        
+        #here, what if instead of dict[minute] = ft made, fr missed, [#set of all players that made up that stat], we do:
+
+
+        #NEW IDEA!
+        # dict[minute] = [fts made, fts missed, all players that made up that stat's yearly averages added up, the number of players that amde up that stat]
+        # then we can calculate the average of the yearly averages at each minute later.
+        #NEW IDEA!
+
         #each minute should have a total made and total missed
         #AND a an average of each player's yearly ft % that is included in the above
         #      - we can accomplish this by keeping a set of players that show freethrows during this consequetive minute
