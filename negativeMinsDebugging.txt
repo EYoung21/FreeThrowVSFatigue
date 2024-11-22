@@ -1,0 +1,1451 @@
+
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 2341.0
+                    Current time (seconds): 585.0
+                    Minutes played: -29.266666666666666
+                    Team: Team.DENVER_NUGGETS
+                    Year: 1999
+                    Month: 11
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 2341.0
+                    Current time (seconds): 699.0
+                    Minutes played: -27.366666666666667
+                    Team: Team.DENVER_NUGGETS
+                    Year: 1999
+                    Month: 11
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 2341.0
+                    Current time (seconds): 699.0
+                    Minutes played: -27.366666666666667
+                    Team: Team.DENVER_NUGGETS
+                    Year: 1999
+                    Month: 11
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: A. McDyess
+                    Entry time (seconds): 2378.0
+                    Current time (seconds): 517.0
+                    Minutes played: -31.016666666666666
+                    Team: Team.DENVER_NUGGETS
+                    Year: 2000
+                    Month: 02
+                    Day: 21
+                    
+                    Negative minutes detected:
+                    Player: A. McDyess
+                    Entry time (seconds): 2378.0
+                    Current time (seconds): 517.0
+                    Minutes played: -31.016666666666666
+                    Team: Team.DENVER_NUGGETS
+                    Year: 2000
+                    Month: 02
+                    Day: 21
+                    
+                    Negative minutes detected:
+                    Player: D. McKey
+                    Entry time (seconds): 2053.0
+                    Current time (seconds): 667.0
+                    Minutes played: -23.1
+                    Team: Team.INDIANA_PACERS
+                    Year: 2000
+                    Month: 03
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: D. McKey
+                    Entry time (seconds): 2053.0
+                    Current time (seconds): 667.0
+                    Minutes played: -23.1
+                    Team: Team.INDIANA_PACERS
+                    Year: 2000
+                    Month: 03
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: C. Childs
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 667.0
+                    Minutes played: -22.033333333333335
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 1999
+                    Month: 11
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: C. Childs
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 667.0
+                    Minutes played: -22.033333333333335
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 1999
+                    Month: 11
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: C. Childs
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 687.0
+                    Minutes played: -21.7
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 1999
+                    Month: 11
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: C. Childs
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 687.0
+                    Minutes played: -21.7
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 1999
+                    Month: 11
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: C. Barkley
+                    Entry time (seconds): 2376.0
+                    Current time (seconds): 546.0
+                    Minutes played: -30.5
+                    Team: Team.PHOENIX_SUNS
+                    Year: 1999
+                    Month: 12
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: C. Barkley
+                    Entry time (seconds): 2376.0
+                    Current time (seconds): 546.0
+                    Minutes played: -30.5
+                    Team: Team.PHOENIX_SUNS
+                    Year: 1999
+                    Month: 12
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: S. Anderson
+                    Entry time (seconds): 2184.0
+                    Current time (seconds): 558.0
+                    Minutes played: -27.1
+                    Team: Team.PHOENIX_SUNS
+                    Year: 1999
+                    Month: 12
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: S. Anderson
+                    Entry time (seconds): 2184.0
+                    Current time (seconds): 558.0
+                    Minutes played: -27.1
+                    Team: Team.PHOENIX_SUNS
+                    Year: 1999
+                    Month: 12
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: C. Barkley
+                    Entry time (seconds): 2376.0
+                    Current time (seconds): 626.0
+                    Minutes played: -29.166666666666668
+                    Team: Team.PHOENIX_SUNS
+                    Year: 1999
+                    Month: 12
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: S. Pippen
+                    Entry time (seconds): 2592.0
+                    Current time (seconds): 704.0
+                    Minutes played: -31.466666666666665
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2000
+                    Month: 02
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: S. Pippen
+                    Entry time (seconds): 2592.0
+                    Current time (seconds): 704.0
+                    Minutes played: -31.466666666666665
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2000
+                    Month: 02
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: J. Howard
+                    Entry time (seconds): 909.0
+                    Current time (seconds): 578.0
+                    Minutes played: -5.516666666666667
+                    Team: Team.WASHINGTON_WIZARDS
+                    Year: 2000
+                    Month: 03
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: R. Mercer
+                    Entry time (seconds): 869.0
+                    Current time (seconds): 706.0
+                    Minutes played: -2.716666666666667
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2001
+                    Month: 03
+                    Day: 23
+                    
+                    Negative minutes detected:
+                    Player: R. Mercer
+                    Entry time (seconds): 869.0
+                    Current time (seconds): 706.0
+                    Minutes played: -2.716666666666667
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2001
+                    Month: 03
+                    Day: 23
+                    
+                    Negative minutes detected:
+                    Player: A. McDyess
+                    Entry time (seconds): 892.0
+                    Current time (seconds): 577.0
+                    Minutes played: -5.25
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2001
+                    Month: 03
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: A. McDyess
+                    Entry time (seconds): 892.0
+                    Current time (seconds): 666.3
+                    Minutes played: -3.7616666666666676
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2001
+                    Month: 03
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: A. McDyess
+                    Entry time (seconds): 892.0
+                    Current time (seconds): 666.3
+                    Minutes played: -3.7616666666666676
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2001
+                    Month: 03
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: J. Williams
+                    Entry time (seconds): 2588.0
+                    Current time (seconds): 651.0
+                    Minutes played: -32.28333333333333
+                    Team: Team.GOLDEN_STATE_WARRIORS
+                    Year: 2000
+                    Month: 11
+                    Day: 10
+                    
+                    Negative minutes detected:
+                    Player: J. Williams
+                    Entry time (seconds): 2588.0
+                    Current time (seconds): 651.0
+                    Minutes played: -32.28333333333333
+                    Team: Team.GOLDEN_STATE_WARRIORS
+                    Year: 2000
+                    Month: 11
+                    Day: 10
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 2333.0
+                    Current time (seconds): 662.6
+                    Minutes played: -27.84
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2001
+                    Month: 01
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 2333.0
+                    Current time (seconds): 662.6
+                    Minutes played: -27.84
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2001
+                    Month: 01
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: A. Davis
+                    Entry time (seconds): 1042.0
+                    Current time (seconds): 718.2
+                    Minutes played: -5.396666666666666
+                    Team: Team.INDIANA_PACERS
+                    Year: 2000
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Davis
+                    Entry time (seconds): 1042.0
+                    Current time (seconds): 718.2
+                    Minutes played: -5.396666666666666
+                    Team: Team.INDIANA_PACERS
+                    Year: 2000
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: J. Jones
+                    Entry time (seconds): 1694.0
+                    Current time (seconds): 718.5
+                    Minutes played: -16.258333333333333
+                    Team: Team.INDIANA_PACERS
+                    Year: 2001
+                    Month: 04
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: J. Jones
+                    Entry time (seconds): 1694.0
+                    Current time (seconds): 718.5
+                    Minutes played: -16.258333333333333
+                    Team: Team.INDIANA_PACERS
+                    Year: 2001
+                    Month: 04
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: E. Piatkowski
+                    Entry time (seconds): 1985.0
+                    Current time (seconds): 620.0
+                    Minutes played: -22.75
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2000
+                    Month: 11
+                    Day: 25
+                    
+                    Negative minutes detected:
+                    Player: E. Piatkowski
+                    Entry time (seconds): 1985.0
+                    Current time (seconds): 620.0
+                    Minutes played: -22.75
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2000
+                    Month: 11
+                    Day: 25
+                    
+                    Negative minutes detected:
+                    Player: E. Piatkowski
+                    Entry time (seconds): 1985.0
+                    Current time (seconds): 620.0
+                    Minutes played: -22.75
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2000
+                    Month: 11
+                    Day: 25
+                    
+                    Negative minutes detected:
+                    Player: L. Odom
+                    Entry time (seconds): 1705.0
+                    Current time (seconds): 495.0
+                    Minutes played: -20.166666666666668
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2001
+                    Month: 01
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: L. Odom
+                    Entry time (seconds): 1705.0
+                    Current time (seconds): 667.4
+                    Minutes played: -17.293333333333333
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2001
+                    Month: 01
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: L. Odom
+                    Entry time (seconds): 1705.0
+                    Current time (seconds): 667.4
+                    Minutes played: -17.293333333333333
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2001
+                    Month: 01
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: V. Baker
+                    Entry time (seconds): 1941.0
+                    Current time (seconds): 627.0
+                    Minutes played: -21.9
+                    Team: Team.LOS_ANGELES_LAKERS
+                    Year: 2001
+                    Month: 03
+                    Day: 11
+                    
+                    Negative minutes detected:
+                    Player: V. Baker
+                    Entry time (seconds): 1941.0
+                    Current time (seconds): 627.0
+                    Minutes played: -21.9
+                    Team: Team.LOS_ANGELES_LAKERS
+                    Year: 2001
+                    Month: 03
+                    Day: 11
+                    
+                    Negative minutes detected:
+                    Player: V. Baker
+                    Entry time (seconds): 1941.0
+                    Current time (seconds): 695.1
+                    Minutes played: -20.765
+                    Team: Team.LOS_ANGELES_LAKERS
+                    Year: 2001
+                    Month: 03
+                    Day: 11
+                    
+                    Negative minutes detected:
+                    Player: S. O'Neal
+                    Entry time (seconds): 2235.0
+                    Current time (seconds): 540.0
+                    Minutes played: -28.25
+                    Team: Team.LOS_ANGELES_LAKERS
+                    Year: 2001
+                    Month: 06
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: S. O'Neal
+                    Entry time (seconds): 2235.0
+                    Current time (seconds): 540.0
+                    Minutes played: -28.25
+                    Team: Team.LOS_ANGELES_LAKERS
+                    Year: 2001
+                    Month: 06
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: K. Garnett
+                    Entry time (seconds): 989.0
+                    Current time (seconds): 592.0
+                    Minutes played: -6.616666666666666
+                    Team: Team.MINNESOTA_TIMBERWOLVES
+                    Year: 2001
+                    Month: 03
+                    Day: 04
+                    
+                    Negative minutes detected:
+                    Player: K. Garnett
+                    Entry time (seconds): 989.0
+                    Current time (seconds): 592.0
+                    Minutes played: -6.616666666666666
+                    Team: Team.MINNESOTA_TIMBERWOLVES
+                    Year: 2001
+                    Month: 03
+                    Day: 04
+                    
+                    Negative minutes detected:
+                    Player: J. Kidd
+                    Entry time (seconds): 985.0
+                    Current time (seconds): 703.4
+                    Minutes played: -4.693333333333333
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 2001
+                    Month: 02
+                    Day: 23
+                    
+                    Negative minutes detected:
+                    Player: J. Kidd
+                    Entry time (seconds): 985.0
+                    Current time (seconds): 703.4
+                    Minutes played: -4.693333333333333
+                    Team: Team.NEW_YORK_KNICKS
+                    Year: 2001
+                    Month: 02
+                    Day: 23
+                    
+                    Negative minutes detected:
+                    Player: D. Armstrong
+                    Entry time (seconds): 970.0
+                    Current time (seconds): 718.6
+                    Minutes played: -4.1899999999999995
+                    Team: Team.ORLANDO_MAGIC
+                    Year: 2001
+                    Month: 04
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: D. Armstrong
+                    Entry time (seconds): 970.0
+                    Current time (seconds): 718.6
+                    Minutes played: -4.1899999999999995
+                    Team: Team.ORLANDO_MAGIC
+                    Year: 2001
+                    Month: 04
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 978.0
+                    Current time (seconds): 486.0
+                    Minutes played: -8.2
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2001
+                    Month: 02
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: D. Christie
+                    Entry time (seconds): 1050.0
+                    Current time (seconds): 644.0
+                    Minutes played: -6.766666666666667
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2000
+                    Month: 11
+                    Day: 16
+                    
+                    Negative minutes detected:
+                    Player: D. Christie
+                    Entry time (seconds): 1050.0
+                    Current time (seconds): 644.0
+                    Minutes played: -6.766666666666667
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2000
+                    Month: 11
+                    Day: 16
+                    
+                    Negative minutes detected:
+                    Player: T. Delk
+                    Entry time (seconds): 909.0
+                    Current time (seconds): 662.0
+                    Minutes played: -4.116666666666666
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2001
+                    Month: 01
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: T. Delk
+                    Entry time (seconds): 909.0
+                    Current time (seconds): 662.0
+                    Minutes played: -4.116666666666666
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2001
+                    Month: 01
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: V. Divac
+                    Entry time (seconds): 2323.0
+                    Current time (seconds): 683.8
+                    Minutes played: -27.32
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2001
+                    Month: 01
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: V. Divac
+                    Entry time (seconds): 2323.0
+                    Current time (seconds): 683.8
+                    Minutes played: -27.32
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2001
+                    Month: 01
+                    Day: 02
+                    
+                    Negative minutes detected:
+                    Player: D. Christie
+                    Entry time (seconds): 2611.0
+                    Current time (seconds): 637.0
+                    Minutes played: -32.9
+                    Team: Team.SAN_ANTONIO_SPURS
+                    Year: 2001
+                    Month: 04
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: B. Shaw
+                    Entry time (seconds): 2104.8
+                    Current time (seconds): 716.0
+                    Minutes played: -23.14666666666667
+                    Team: Team.TORONTO_RAPTORS
+                    Year: 2000
+                    Month: 12
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: B. Shaw
+                    Entry time (seconds): 2104.8
+                    Current time (seconds): 716.0
+                    Minutes played: -23.14666666666667
+                    Team: Team.TORONTO_RAPTORS
+                    Year: 2000
+                    Month: 12
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: J. Terry
+                    Entry time (seconds): 958.0
+                    Current time (seconds): 655.0
+                    Minutes played: -5.05
+                    Team: Team.ATLANTA_HAWKS
+                    Year: 2002
+                    Month: 04
+                    Day: 13
+                    
+                    Negative minutes detected:
+                    Player: B. Russell
+                    Entry time (seconds): 2005.0
+                    Current time (seconds): 719.5
+                    Minutes played: -21.425
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2002
+                    Month: 01
+                    Day: 05
+                    
+                    Negative minutes detected:
+                    Player: B. Russell
+                    Entry time (seconds): 2005.0
+                    Current time (seconds): 719.5
+                    Minutes played: -21.425
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2002
+                    Month: 01
+                    Day: 05
+                    
+                    Negative minutes detected:
+                    Player: R. Mercer
+                    Entry time (seconds): 2362.0
+                    Current time (seconds): 554.0
+                    Minutes played: -30.133333333333333
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2002
+                    Month: 01
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: R. Mercer
+                    Entry time (seconds): 2362.0
+                    Current time (seconds): 554.0
+                    Minutes played: -30.133333333333333
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2002
+                    Month: 01
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: A. Jamison
+                    Entry time (seconds): 2517.0
+                    Current time (seconds): 555.0
+                    Minutes played: -32.7
+                    Team: Team.GOLDEN_STATE_WARRIORS
+                    Year: 2002
+                    Month: 02
+                    Day: 25
+                    
+                    Negative minutes detected:
+                    Player: A. Jamison
+                    Entry time (seconds): 2517.0
+                    Current time (seconds): 555.0
+                    Minutes played: -32.7
+                    Team: Team.GOLDEN_STATE_WARRIORS
+                    Year: 2002
+                    Month: 02
+                    Day: 25
+                    
+                    Negative minutes detected:
+                    Player: S. O'Neal
+                    Entry time (seconds): 2393.0
+                    Current time (seconds): 443.0
+                    Minutes played: -32.5
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2001
+                    Month: 11
+                    Day: 15
+                    
+                    Negative minutes detected:
+                    Player: S. O'Neal
+                    Entry time (seconds): 2393.0
+                    Current time (seconds): 555.0
+                    Minutes played: -30.633333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2001
+                    Month: 11
+                    Day: 15
+                    
+                    Negative minutes detected:
+                    Player: S. O'Neal
+                    Entry time (seconds): 2393.0
+                    Current time (seconds): 555.0
+                    Minutes played: -30.633333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2001
+                    Month: 11
+                    Day: 15
+                    
+                    Negative minutes detected:
+                    Player: M. Norris
+                    Entry time (seconds): 2071.0
+                    Current time (seconds): 690.6
+                    Minutes played: -23.006666666666668
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2002
+                    Month: 01
+                    Day: 29
+                    
+                    Negative minutes detected:
+                    Player: M. Norris
+                    Entry time (seconds): 2071.0
+                    Current time (seconds): 690.6
+                    Minutes played: -23.006666666666668
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2002
+                    Month: 01
+                    Day: 29
+                    
+                    Negative minutes detected:
+                    Player: C. Mills
+                    Entry time (seconds): 1963.0
+                    Current time (seconds): 444.0
+                    Minutes played: -25.316666666666666
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2001
+                    Month: 11
+                    Day: 03
+                    
+                    Negative minutes detected:
+                    Player: D. Fisher
+                    Entry time (seconds): 2578.0
+                    Current time (seconds): 719.2
+                    Minutes played: -30.98
+                    Team: Team.PORTLAND_TRAIL_BLAZERS
+                    Year: 2002
+                    Month: 04
+                    Day: 14
+                    
+                    Negative minutes detected:
+                    Player: D. Fisher
+                    Entry time (seconds): 2578.0
+                    Current time (seconds): 719.2
+                    Minutes played: -30.98
+                    Team: Team.PORTLAND_TRAIL_BLAZERS
+                    Year: 2002
+                    Month: 04
+                    Day: 14
+                    
+                    Negative minutes detected:
+                    Player: K. Martin
+                    Entry time (seconds): 2387.0
+                    Current time (seconds): 559.0
+                    Minutes played: -30.466666666666665
+                    Team: Team.UTAH_JAZZ
+                    Year: 2001
+                    Month: 11
+                    Day: 21
+                    
+                    Negative minutes detected:
+                    Player: D. Mason
+                    Entry time (seconds): 1978.0
+                    Current time (seconds): 659.0
+                    Minutes played: -21.983333333333334
+                    Team: Team.ATLANTA_HAWKS
+                    Year: 2002
+                    Month: 11
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: D. Mason
+                    Entry time (seconds): 1978.0
+                    Current time (seconds): 659.0
+                    Minutes played: -21.983333333333334
+                    Team: Team.ATLANTA_HAWKS
+                    Year: 2002
+                    Month: 11
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: C. Benjamin
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 495.0
+                    Minutes played: -24.9
+                    Team: Team.ATLANTA_HAWKS
+                    Year: 2003
+                    Month: 01
+                    Day: 22
+                    
+                    Negative minutes detected:
+                    Player: C. Benjamin
+                    Entry time (seconds): 1989.0
+                    Current time (seconds): 495.0
+                    Minutes played: -24.9
+                    Team: Team.ATLANTA_HAWKS
+                    Year: 2003
+                    Month: 01
+                    Day: 22
+                    
+                    Negative minutes detected:
+                    Player: P. Pierce
+                    Entry time (seconds): 877.0
+                    Current time (seconds): 675.3
+                    Minutes played: -3.3616666666666672
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: P. Pierce
+                    Entry time (seconds): 877.0
+                    Current time (seconds): 675.3
+                    Minutes played: -3.3616666666666672
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: P. Pierce
+                    Entry time (seconds): 877.0
+                    Current time (seconds): 684.1
+                    Minutes played: -3.2149999999999994
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: P. Pierce
+                    Entry time (seconds): 877.0
+                    Current time (seconds): 684.1
+                    Minutes played: -3.2149999999999994
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 994.0
+                    Current time (seconds): 700.0
+                    Minutes played: -4.9
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2003
+                    Month: 02
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 994.0
+                    Current time (seconds): 700.0
+                    Minutes played: -4.9
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2003
+                    Month: 02
+                    Day: 24
+                    
+                    Negative minutes detected:
+                    Player: A. Walker
+                    Entry time (seconds): 952.0
+                    Current time (seconds): 655.0
+                    Minutes played: -4.95
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2003
+                    Month: 04
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: A. Walker
+                    Entry time (seconds): 952.0
+                    Current time (seconds): 655.0
+                    Minutes played: -4.95
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2003
+                    Month: 04
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: P. Pierce
+                    Entry time (seconds): 926.0
+                    Current time (seconds): 481.0
+                    Minutes played: -7.416666666666667
+                    Team: Team.BOSTON_CELTICS
+                    Year: 2003
+                    Month: 05
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: J. Crawford
+                    Entry time (seconds): 1322.0
+                    Current time (seconds): 464.0
+                    Minutes played: -14.3
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2003
+                    Month: 04
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: J. Crawford
+                    Entry time (seconds): 1322.0
+                    Current time (seconds): 464.0
+                    Minutes played: -14.3
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2003
+                    Month: 04
+                    Day: 01
+                    
+                    Negative minutes detected:
+                    Player: J. Crawford
+                    Entry time (seconds): 1401.3
+                    Current time (seconds): 500.0
+                    Minutes played: -15.021666666666667
+                    Team: Team.CHICAGO_BULLS
+                    Year: 2003
+                    Month: 04
+                    Day: 05
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1664.0
+                    Current time (seconds): 679.8
+                    Minutes played: -16.403333333333332
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1664.0
+                    Current time (seconds): 679.8
+                    Minutes played: -16.403333333333332
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1664.0
+                    Current time (seconds): 679.8
+                    Minutes played: -16.403333333333332
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1664.0
+                    Current time (seconds): 1174.0
+                    Minutes played: -8.166666666666666
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2002
+                    Month: 12
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1934.0
+                    Current time (seconds): 681.3
+                    Minutes played: -20.878333333333334
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2003
+                    Month: 04
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1934.0
+                    Current time (seconds): 681.3
+                    Minutes played: -20.878333333333334
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2003
+                    Month: 04
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1934.0
+                    Current time (seconds): 707.7
+                    Minutes played: -20.438333333333333
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2003
+                    Month: 04
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: S. Parker
+                    Entry time (seconds): 1934.0
+                    Current time (seconds): 707.7
+                    Minutes played: -20.438333333333333
+                    Team: Team.CLEVELAND_CAVALIERS
+                    Year: 2003
+                    Month: 04
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: M. Finley
+                    Entry time (seconds): 2407.0
+                    Current time (seconds): 438.0
+                    Minutes played: -32.81666666666667
+                    Team: Team.DALLAS_MAVERICKS
+                    Year: 2003
+                    Month: 02
+                    Day: 27
+                    
+                    Negative minutes detected:
+                    Player: M. Finley
+                    Entry time (seconds): 2407.0
+                    Current time (seconds): 438.0
+                    Minutes played: -32.81666666666667
+                    Team: Team.DALLAS_MAVERICKS
+                    Year: 2003
+                    Month: 02
+                    Day: 27
+                    
+                    Negative minutes detected:
+                    Player: J. Crawford
+                    Entry time (seconds): 2660.0
+                    Current time (seconds): 524.0
+                    Minutes played: -35.6
+                    Team: Team.DETROIT_PISTONS
+                    Year: 2003
+                    Month: 04
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: J. Crawford
+                    Entry time (seconds): 2660.0
+                    Current time (seconds): 524.0
+                    Minutes played: -35.6
+                    Team: Team.DETROIT_PISTONS
+                    Year: 2003
+                    Month: 04
+                    Day: 09
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 454.0
+                    Minutes played: -8.483333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 454.0
+                    Minutes played: -8.483333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 545.0
+                    Minutes played: -6.966666666666667
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 545.0
+                    Minutes played: -6.966666666666667
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 614.0
+                    Minutes played: -5.816666666666666
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 614.0
+                    Minutes played: -5.816666666666666
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 649.0
+                    Minutes played: -5.233333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 963.0
+                    Current time (seconds): 649.0
+                    Minutes played: -5.233333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: R. Horry
+                    Entry time (seconds): 2495.0
+                    Current time (seconds): 686.4
+                    Minutes played: -30.14333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: R. Horry
+                    Entry time (seconds): 2495.0
+                    Current time (seconds): 686.4
+                    Minutes played: -30.14333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 01
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 1104.0
+                    Current time (seconds): 706.0
+                    Minutes played: -6.633333333333334
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 03
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: S. Francis
+                    Entry time (seconds): 1104.0
+                    Current time (seconds): 706.0
+                    Minutes played: -6.633333333333334
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 03
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: G. Rice
+                    Entry time (seconds): 1887.0
+                    Current time (seconds): 715.6
+                    Minutes played: -19.523333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 03
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: G. Rice
+                    Entry time (seconds): 1887.0
+                    Current time (seconds): 715.6
+                    Minutes played: -19.523333333333333
+                    Team: Team.HOUSTON_ROCKETS
+                    Year: 2003
+                    Month: 03
+                    Day: 12
+                    
+                    Negative minutes detected:
+                    Player: J. Kidd
+                    Entry time (seconds): 2423.0
+                    Current time (seconds): 662.8
+                    Minutes played: -29.336666666666666
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2002
+                    Month: 11
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: J. Kidd
+                    Entry time (seconds): 2423.0
+                    Current time (seconds): 662.8
+                    Minutes played: -29.336666666666666
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Year: 2002
+                    Month: 11
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: D. Fisher
+                    Entry time (seconds): 2497.0
+                    Current time (seconds): 697.6
+                    Minutes played: -29.990000000000002
+                    Team: Team.MEMPHIS_GRIZZLIES
+                    Year: 2002
+                    Month: 11
+                    Day: 29
+                    
+                    Negative minutes detected:
+                    Player: D. Fisher
+                    Entry time (seconds): 2497.0
+                    Current time (seconds): 697.6
+                    Minutes played: -29.990000000000002
+                    Team: Team.MEMPHIS_GRIZZLIES
+                    Year: 2002
+                    Month: 11
+                    Day: 29
+                    
+                    Negative minutes detected:
+                    Player: L. Harris
+                    Entry time (seconds): 1962.0
+                    Current time (seconds): 585.0
+                    Minutes played: -22.95
+                    Team: Team.MILWAUKEE_BUCKS
+                    Year: 2003
+                    Month: 04
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: L. Harris
+                    Entry time (seconds): 1962.0
+                    Current time (seconds): 585.0
+                    Minutes played: -22.95
+                    Team: Team.MILWAUKEE_BUCKS
+                    Year: 2003
+                    Month: 04
+                    Day: 26
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 616.0
+                    Minutes played: -6.383333333333334
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 616.0
+                    Minutes played: -6.383333333333334
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 704.5
+                    Minutes played: -4.908333333333333
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 704.5
+                    Minutes played: -4.908333333333333
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 713.8
+                    Minutes played: -4.753333333333334
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 999.0
+                    Current time (seconds): 713.8
+                    Minutes played: -4.753333333333334
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2002
+                    Month: 12
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 1091.0
+                    Current time (seconds): 617.0
+                    Minutes played: -7.9
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2003
+                    Month: 01
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 1091.0
+                    Current time (seconds): 617.0
+                    Minutes played: -7.9
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2003
+                    Month: 01
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 1091.0
+                    Current time (seconds): 711.0
+                    Minutes played: -6.333333333333333
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2003
+                    Month: 01
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: A. Iverson
+                    Entry time (seconds): 1091.0
+                    Current time (seconds): 711.0
+                    Minutes played: -6.333333333333333
+                    Team: Team.PHILADELPHIA_76ERS
+                    Year: 2003
+                    Month: 01
+                    Day: 06
+                    
+                    Negative minutes detected:
+                    Player: S. Marbury
+                    Entry time (seconds): 1045.0
+                    Current time (seconds): 713.5
+                    Minutes played: -5.525
+                    Team: Team.PHOENIX_SUNS
+                    Year: 2003
+                    Month: 03
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: S. Marbury
+                    Entry time (seconds): 1045.0
+                    Current time (seconds): 713.5
+                    Minutes played: -5.525
+                    Team: Team.PHOENIX_SUNS
+                    Year: 2003
+                    Month: 03
+                    Day: 17
+                    
+                    Negative minutes detected:
+                    Player: D. Anderson
+                    Entry time (seconds): 2476.0
+                    Current time (seconds): 466.0
+                    Minutes played: -33.5
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2002
+                    Month: 12
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: D. Anderson
+                    Entry time (seconds): 2476.0
+                    Current time (seconds): 466.0
+                    Minutes played: -33.5
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2002
+                    Month: 12
+                    Day: 28
+                    
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 1756.0
+                    Current time (seconds): 1163.0
+                    Minutes played: -9.883333333333333
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2003
+                    Month: 05
+                    Day: 10
+                    
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 1756.0
+                    Current time (seconds): 1431.6
+                    Minutes played: -5.406666666666668
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2003
+                    Month: 05
+                    Day: 10
+                    
+                    Negative minutes detected:
+                    Player: N. Van Exel
+                    Entry time (seconds): 1756.0
+                    Current time (seconds): 1431.6
+                    Minutes played: -5.406666666666668
+                    Team: Team.SACRAMENTO_KINGS
+                    Year: 2003
+                    Month: 05
+                    Day: 10
+                    
+                    Negative minutes detected:
+                    Player: R. Horry
+                    Entry time (seconds): 1972.0
+                    Current time (seconds): 711.5
+                    Minutes played: -21.008333333333333
+                    Team: Team.TORONTO_RAPTORS
+                    Year: 2002
+                    Month: 12
+                    Day: 22
+                    
+                    Negative minutes detected:
+                    Player: R. Horry
+                    Entry time (seconds): 1972.0
+                    Current time (seconds): 711.5
+                    Minutes played: -21.008333333333333
+                    Team: Team.TORONTO_RAPTORS
+                    Year: 2002
+                    Month: 12
+                    Day: 22
+                    
+                    Negative minutes detected:
+                    Player: M. Harpring
+                    Entry time (seconds): 2469.0
+                    Current time (seconds): 690.6
+                    Minutes played: -29.64
+                    Team: Team.UTAH_JAZZ
+                    Year: 2003
+                    Month: 01
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: M. Harpring
+                    Entry time (seconds): 2469.0
+                    Current time (seconds): 690.6
+                    Minutes played: -29.64
+                    Team: Team.UTAH_JAZZ
+                    Year: 2003
+                    Month: 01
+                    Day: 20
+                    
+                    Negative minutes detected:
+                    Player: M. Jordan
+                    Entry time (seconds): 904.0
+                    Current time (seconds): 437.0
+                    Minutes played: -7.783333333333333
+                    Team: Team.WASHINGTON_WIZARDS
+                    Year: 2003
+                    Month: 02
+                    Day: 27
+                    
