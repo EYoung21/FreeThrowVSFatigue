@@ -64,6 +64,7 @@ class FreeThrowAnalyzer:
         
         #here, what if instead of dict[minute] = ft made, fr missed, [#set of all players that made up that stat], we do:
 
+        # minute -> ftms ftas (all players made up that figure)
 
         #NEW IDEA!
         # dict[minute] = [fts made, fts missed, all players that made up that stat's yearly averages added up, the number of players that amde up that stat]
