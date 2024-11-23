@@ -3,10 +3,6 @@
         1336,
         445,
         [
-            // total %
-            // number of players
-            // weight by number of ft attempts for each player
-            // weight would be number of attempts    (may want to store number made, too)
             "C. Robinson",
             "H. Grant",
             "M. Bryant",

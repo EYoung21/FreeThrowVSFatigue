@@ -71,6 +71,16 @@ class FreeThrowAnalyzer:
         # then we can calculate the average of the yearly averages at each minute later.
         #NEW IDEA!
 
+
+        # // total %
+        # // number of players that make up percentage
+        # // weight by number of ft attempts for each player
+        # // weight would be number of attempts    (may want to store number made, too)
+
+
+
+
+
         #each minute should have a total made and total missed
         #AND a an average of each player's yearly ft % that is included in the above
         #      - we can accomplish this by keeping a set of players that show freethrows during this consequetive minute
@@ -152,6 +162,11 @@ class FreeThrowAnalyzer:
         # print("\n=== Game Timeline ===")
         # for play in pbp_data:
         #     print(f"Period: {play.get('period')}, Remaining Seconds: {play.get('remaining_seconds_in_period')}, Description: {play.get('description')}")
+        
+        # // total %
+        #     // number of players
+        #     // weight by number of ft attempts for each player
+        #     // weight would be number of attempts    (may want to store number made, too)
 
         for play in pbp_data:
             # print(str(play))
