@@ -77,7 +77,9 @@ class FreeThrowAnalyzer:
         # // weight by number of ft attempts for each player
         # // weight would be number of attempts    (may want to store number made, too)
 
+        # total % = (sum of all yearly percentage * number of ft attempted) / sum of all # ft attempted
 
+        #g
 
 
 
