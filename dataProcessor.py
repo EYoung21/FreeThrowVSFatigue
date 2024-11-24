@@ -77,9 +77,12 @@ class FreeThrowAnalyzer:
         # // weight by number of ft attempts for each player
         # // weight would be number of attempts    (may want to store number made, too)
 
-        # total % = (sum of all yearly percentage * number of ft attempted) / sum of all # ft attempted
 
-        #g
+        #WHAT TO DO
+        # add up all the total %s, where total % == (sum of all yearly percentage * number of ft attempted) / sum of all # ft attempted
+        # divide that total by the number of players that made up the percentage through accumulator
+
+        # weight handled above
 
 
 
@@ -262,19 +265,21 @@ class FreeThrowAnalyzer:
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
                         print(str(player))
                         print("make")
-                        self.minutes[curr_minute] = [1, 0, set()] #total made, total missed, players at this minute
-                        self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
+                        self.minutes[curr_minute] = [1, 0, dict()] #!!!!!!!YOYOYO total made, total missed, players at this minute mapped to arr of their yearly ft% average and the number of attempts at that minute
+                        if player not in self.minutes[curr_minute][2]:
+                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] # attempts at min, ft% at yr
+                        # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
                         print(str(player))
                         print("miss")
-                        self.minutes[curr_minute] = [0, 1, set()] #they're 0 for 1
+                        self.minutes[curr_minute] = [0, 1, dict()] #they're 0 for 1
                         self.minutes[curr_minute][2].add(player)
                 else: #the minute already was instantiated
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
                         print(str(player))
                         print("make")
                         self.minutes[curr_minute][0] += 1 #adds a make
-                        self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
+                        self.minutes[curr_minute][2].add(player) #adds player to set if not already in it  #adds player to dictionary mapped to [<number fts attempted>, season ft avg]
                     else: #the freethrow was missed
                         print(str(player))
                         print("miss")
@@ -328,98 +333,98 @@ class FreeThrowAnalyzer:
 
 
     
-    def year_get_player_ft_pct(self, player_name, year, originAnalyzer): 
-        def changeToFirst(word):
-            if word == "Scotty Pippen Jr.":
-                originAnalyzer.ftNameToActualName["S. Pippen "] = "Scotty Pippen Jr."
-                return "S. Pippen "
-            if word == "Sasha Vezenkov":
-                originAnalyzer.ftNameToActualName["A. Vezenkov"] = "Sasha Vezenkov"
-                return "A. Vezenkov"
-            if word == "Dariq Whitehead":
-                originAnalyzer.ftNameToActualName["D. Miller-Whitehead"] = "Dariq Whitehead"
-                return "D. Miller-Whitehead"
-            stringArr = word.split(" ")
-            firstString = stringArr[0][0] + "." #gets first letter of first name
-            secondString = stringArr[1] #gets second string
-            fullString = firstString + " " + secondString
-            return fullString
+    # def year_get_player_ft_pct(self, player_name, year, originAnalyzer): 
+    #     def changeToFirst(word):
+    #         if word == "Scotty Pippen Jr.":
+    #             originAnalyzer.ftNameToActualName["S. Pippen "] = "Scotty Pippen Jr."
+    #             return "S. Pippen "
+    #         if word == "Sasha Vezenkov":
+    #             originAnalyzer.ftNameToActualName["A. Vezenkov"] = "Sasha Vezenkov"
+    #             return "A. Vezenkov"
+    #         if word == "Dariq Whitehead":
+    #             originAnalyzer.ftNameToActualName["D. Miller-Whitehead"] = "Dariq Whitehead"
+    #             return "D. Miller-Whitehead"
+    #         stringArr = word.split(" ")
+    #         firstString = stringArr[0][0] + "." #gets first letter of first name
+    #         secondString = stringArr[1] #gets second string
+    #         fullString = firstString + " " + secondString
+    #         return fullString
 
-        try:
-            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                client.players_season_totals(
-                    season_end_year=year, 
-                    output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                )
-                time.sleep(1.85)
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 429:
-                retry_after = e.response.headers.get("Retry-After")
-                if retry_after:
-                    print(f"Rate limited. Retrying after {retry_after} seconds.")
-                    time.sleep(int(retry_after))
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                        client.players_season_totals(
-                            season_end_year=year, 
-                            output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                        )
-                        time.sleep(1.85)
-                else:
-                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-                    time.sleep(60)
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                        client.players_season_totals(
-                            season_end_year=year, 
-                            output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                        )
-                        time.sleep(1.85)
-            else:
-                raise
+    #     try:
+    #         if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+    #             client.players_season_totals(
+    #                 season_end_year=year, 
+    #                 output_type=OutputType.CSV, 
+    #                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+    #             )
+    #             time.sleep(1.85)
+    #     except requests.exceptions.HTTPError as e:
+    #         if e.response.status_code == 429:
+    #             retry_after = e.response.headers.get("Retry-After")
+    #             if retry_after:
+    #                 print(f"Rate limited. Retrying after {retry_after} seconds.")
+    #                 time.sleep(int(retry_after))
+    #                 if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+    #                     client.players_season_totals(
+    #                         season_end_year=year, 
+    #                         output_type=OutputType.CSV, 
+    #                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+    #                     )
+    #                     time.sleep(1.85)
+    #             else:
+    #                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+    #                 time.sleep(60)
+    #                 if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+    #                     client.players_season_totals(
+    #                         season_end_year=year, 
+    #                         output_type=OutputType.CSV, 
+    #                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+    #                     )
+    #                     time.sleep(1.85)
+    #         else:
+    #             raise
 
-        # Open file with UTF-8 encoding and error handling
-        with open(f"./{year-1}_{year}_player_season_totals.csv", 'r', encoding='utf-8', errors='replace') as file:
-            reader = csv.reader(file, delimiter=',')
-            next(reader)  # Skip header row
-            rows = list(reader)
-            rows = rows[:-1]  # Skip last row (league averages)
+    #     # Open file with UTF-8 encoding and error handling
+    #     with open(f"./{year-1}_{year}_player_season_totals.csv", 'r', encoding='utf-8', errors='replace') as file:
+    #         reader = csv.reader(file, delimiter=',')
+    #         next(reader)  # Skip header row
+    #         rows = list(reader)
+    #         rows = rows[:-1]  # Skip last row (league averages)
             
-            for i, row in enumerate(rows):
-                print("name from rows: " + row[1])
-                fullString = changeToFirst(row[1])
-                print("Player from row changed name: " + fullString)
+    #         for i, row in enumerate(rows):
+    #             print("name from rows: " + row[1])
+    #             fullString = changeToFirst(row[1])
+    #             print("Player from row changed name: " + fullString)
 
-                if fullString == player_name:
-                    originAnalyzer.ftNameToActualName[player_name] = row[1]
-                    print("Player from row: " + row[1])
-                    if int(row[13]) > 0:
-                        made = row[12]
-                        attempted = row[13]
-                        if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
-                            return [int(made), int(attempted)]
-                        else:
-                            indicesToCheck = []
-                            j = i+1
-                            while j < len(rows):
-                                if changeToFirst(rows[j][1]) == player_name:
-                                    indicesToCheck.append(j)
-                                j += 1
+    #             if fullString == player_name:
+    #                 originAnalyzer.ftNameToActualName[player_name] = row[1]
+    #                 print("Player from row: " + row[1])
+    #                 if int(row[13]) > 0:
+    #                     made = row[12]
+    #                     attempted = row[13]
+    #                     if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
+    #                         return [int(made), int(attempted)]
+    #                     else:
+    #                         indicesToCheck = []
+    #                         j = i+1
+    #                         while j < len(rows):
+    #                             if changeToFirst(rows[j][1]) == player_name:
+    #                                 indicesToCheck.append(j)
+    #                             j += 1
 
-                            for k in range(len(indicesToCheck)):
-                                if int(rows[k][13]) > 0:
-                                    made += rows[k][12]
-                                    attempted += rows[k][13]
+    #                         for k in range(len(indicesToCheck)):
+    #                             if int(rows[k][13]) > 0:
+    #                                 made += rows[k][12]
+    #                                 attempted += rows[k][13]
                             
-                            if row[1] not in originAnalyzer.actualNameToSeasonAverages:
-                                originAnalyzer.actualNameToSeasonAverages[row[1]] = {year: [int(made), int(attempted)]}
-                            else:
-                                originAnalyzer.actualNameToSeasonAverages[row[1]][year] = [int(made), int(attempted)]
+    #                         if row[1] not in originAnalyzer.actualNameToSeasonAverages:
+    #                             originAnalyzer.actualNameToSeasonAverages[row[1]] = {year: [int(made), int(attempted)]}
+    #                         else:
+    #                             originAnalyzer.actualNameToSeasonAverages[row[1]][year] = [int(made), int(attempted)]
 
-                            return [int(made), int(attempted)]
-                    return "No free throws"
-            return None
+    #                         return [int(made), int(attempted)]
+    #                 return "No free throws"
+    #         return None
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
     def calculateMinuteAndYearlyAverages(self, year, originAnalyzer):
@@ -453,7 +458,7 @@ class FreeThrowAnalyzer:
         
         return [atMinuteAverages, atMinuteYearlyAverages]
     
-    def __get_player_ft_pct(self, player_name, year): 
+    def get_player_ft_pct(self, player_name, year): 
         #number_repeated represents how many consequetive times a player's ft average comes from another team
         # print("playername: " + player_name)
         def changeToFirst(word):
@@ -465,113 +470,86 @@ class FreeThrowAnalyzer:
 
             return fullString
         
-        if year in self.actualNameToSeasonAverages[player_name]:
-            #if year is in already existing parsed ft% for given player for given year, we don't have to do all of the above (it was done for us in a previously)
-            try:
-                made = self.actualNameToSeasonAverages[player_name][year][0]
-                attempted = self.actualNameToSeasonAverages[player_name][year][1]
-                return [int(made), int(attempted)]
-            except Exception as e:
-                self.dictionary_error_counter += 1
-                timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
-                error_msg = f"""
-            ERROR {self.dictionary_error_counter}:
-            Time: {timestamp}
-            Player: {player_name}
-            Year: {year}
-            Error: {str(e)}
-            Traceback: {traceback.format_exc()}
-            Dictionary State: {self.actualNameToSeasonAverages.get(player_name, 'Player not found')}
-            ----------------------------------------
-            """
-                
-                with open('dictionaryErrors.txt', 'a') as f:
-                    f.write(error_msg)
-                
-                # You might want to return some default value here instead of None
-                return [0, 0]  # or whatever default makes sense for your application
-        else:#
-            try:
-                if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                    client.players_season_totals(
-                        season_end_year=year, 
-                        output_type=OutputType.CSV, 
-                        output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                    )
-                    time.sleep(1.85)
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 429:
-                    # Get the Retry-After header, if available
-                    retry_after = e.response.headers.get("Retry-After")
-                    if retry_after:
-                        # If Retry-After is in seconds, wait that long
-                        print(f"Rate limited. Retrying after {retry_after} seconds.")
-                        time.sleep(int(retry_after))
-                        # Retry the request
-                        if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                            client.players_season_totals(
-                                season_end_year=year, 
-                                output_type=OutputType.CSV, 
-                                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                            )
-                            time.sleep(1.85)
-                    else:
-                        print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-                        time.sleep(60)  # Default wait time if Retry-After header is missing
-                        if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-                            client.players_season_totals(
-                                season_end_year=year, 
-                                output_type=OutputType.CSV, 
-                                output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-                            )
-                            time.sleep(1.85)
+        try:
+            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                client.players_season_totals(
+                    season_end_year=year, 
+                    output_type=OutputType.CSV, 
+                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                )
+                time.sleep(1.85)
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                # Get the Retry-After header, if available
+                retry_after = e.response.headers.get("Retry-After")
+                if retry_after:
+                    # If Retry-After is in seconds, wait that long
+                    print(f"Rate limited. Retrying after {retry_after} seconds.")
+                    time.sleep(int(retry_after))
+                    # Retry the request
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(1.85)
                 else:
-                    # Re-raise if it's a different HTTP error
-                    raise
-            
-            with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
-                reader = csv.reader(file, delimiter=',')
-                # Skip the header row
-                next(reader)
-                rows = list(reader)
-                #indcies 12 and 13 are made and attempted respectively
-                rows = rows[:-1] #skip last row, league averages
-                for i, row in enumerate(rows):
-                    # player_row = row[0]
-                    # print("Player from row: " + row[1])
-                    print("name from rows: " + row[1])
-                    fullString = changeToFirst(row[1])
-                    # print("changed: " + fullString)
-                    # exit()
-                    print("Player from row changed name: " + fullString)
+                    print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
+                    time.sleep(60)  # Default wait time if Retry-After header is missing
+                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                        client.players_season_totals(
+                            season_end_year=year, 
+                            output_type=OutputType.CSV, 
+                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                        )
+                        time.sleep(1.85)
+            else:
+                # Re-raise if it's a different HTTP error
+                raise
+        
+        with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
+            reader = csv.reader(file, delimiter=',')
+            # Skip the header row
+            next(reader)
+            rows = list(reader)
+            #indcies 12 and 13 are made and attempted respectively
+            rows = rows[:-1] #skip last row, league averages
+            for i, row in enumerate(rows):
+                # player_row = row[0]
+                # print("Player from row: " + row[1])
+                print("name from rows: " + row[1])
+                fullString = changeToFirst(row[1])
+                # print("changed: " + fullString)
+                # exit()
+                print("Player from row changed name: " + fullString)
 
-                    if fullString == player_name:
-                        print("Player from row: " + row[1])
-                        if int(row[13]) > 0: # avoid division by zero
-                            made = row[12]
-                            attempted = row[13]
-                            if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
-                                # print("player only appeared once")
-                                return [int(made), int(attempted)] 
-                                #returns array of number made in first bucket and number attempted in second bucket
-                            else:
-                                indicesToCheck = []
-                                j = i+1
-                                while j < len(rows):
-                                    if changeToFirst(rows[j][1]) == player_name:
-                                        indicesToCheck.append(j)
-                                    j += 1
+                if fullString == player_name:
+                    print("Player from row: " + row[1])
+                    if int(row[13]) > 0: # avoid division by zero
+                        made = row[12]
+                        attempted = row[13]
+                        if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
+                            # print("player only appeared once")
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
+                        else:
+                            indicesToCheck = []
+                            j = i+1
+                            while j < len(rows):
+                                if changeToFirst(rows[j][1]) == player_name:
+                                    indicesToCheck.append(j)
+                                j += 1
 
-                                for k in range(len(indicesToCheck)):
-                                    if int(rows[k][13]) > 0:
-                                        made += rows[k][12]
-                                        attempted += rows[k][13]
-                                # print("player was traded mid season")
-                                return [int(made), int(attempted)] 
-                                #returns array of number made in first bucket and number attempted in second bucket
-                        return "No free throws"
-                return None #if player requested wasn't in season stats
+                            for k in range(len(indicesToCheck)):
+                                if int(rows[k][13]) > 0:
+                                    made += rows[k][12]
+                                    attempted += rows[k][13]
+                            # print("player was traded mid season")
+                            return [int(made), int(attempted)] 
+                            #returns array of number made in first bucket and number attempted in second bucket
+                    return "No free throws"
+            return None #if player requested wasn't in season stats
             
 
     
