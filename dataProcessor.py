@@ -34,6 +34,10 @@ import os
 import json
 from typing import Dict, List, Tuple
 from collections import defaultdict
+from scipy import stats
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 
 # Look for? / do we maybe need to handle?:
@@ -538,6 +542,11 @@ def get_team_home_dates(team, year):
         
     return sorted(list(dates))
 
+from scipy import stats
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
     # Get all minutes (x-axis)
     minutes = sorted(minute_averages.keys())
@@ -547,7 +556,29 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     yearly_percentages = [yearly_averages[m] for m in minutes]
     differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
 
-    # Create DataFrame and save to CSV
+    # Linear regression between minute averages and season averages
+    slope, intercept, r_value, p_value, std_err = stats.linregress(ft_percentages, yearly_percentages)
+
+    # Log regression details
+    print(f"Linear Regression Between Minute FT% and Yearly FT%:")
+    print(f"  Slope: {slope:.4f}")
+    print(f"  Intercept: {intercept:.4f}")
+    print(f"  R-squared: {r_value**2:.4f}")
+    print(f"  P-value: {p_value:.4e}")
+    print(f"  Standard Error: {std_err:.4f}")
+
+    # Create a line for the regression
+    regression_line = slope * np.array(ft_percentages) + intercept
+
+    # Save regression data to DataFrame
+    regression_df = pd.DataFrame({
+        'Minute_FT%': ft_percentages,
+        'Yearly_FT%': yearly_percentages,
+        'Regression_Predicted': regression_line
+    })
+    regression_df.to_csv(f'{startYear}-{endYear}_regression_analysis.csv', index=False)
+
+    # Create DataFrame and save to CSV for original data
     df = pd.DataFrame({
         'Minute': minutes,
         'Minute_Average_FT%': ft_percentages,
@@ -573,6 +604,9 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
     plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
     plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
+
+    # Plot regression line
+    plt.plot(ft_percentages, regression_line, 'm--', label='Regression Between Minute FT% and Yearly FT%', linewidth=2)
 
     # Plot trendlines
     plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
