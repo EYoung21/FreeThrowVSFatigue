@@ -30,6 +30,9 @@ import numpy as np
 from scipy import stats
 import matplotlib.pyplot as plt
 import pandas as pd
+import os
+import json
+from typing import Dict, List, Tuple
 
 
 # Look for? / do we maybe need to handle?:
@@ -104,7 +107,7 @@ class FreeThrowAnalyzer:
         self.play_by_play_error_counter = 0
 
             
-    def process_team_games(self, team: Team, year: int, month: int, day: int, yearAnalyzer):
+    def process_team_games(self, team: Team, year: int, month: int, day: int):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
         try:
@@ -115,7 +118,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(1.85)
-            self._process_game_data(pbp_data, team, yearAnalyzer, year, month, day) #passing year so I can print it
+            self._process_game_data(pbp_data, team, year, month, day) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -141,7 +144,7 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.85)
-                    self._process_game_data(pbp_data, team, yearAnalyzer, year, month, day)
+                    self._process_game_data(pbp_data, team, year, month, day)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -152,12 +155,12 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.85)
-                    self._process_game_data(pbp_data, team, yearAnalyzer, year, month, day)
+                    self._process_game_data(pbp_data, team, year, month, day)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict], team, yearAnalyzer, year, month, day):
+    def _process_game_data(self, pbp_data: List[dict], team, year, month, day):
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -195,11 +198,9 @@ class FreeThrowAnalyzer:
 
             if 'free throw' in str(play.get('description', '')):
                 self.total_attempted += 1
-                yearAnalyzer.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
                     self.total_made += 1
-                    yearAnalyzer.total_made += 1
                 if 'misses' in play['description']:
                     player = play['description'].split(' misses')[0]
 
@@ -253,7 +254,6 @@ class FreeThrowAnalyzer:
                         f.write(debug_string)  # Write to file
 
                     self.total_negative_minutes += 1
-                    yearAnalyzer.total_negative_minutes += 1
                     continue
 
                 curr_minute = int(math.floor(minutes_played))
@@ -282,7 +282,7 @@ class FreeThrowAnalyzer:
                         if player not in self.minutes[curr_minute][2]:
                             self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
                         else:
-                            self.minutes[curr_minute][2][player][0] += 1 #increments make in player dict
+                            self.minutes[curr_minute][2][player][0] += 1 #increments attempt in player dict
 
                         # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it  #adds player to dictionary mapped to [<number fts attempted>, season ft avg]
                     else: #the freethrow was missed
@@ -292,30 +292,7 @@ class FreeThrowAnalyzer:
                         if player not in self.minutes[curr_minute][2]:
                             self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
                         else:
-                            self.minutes[curr_minute][2][player][1] += 1 #increments miss in player dict
-                
-                if curr_minute not in yearAnalyzer.minutes:
-                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
-                        # print(str(player))
-                        # print("make")
-                        yearAnalyzer.minutes[curr_minute] = [1, 0, set()] #total made, total missed, players at this minute
-                        yearAnalyzer.minutes[curr_minute][2].add(player) #adds player to set if not already in it
-                    else: #the freethrow was missed
-                        # print(str(player))
-                        # print("miss")
-                        yearAnalyzer.minutes[curr_minute] = [0, 1, set()] #they're 0 for 1
-                        self.minutes[curr_minute][2].add(player)
-                else: #the minute already was instantiated
-                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
-                        # print(str(player))
-                        # print("make")
-                        yearAnalyzer.minutes[curr_minute][0] += 1 #adds a make
-                        yearAnalyzer.minutes[curr_minute][2].add(player) #adds player to set if not already in it
-                    else: #the freethrow was missed
-                        # print(str(player))
-                        # print("miss")
-                        yearAnalyzer.minutes[curr_minute][1] += 1 #adds a miss
-                        yearAnalyzer.minutes[curr_minute][2].add(player)
+                            self.minutes[curr_minute][2][player][0] += 1 #increments attempt in player dict
             
 
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, type): #remaining seconds, quarter (1, 2, 3, 4)
@@ -435,34 +412,49 @@ class FreeThrowAnalyzer:
     #         return None
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
-    def calculateMinuteAndYearlyAverages(self, year, originAnalyzer):
+    def calculateMinuteAndYearlyAverages(self, year):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
         for key in self.minutes:
-            total_made = 0
-            total_attempted = 0
+            
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
             atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
-            players = list(self.minutes[key][2])
-            totalNumberPlayers = len(players)
-            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-                currPlayerName = players[i] #curr player
-                print("Looking for: " + "|" + str(currPlayerName) + "|")
-                # print(str(data))
-                # print(str(self.get_player_ft_pct(data, "Joel Embid")))
-                # exit()
-                # print("looking for: " + str(currPlayerName))
-                madeAttemptedArr = self.year_get_player_ft_pct(currPlayerName, year, originAnalyzer)
-                if madeAttemptedArr != "No free throws" and madeAttemptedArr is not None:
-                    # print("returned: " + str(returned))
-                    total_made += madeAttemptedArr[0]
-                    total_attempted += madeAttemptedArr[1]
+            playerLength = len(list(self.minutes[key][2]))
+
+            numerator = 0
+
+            denominator = 0
+
+            for key2 in self.minutes[key][2]:
+                numerator += self.minutes[key][2][key2][0] * self.minutes[key][2][key2][1]
+                denominator += self.minutes[key][2][key2][0]
+            
+            atMinuteYearlyAverages[key] = float(numerator / denominator)
+
+            #numerator  = attempted * percentage of player
+
+            #denominator = sum of total attempts
+
+            # players = list(self.minutes[key][2])
+            # totalNumberPlayers = len(players)
+            # for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
+            #     currPlayerName = players[i] #curr player
+            #     print("Looking for: " + "|" + str(currPlayerName) + "|")
+            #     # print(str(data))
+            #     # print(str(self.get_player_ft_pct(data, "Joel Embid")))
+            #     # exit()
+            #     # print("looking for: " + str(currPlayerName))
+            #     madeAttemptedArr = self.year_get_player_ft_pct(currPlayerName, year, originAnalyzer)
+            #     if madeAttemptedArr != "No free throws" and madeAttemptedArr is not None:
+            #         # print("returned: " + str(returned))
+            #         total_made += madeAttemptedArr[0]
+            #         total_attempted += madeAttemptedArr[1]
 
             # averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
 
-            atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
+            # atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
         
         return [atMinuteAverages, atMinuteYearlyAverages]
     
@@ -799,6 +791,73 @@ def parse_data_file(file_path):
 
     return data
 
+
+def process_season_stats(folder_path: str) -> Tuple[Dict[str, float], Dict[str, float]]:
+    """
+    Process basketball statistics from multiple seasons (1999-2024) and calculate overall averages.
+    
+    Args:
+        folder_path (str): Path to the folder containing the season data files
+        
+    Returns:
+        Tuple[Dict[str, float], Dict[str, float]]: Two dictionaries containing:
+            1. Average minutes per player number across all seasons
+            2. Average yearly statistics per player number across all seasons
+    """
+    # Initialize dictionaries to store sums and counts for averaging
+    minute_sums = {}
+    minute_counts = {}
+    yearly_sums = {}
+    yearly_counts = {}
+    
+    # Process seasons from 1999-2000 to 2023-2024
+    for year in range(1999, 2024):
+        season = f"{year}-{year+1}"
+        
+        # Construct file paths
+        minute_file = os.path.join(folder_path, f"minute_averages_{season}.txt")
+        yearly_file = os.path.join(folder_path, f"yearly_averages_{season}.txt")
+        
+        try:
+            # Process minute averages
+            with open(minute_file, 'r') as f:
+                minute_data = json.loads(f.read())
+                for min, percetnage in minute_data.items():
+                    if min not in minute_sums:
+                        minute_sums[min] = 0
+                        minute_counts[min] = 0
+                    minute_sums[min] += percetnage
+                    minute_counts[min] += 1
+            
+            # Process yearly averages
+            with open(yearly_file, 'r') as f:
+                yearly_data = json.loads(f.read())
+                for yrmin, per in yearly_data.items():
+                    if yrmin not in yearly_sums:
+                        yearly_sums[yrmin] = 0
+                        yearly_counts[yrmin] = 0
+                    yearly_sums[yrmin] += per
+                    yearly_counts[yrmin] += 1
+                    
+        except FileNotFoundError:
+            print(f"Warning: Could not find data files for season {season}")
+            continue
+        except json.JSONDecodeError:
+            print(f"Warning: Invalid JSON format in files for season {season}")
+            continue
+    
+    minute_avgs = {}
+
+    yr_avgs = {}
+
+    for minute in minute_sums:
+        minute_avgs[minute] = minute_sums[minute] / minute_counts[minute]
+    
+    for min in yearly_sums:
+        yr_avgs[min] = yearly_sums[min] / yearly_counts[min]
+    
+    return [minute_avgs, yr_avgs]
+
 def main():
     analyzer = FreeThrowAnalyzer()
 
@@ -842,13 +901,17 @@ def main():
             return list(obj)
         raise TypeError
 
+    total_neg = 0
+    total_made = 0
+    total_attempted = 0
+
     #VITAL, only commented for a sec for testing
     for year in range(2000, 2025):
         # Check if both files already exist
-        minute_averages_file = f'minute_averages_{year-1}-{year}.txt'
-        yearly_averages_file = f'yearly_averages_{year-1}-{year}.txt'
+        minute_averages_file = os.path.join('dataForEachYear', f'minute_averages_{year-1}-{year}.txt')
+        yearly_averages_file = os.path.join('dataForEachYear', f'yearly_averages_{year-1}-{year}.txt')
 
-        minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
+        # minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
         
         #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
         # if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
@@ -870,7 +933,7 @@ def main():
                 analyzer.play_by_play_error_counter = 0
 
                 try:
-                    analyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], yearAnalyzer)
+                    yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
                 except Exception as e:
                     analyzer.play_by_play_error_counter += 1
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -891,9 +954,12 @@ def main():
                         continue
                 print("processed game")
         print(f"Total neg at {year}:" + str(yearAnalyzer.total_negative_minutes))
+        total_neg += yearAnalyzer.total_negative_minutes
         print(f"Totl made at {year}" + str(yearAnalyzer.total_made))
+        total_made += yearAnalyzer.total_made
         print(f"Total attempted at {year}" + str(yearAnalyzer.total_attempted))
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year, analyzer)
+        total_attempted += yearAnalyzer.total_attempted
+        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year)
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
 
@@ -904,8 +970,8 @@ def main():
         with open(yearly_averages_file, 'w') as f:
             json.dump(yearlyMinuteYearlyAveragesDict, f, indent=4)
 
-        with open(minute_total_dict_file, 'w') as f:
-            json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
+        # with open(minute_total_dict_file, 'w') as f:
+        #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
 
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
         
@@ -926,39 +992,23 @@ def main():
     # print("minutesDict: " + str(analyzer.minutes))
 
     # analyzer.minutes = {2: [1564, 435, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'S. Aldama', 'P. Connaughton', 'J. Landale', 'A. Coffey', 'E. Mobley', 'D. Terry', 'A. Fudge', 'J. Isaac', 'D. Jordan', 'B. Williams', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'G. Brown', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'D. Bane', 'P. Banchero', 'D. Lillard', 'P. Watson', 'J. Cain', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'N. Little', 'J. Morant', 'M. Bagley', 'D. Schröder', 'T. Thompson', 'O. Toppin', 'D. Sabonis', 'J. Freeman-Liberty', 'F. Ntilikina', 'T. Lyles', 'I. Okoro', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'L. Waters', 'S. Milton', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'T. Camara', 'D. Green', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'H. Barnes', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'S. Barnes', 'C. LeVert', 'J. Murray', 'R. Jackson', 'T. Vukcevic', 'S. Sharpe', 'J. Crowder', 'T. Craig', 'Z. Williams', 'J. Nwora', 'D. Rose', 'J. Tatum', 'J. Collins', 'D. Roddy', 'I. Jackson', 'L. Walker', 'M. Moody', 'K. Thompson', 'A. Nembhard', 'J. Konchar', 'J. McGee', 'D. Exum', 'C. Joseph', 'C. Cunningham', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'A. Black', 'T. Maxey', 'J. Jaquez', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'L. Shamet', 'D. Šarić', 'D. Booker', 'S. Lee', 'J. Nowell', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'G. Niang', 'S. Henderson', 'K. George', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'U. Garuba', 'O. Anunoby', 'I. Quickley', 'K. Hayes', 'D. Hunter', 'P. Washington', 'C. Gillespie', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'J. Rhoden', 'Z. Williamson', 'G. Dick', 'D. Banton', 'J. Bernard', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'D. Vassell', 'Y. Watanabe', 'F. Korkmaz', 'D. Garland', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'C. Sexton', 'K. Martin', 'M. Flynn', 'T. Rozier', 'M. Robinson', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'J. Randle', 'R. Williams', 'S. Pippen ', 'J. Davis', 'N. Batum', 'J. Clarkson', 'G. Mathews', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'O. Okongwu', 'L. Stevens', 'S. Mays', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'C. Reddish', 'N. Richards', 'J. Giddey', 'B. Brown', 'J. Vanderbilt', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'B. Hyland', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'G. Harris', 'K. Oubre', 'M. Fultz', 'B. Lopez', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'M. Diabaté', 'K. Caldwell-Pope', 'N. Clowney', 'L. Garza', 'I. Badji', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'B. Biyombo', 'M. Bridges', 'N. Marshall', 'K. Olynyk', 'D. Daniels', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Zeller', 'C. Holmgren', 'C. Swider', 'D. Melton', 'M. Diakite', 'B. Marjanović', 'J. Wilson', 'A. Gill', 'R. Gobert', 'M. Plumlee', 'K. Huerter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'T. Smith', 'J. Strawther', 'K. Porziņģis', 'K. Knox', 'A. Lawson', 'B. Key', 'K. Anderson', 'J. Minott', 'M. Strus', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'D. Nix', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'A. Len', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'F. VanVleet', 'R. Lopez', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'T. Mann', 'J. Brunson', 'R. Rupert', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Conley', 'L. Miller', 'C. Boucher', 'K. Love', 'C. Okeke', 'D. Robinson', 'A. Davis', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'D. Jeffries', 'B. McGowens', 'B. Fernando', 'D. Bertāns', 'L. Black', 'L. Dončić', 'J. Hardy', 'S. Lundy', 'K. Kuzma'}], 3: [1589, 423, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'P. Connaughton', 'J. Landale', 'A. Sanogo', 'A. Coffey', 'D. Terry', 'E. Mobley', 'J. Isaac', 'D. Jordan', 'B. Williams', 'I. Livers', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'S. Umude', 'D. Bane', 'P. Banchero', 'H. Giles', 'D. Lillard', 'P. Watson', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'M. Bagley', 'D. Schröder', 'R. Rollins', 'J. Holiday', 'F. Petrušev', 'O. Toppin', 'D. Sabonis', 'T. Lyles', 'I. Okoro', 'L. Dort', 'J. Goodwin', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'O. Tshiebwe', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'C. LeVert', 'J. Murray', 'R. Jackson', 'S. Sharpe', 'J. Richardson', 'T. Craig', 'B. Beal', 'J. Nwora', 'T. Warren', 'J. Tatum', 'J. Collins', 'D. Roddy', 'D. Murray', 'L. Walker', 'M. Moody', 'I. Jackson', 'K. Thompson', 'A. Nembhard', 'J. McGee', 'D. Exum', 'P. Baldwin', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'T. Maxey', 'J. Jaquez', 'K. Ellis', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'D. Šarić', 'D. Booker', 'L. Shamet', 'J. Hart', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'S. Henderson', 'K. George', 'M. Nowell', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'I. Quickley', 'D. Hunter', 'P. Washington', 'P. Mills', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'Z. Williamson', 'G. Dick', 'A. Simons', 'D. Banton', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'F. Korkmaz', 'N. Queta', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'J. Springer', 'C. Sexton', 'W. Kessler', 'K. Martin', 'M. Flynn', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'A. Nesmith', 'J. Randle', 'H. Highsmith', 'R. Williams', 'S. Pippen ', 'J. Davis', 'J. Clarkson', 'G. Mathews', 'T. Prince', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'S. Hauser', 'O. Okongwu', 'S. Mays', 'L. Stevens', 'K. Dunn', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'J. McLaughlin', 'J. Hood-Schifino', 'N. Richards', 'B. Brown', 'C. Payne', 'D. McDermott', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'K. Oubre', 'M. Fultz', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Fontecchio', 'O. Dieng', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'D. House', 'K. Caldwell-Pope', 'L. Garza', 'I. Badji', 'T. Forrest', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'N. Hinton', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'M. Bridges', 'C. Castleton', 'N. Marshall', 'K. Olynyk', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'L. Kennard', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Holmgren', 'B. Marjanović', 'G. Temple', 'J. Phillips', 'B. Sheppard', "R. O'Neale", 'A. Gill', 'M. Plumlee', 'R. Gobert', 'T. Bryant', 'J. Porter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'M. Muscala', 'J. Strawther', 'K. Lewis', 'K. Porziņģis', 'L. Šamanić', 'K. Anderson', 'A. Horford', 'A. Holiday', 'A. Hagans', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'J. Champagnie', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'B. Boeheim', 'I. Wainright', 'T. Mann', 'J. Brunson', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Pereira', 'C. Boucher', 'K. Love', 'D. Robinson', 'A. Davis', 'A. Caruso', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'M. Smart', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'B. McGowens', 'B. Fernando', 'L. Black', 'G. Santos', 'L. Dončić', 'C. Houstan', 'J. Hardy', 'S. Lundy', 'K. Looney', 'K. Kuzma'}]}
-
-
-
-
-    # ansArr = analyzer.calculateLargeMinuteAndYearlyAverages() 
-    ansArr = analyzer.calculateLargeMinuteAndYearlyAverages() 
-
-
-
-
-
-
-    #will have to be career ft shots for each player, or could be the yearly averages for every year they played
+    results = process_season_stats("/dataForEachYear")
     
-    allMinuteAveragesDict = ansArr[0]
-
-    allMinuteYearlyAveragesDict = ansArr[1]
-
-
+    minute_averages = results[0]
+    yearly_averages = results[1]
+    
     all_minute_averages_file = f'all_minute_averages_2000-2024.txt'
     all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
 
-    all_minute_total_dict_file = f"all_minute_total_dict_file_2000-2024"
-
     with open(all_minute_averages_file, 'w') as f:
-            json.dump(allMinuteAveragesDict, f, indent=4)
+            json.dump(minute_averages, f, indent=4)
         
     with open(all_yearly_averages_file, 'w') as f:
-        json.dump(allMinuteYearlyAveragesDict, f, indent=4)
+        json.dump(yearly_averages, f, indent=4)
 
-    # This will convert each set() in the lists to a list while preserving the structure
-    with open(all_minute_total_dict_file, 'w') as f:
-        json.dump(analyzer.minutes, f, indent=4, default=set_default)
+    # # This will convert each set() in the lists to a list while preserving the structure
+    # with open(all_minute_total_dict_file, 'w') as f:
+    #     json.dump(analyzer.minutes, f, indent=4, default=set_default)
 
 
     #if need to convert back to set:
@@ -977,7 +1027,7 @@ def main():
 
     print()
 
-    plot_ft_percentages(allMinuteAveragesDict, allMinuteYearlyAveragesDict, 2000, 2024, analyzer.total_made, analyzer.total_attempted)
+    plot_ft_percentages(minute_averages, yearly_averages, 2000, 2024, total_made, total_attempted)
 
     exit()
 
