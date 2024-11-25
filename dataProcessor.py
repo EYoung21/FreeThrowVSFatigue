@@ -700,8 +700,8 @@ def process_season_stats(folder_path, mapping, yrMinAttempts):
                     if yrmin not in yearly_sums:
                         yearly_sums[yrmin] = 0
                         yearly_counts[yrmin] = 0
-                    yearly_sums[yrmin] += per * yrMinAttempts[year][yrmin] #multiplies the percentage at that minute for a given year by the total number of freethrows attempted at that minute for that year
-                    yearly_counts[yrmin] += yrMinAttempts[year][yrmin]
+                    yearly_sums[yrmin] += per * yrMinAttempts[year][yrmin] #multiplies (the numerator) the percentage at that minute for a given year by the total number of freethrows attempted at that minute for that year
+                    yearly_counts[yrmin] += yrMinAttempts[year][yrmin] #adds the total fts attemtped at this minute for this year to the denom
                     
         except FileNotFoundError:
             print(f"Warning: Could not find data files for season {season}")
@@ -718,10 +718,7 @@ def process_season_stats(folder_path, mapping, yrMinAttempts):
         minute_avgs[minute] = minute_sums[minute] / minute_counts[minute]
     
     for min in yearly_sums:
-
-        #attempt at each minute * percentage at each minute / total attempts at minute
-
-        yr_avgs[min] = yearly_sums[min] / yearly_counts[min]
+        yr_avgs[min] = yearly_sums[min] / yearly_counts[min] #for each minute, divides the total weighted percentages by the total number of attempts
     
     return [minute_avgs, yr_avgs]
 
