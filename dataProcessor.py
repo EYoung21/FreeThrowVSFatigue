@@ -266,25 +266,33 @@ class FreeThrowAnalyzer:
                         print(str(player))
                         print("make")
                         self.minutes[curr_minute] = [1, 0, dict()] #!!!!!!!YOYOYO total made, total missed, players at this minute mapped to arr of their yearly ft% average and the number of attempts at that minute
-                        if player not in self.minutes[curr_minute][2]:
-                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] # attempts at min, ft% at yr
+                        # if player not in self.minutes[curr_minute][2]:
+                        self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] # attempts at min, ft% at yr
                         # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
                     else: #the freethrow was missed
                         print(str(player))
                         print("miss")
                         self.minutes[curr_minute] = [0, 1, dict()] #they're 0 for 1
-                        self.minutes[curr_minute][2].add(player)
+                        self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)]
                 else: #the minute already was instantiated
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
                         print(str(player))
                         print("make")
                         self.minutes[curr_minute][0] += 1 #adds a make
-                        self.minutes[curr_minute][2].add(player) #adds player to set if not already in it  #adds player to dictionary mapped to [<number fts attempted>, season ft avg]
+                        if player not in self.minutes[curr_minute][2]:
+                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
+                        else:
+                            self.minutes[curr_minute][2][player][0] += 1 #increments make in player dict
+
+                        # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it  #adds player to dictionary mapped to [<number fts attempted>, season ft avg]
                     else: #the freethrow was missed
                         print(str(player))
                         print("miss")
                         self.minutes[curr_minute][1] += 1 #adds a miss
-                        self.minutes[curr_minute][2].add(player)
+                        if player not in self.minutes[curr_minute][2]:
+                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
+                        else:
+                            self.minutes[curr_minute][2][player][1] += 1 #increments miss in player dict
                 
                 if curr_minute not in yearAnalyzer.minutes:
                     if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
