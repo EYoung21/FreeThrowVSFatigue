@@ -107,7 +107,7 @@ class FreeThrowAnalyzer:
         self.play_by_play_error_counter = 0
 
             
-    def process_team_games(self, team: Team, year: int, month: int, day: int):
+    def process_team_games(self, team: Team, year: int, month: int, day: int, seasonYear):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
         try:
@@ -118,7 +118,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(1.85)
-            self._process_game_data(pbp_data, team, year, month, day) #passing year so I can print it
+            self._process_game_data(pbp_data, team, year, month, day, seasonYear) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -144,7 +144,7 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.85)
-                    self._process_game_data(pbp_data, team, year, month, day)
+                    self._process_game_data(pbp_data, team, year, month, day, seasonYear)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
@@ -155,12 +155,12 @@ class FreeThrowAnalyzer:
                         day=day
                     )
                     time.sleep(1.85)
-                    self._process_game_data(pbp_data, team, year, month, day)
+                    self._process_game_data(pbp_data, team, year, month, day, seasonYear)
             else:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict], team, year, month, day):
+    def _process_game_data(self, pbp_data: List[dict], team, year, month, day, seasonYear):
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -260,39 +260,56 @@ class FreeThrowAnalyzer:
 
                 print("minute played: " + str(curr_minute))
 
-                print()
+                
+                # print("curr_minute: " + str(curr_minute))
+                # print(str(self.minutes))
+                # ft_pct = self.get_player_ft_pct(player, seasonYear)
+                # print("returned: " + str(ft_pct))
+                # exit()
                 if curr_minute not in self.minutes:
-                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                    ft_pct = self.get_player_ft_pct(player, seasonYear)
+                    # print(str(ft_pct))
+                    if ft_pct is None or ft_pct == "No free throws":
+                        print(f"No FT data found for {player} in year {year}")
+                        continue
+                    
+                    if 'makes' in play['description']:
                         print(str(player))
                         print("make")
-                        self.minutes[curr_minute] = [1, 0, dict()] #!!!!!!!YOYOYO total made, total missed, players at this minute mapped to arr of their yearly ft% average and the number of attempts at that minute
-                        # if player not in self.minutes[curr_minute][2]:
-                        self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] # attempts at min, ft% at yr
-                        # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it
-                    else: #the freethrow was missed
+                        self.minutes[curr_minute] = [1, 0, dict()]
+                        self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
+                        print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+                    else:
                         print(str(player))
                         print("miss")
-                        self.minutes[curr_minute] = [0, 1, dict()] #they're 0 for 1
-                        self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)]
-                else: #the minute already was instantiated
-                    if 'makes' in play['description']: #the player made the freethrow, they're now 1 for 1
+                        self.minutes[curr_minute] = [0, 1, dict()]
+                        self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
+                        print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+                else:
+                    ft_pct = self.get_player_ft_pct(player, seasonYear)
+                    if ft_pct is None or ft_pct == "No free throws":
+                        print(f"No FT data found for {player} in year {year}")
+                        continue
+                        
+                    if 'makes' in play['description']:
                         print(str(player))
                         print("make")
-                        self.minutes[curr_minute][0] += 1 #adds a make
+                        self.minutes[curr_minute][0] += 1
                         if player not in self.minutes[curr_minute][2]:
-                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
+                            self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100]
                         else:
-                            self.minutes[curr_minute][2][player][0] += 1 #increments attempt in player dict
-
-                        # self.minutes[curr_minute][2].add(player) #adds player to set if not already in it  #adds player to dictionary mapped to [<number fts attempted>, season ft avg]
-                    else: #the freethrow was missed
+                            self.minutes[curr_minute][2][player][0] += 1
+                        print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+                    else:
                         print(str(player))
                         print("miss")
-                        self.minutes[curr_minute][1] += 1 #adds a miss
+                        self.minutes[curr_minute][1] += 1
                         if player not in self.minutes[curr_minute][2]:
-                            self.minutes[curr_minute][2][player] = [1, self.get_player_ft_pct(player, year)] #creates player dict
+                            self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100]
                         else:
-                            self.minutes[curr_minute][2][player][0] += 1 #increments attempt in player dict
+                            self.minutes[curr_minute][2][player][0] += 1
+                        print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+                print()
             
 
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, type): #remaining seconds, quarter (1, 2, 3, 4)
@@ -304,115 +321,8 @@ class FreeThrowAnalyzer:
         else:
             return (4*12*60) + (quarter*5*60) - remainingSecondsInPeriod
 
-        # remainingMinutes = remainingSecondsInQuarter / 60
-        # minutesPlayedInQuarter = 12 - remainingMinutes
-
-        # if str(quarter) == "1":
-        #     return minutesPlayedInQuarter
-        # elif str(quarter) == "2":
-        #     return 12 + minutesPlayedInQuarter
-        # elif str(quarter) == "3":
-        #     return 24 + minutesPlayedInQuarter
-        # elif str(quarter) == "4":
-        #     return 36 + minutesPlayedInQuarter
-
-
-    
-    # def year_get_player_ft_pct(self, player_name, year, originAnalyzer): 
-    #     def changeToFirst(word):
-    #         if word == "Scotty Pippen Jr.":
-    #             originAnalyzer.ftNameToActualName["S. Pippen "] = "Scotty Pippen Jr."
-    #             return "S. Pippen "
-    #         if word == "Sasha Vezenkov":
-    #             originAnalyzer.ftNameToActualName["A. Vezenkov"] = "Sasha Vezenkov"
-    #             return "A. Vezenkov"
-    #         if word == "Dariq Whitehead":
-    #             originAnalyzer.ftNameToActualName["D. Miller-Whitehead"] = "Dariq Whitehead"
-    #             return "D. Miller-Whitehead"
-    #         stringArr = word.split(" ")
-    #         firstString = stringArr[0][0] + "." #gets first letter of first name
-    #         secondString = stringArr[1] #gets second string
-    #         fullString = firstString + " " + secondString
-    #         return fullString
-
-    #     try:
-    #         if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-    #             client.players_season_totals(
-    #                 season_end_year=year, 
-    #                 output_type=OutputType.CSV, 
-    #                 output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-    #             )
-    #             time.sleep(1.85)
-    #     except requests.exceptions.HTTPError as e:
-    #         if e.response.status_code == 429:
-    #             retry_after = e.response.headers.get("Retry-After")
-    #             if retry_after:
-    #                 print(f"Rate limited. Retrying after {retry_after} seconds.")
-    #                 time.sleep(int(retry_after))
-    #                 if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-    #                     client.players_season_totals(
-    #                         season_end_year=year, 
-    #                         output_type=OutputType.CSV, 
-    #                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-    #                     )
-    #                     time.sleep(1.85)
-    #             else:
-    #                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
-    #                 time.sleep(60)
-    #                 if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
-    #                     client.players_season_totals(
-    #                         season_end_year=year, 
-    #                         output_type=OutputType.CSV, 
-    #                         output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
-    #                     )
-    #                     time.sleep(1.85)
-    #         else:
-    #             raise
-
-    #     # Open file with UTF-8 encoding and error handling
-    #     with open(f"./{year-1}_{year}_player_season_totals.csv", 'r', encoding='utf-8', errors='replace') as file:
-    #         reader = csv.reader(file, delimiter=',')
-    #         next(reader)  # Skip header row
-    #         rows = list(reader)
-    #         rows = rows[:-1]  # Skip last row (league averages)
-            
-    #         for i, row in enumerate(rows):
-    #             print("name from rows: " + row[1])
-    #             fullString = changeToFirst(row[1])
-    #             print("Player from row changed name: " + fullString)
-
-    #             if fullString == player_name:
-    #                 originAnalyzer.ftNameToActualName[player_name] = row[1]
-    #                 print("Player from row: " + row[1])
-    #                 if int(row[13]) > 0:
-    #                     made = row[12]
-    #                     attempted = row[13]
-    #                     if i + 1 >= len(rows) or changeToFirst(rows[i+1][1]) != player_name:
-    #                         return [int(made), int(attempted)]
-    #                     else:
-    #                         indicesToCheck = []
-    #                         j = i+1
-    #                         while j < len(rows):
-    #                             if changeToFirst(rows[j][1]) == player_name:
-    #                                 indicesToCheck.append(j)
-    #                             j += 1
-
-    #                         for k in range(len(indicesToCheck)):
-    #                             if int(rows[k][13]) > 0:
-    #                                 made += rows[k][12]
-    #                                 attempted += rows[k][13]
-                            
-    #                         if row[1] not in originAnalyzer.actualNameToSeasonAverages:
-    #                             originAnalyzer.actualNameToSeasonAverages[row[1]] = {year: [int(made), int(attempted)]}
-    #                         else:
-    #                             originAnalyzer.actualNameToSeasonAverages[row[1]][year] = [int(made), int(attempted)]
-
-    #                         return [int(made), int(attempted)]
-    #                 return "No free throws"
-    #         return None
-
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
-    def calculateMinuteAndYearlyAverages(self, year):
+    def calculateMinuteAndYearlyAverages(self):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
@@ -421,40 +331,26 @@ class FreeThrowAnalyzer:
             minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
             atMinuteAverages[key] = minuteAverage * 100 #to get percentage
 
-            playerLength = len(list(self.minutes[key][2]))
-
-            numerator = 0
-
-            denominator = 0
+            # playerLength = len(list(self.minutes[key][2]))
+            #don't think i need
+            
+            numeratorSum = 0
+            
+            denominatorSum = 0
 
             for key2 in self.minutes[key][2]:
-                numerator += self.minutes[key][2][key2][0] * self.minutes[key][2][key2][1]
-                denominator += self.minutes[key][2][key2][0]
+                numerator = self.minutes[key][2][key2][0] * self.minutes[key][2][key2][1]
+                denominator = self.minutes[key][2][key2][0]
+
+                numeratorSum += numerator
+
+                denominatorSum += denominator
+
             
-            atMinuteYearlyAverages[key] = float(numerator / denominator)
+            atMinuteYearlyAverages[key] = float(numeratorSum / denominatorSum)
+            #this is our weighted average ft% at a given min
 
-            #numerator  = attempted * percentage of player
-
-            #denominator = sum of total attempts
-
-            # players = list(self.minutes[key][2])
-            # totalNumberPlayers = len(players)
-            # for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-            #     currPlayerName = players[i] #curr player
-            #     print("Looking for: " + "|" + str(currPlayerName) + "|")
-            #     # print(str(data))
-            #     # print(str(self.get_player_ft_pct(data, "Joel Embid")))
-            #     # exit()
-            #     # print("looking for: " + str(currPlayerName))
-            #     madeAttemptedArr = self.year_get_player_ft_pct(currPlayerName, year, originAnalyzer)
-            #     if madeAttemptedArr != "No free throws" and madeAttemptedArr is not None:
-            #         # print("returned: " + str(returned))
-            #         total_made += madeAttemptedArr[0]
-            #         total_attempted += madeAttemptedArr[1]
-
-            # averageFTPercentageForAllPlayersAtMinute = totalPercentage / totalNumberPlayers
-
-            # atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
+            #sum of all %s * attampts / sum of all attempts
         
         return [atMinuteAverages, atMinuteYearlyAverages]
     
@@ -515,6 +411,8 @@ class FreeThrowAnalyzer:
             rows = list(reader)
             #indcies 12 and 13 are made and attempted respectively
             rows = rows[:-1] #skip last row, league averages
+            print(f"Looking for {player_name} in {year-1}-{year} season")
+            found = False
             for i, row in enumerate(rows):
                 # player_row = row[0]
                 # print("Player from row: " + row[1])
@@ -525,6 +423,8 @@ class FreeThrowAnalyzer:
                 print("Player from row changed name: " + fullString)
 
                 if fullString == player_name:
+                    found = True
+                    print(f"Found {player_name}: FT made={row[12]}, FT attempted={row[13]}")
                     print("Player from row: " + row[1])
                     if int(row[13]) > 0: # avoid division by zero
                         made = row[12]
@@ -549,91 +449,9 @@ class FreeThrowAnalyzer:
                             return [int(made), int(attempted)] 
                             #returns array of number made in first bucket and number attempted in second bucket
                     return "No free throws"
+            if not found:
+                print(f"Player {player_name} not found in {year-1}-{year} season")
             return None #if player requested wasn't in season stats
-            
-
-    
-    def calculateLargeMinuteAndYearlyAverages(self):
-        atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
-        atMinuteYearlyAverages = dict()
-        
-
-        for key in self.minutes:
-            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
-            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
-
-            # totalPercentage = float(0)
-            players = list(self.minutes[key][2])
-            totalNumberPlayers = len(players)
-            for i in range(totalNumberPlayers): #looping through set of players that shot fts at each minute
-                #TODO:here, get nba entry and exit years (/dates) (/present?) of current player, then loop through only those years
-                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/endpoints/commonplayerinfo.md
-
-                #may have to get player id with:
-                #https://github.com/swar/nba_api/blob/master/docs/nba_api/stats/static/players.md
-
-                currPlayerName = players[i] #curr player
-                actualName = self.ftNameToActualName[currPlayerName] 
-                #to convert from ftname to actual name, which we kept track of during original loop through all seasons by passing originalAnalyzer to individual calculateMinuteAndYearlyAverages func
-                nbaapiPlayer = get_player_career_span(actualName)
-                
-                print(str(get_player_career_span(actualName)))
-
-                firstYear = nbaapiPlayer['rookie_year']
-                lastYear = nbaapiPlayer['last_year']
-
-
-                # exit()
-                # break
-
-                for year in range(firstYear, lastYear + 1): #to hit their last season, range is exclusive of upper bound
-                    print("Looking for: " + "|" + str(currPlayerName) + "|")
-                    # print(str(data))
-                    # print(str(self.get_player_ft_pct(data, "Joel Embid"))) #need to write new version of this function but for multiple names
-                    # exit()
-                    # print("looking for: " + str(currPlayerName))
-                    madeAttemptedArr = self.__get_player_ft_pct(actualName, year)
-                    #could maybe pass in actualName here, to not have to convert from name in player_season_totals to ftName type, then you could map "actualName"
-                    #but actual name from nbaapiPlayer may differ form the names in that csv, so best to leave it as this for now
-                    if madeAttemptedArr != "No free throws":
-                        total_made = madeAttemptedArr[0]
-                        total_attempted = madeAttemptedArr[1]
-                    
-                    # if (returned is None): #the player 
-                    #     continue
-
-            # averageFTPercentageForAllPlayersAtMinute = (total_made / total_attempted) * 100
-
-            atMinuteYearlyAverages[key] = (total_made / total_attempted) * 100
-        
-        return [atMinuteAverages, atMinuteYearlyAverages]
-
-def get_player_career_span(player_name):
-   # Search for the player
-   player_matches = players.find_players_by_full_name(player_name)
-   
-   if not player_matches:
-       return f"No player found with name '{player_name}'"
-   
-   if len(player_matches) > 1:
-       # If multiple matches, show all options
-       return "Multiple players found:\n" + "\n".join(
-           f"- {p['full_name']} (ID: {p['id']})" for p in player_matches
-       )
-   
-   # Get the player's ID and info
-   player = player_matches[0]
-   player_info = commonplayerinfo.CommonPlayerInfo(player_id=player['id'])
-   common_info = player_info.get_normalized_dict()['CommonPlayerInfo'][0]
-   
-   # Return formatted career information
-   return {
-       'name': common_info['DISPLAY_FIRST_LAST'],
-       'rookie_year': common_info['FROM_YEAR'],
-       'last_year': common_info['TO_YEAR'],
-       'seasons_played': common_info['SEASON_EXP'],
-       'is_active': player['is_active']
-   }
 
 def get_team_home_dates(team, year):
     # Open the file and create the reader
@@ -933,7 +751,7 @@ def main():
                 analyzer.play_by_play_error_counter = 0
 
                 try:
-                    yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2])
+                    yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], year)
                 except Exception as e:
                     analyzer.play_by_play_error_counter += 1
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
