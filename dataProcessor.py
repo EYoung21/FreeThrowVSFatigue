@@ -65,7 +65,7 @@ import matplotlib.pyplot as plt
 
 class yrToMinToAttemptsClass:
     def __init__(self):
-        self.yrToMinToAttempts = defaultdict(int)
+        self.yrToMinToAttempts = defaultdict(defaultdict(int))
 
 class FreeThrowAnalyzer:
     def __init__(self):
@@ -432,11 +432,11 @@ class FreeThrowAnalyzer:
             for i, row in enumerate(rows):
                 # player_row = row[0]
                 # print("Player from row: " + row[1])
-                print("name from rows: " + row[1])
+                # print("name from rows: " + row[1])
                 fullString = changeToFirst(row[1])
                 # print("changed: " + fullString)
                 # exit()
-                print("Player from row changed name: " + fullString)
+                # print("Player from row changed name: " + fullString)
 
                 if fullString == player_name:
                     found = True
