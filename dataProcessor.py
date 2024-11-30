@@ -328,13 +328,15 @@ class FreeThrowAnalyzer:
                 print()
             
 
-    def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, type): #remaining seconds, quarter (1, 2, 3, 4)
+    def calculateConvertedIGT(remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
         # print("remaining seconds: " + str(remainingSecondsInQuarter))
         # print("quarter: " + str(quarter))
         # exit()
-        if type != "OVERTIME":
+        # print("the type is: " + str(typeIs))
+        if str(typeIs) != "PeriodType.OVERTIME":
             return (quarter * 12 * 60) - remainingSecondsInPeriod #returns seconds elapses so far
         else:
+            print("it's OVERTIME!!dwkfuhwflhwfe")
             return (4*12*60) + (quarter*5*60) - remainingSecondsInPeriod
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
