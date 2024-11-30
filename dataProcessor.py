@@ -65,7 +65,7 @@ import matplotlib.pyplot as plt
 
 class yrToMinToAttemptsClass:
     def __init__(self):
-        self.yrToMinToAttempts = defaultdict(defaultdict(int)) #cause its a defaultdict mapping years to default difts mapping minutes to # of attempts at that minute
+        self.yrToMinToAttempts = defaultdict(lambda: defaultdict(int)) #cause its a defaultdict mapping years to default difts mapping minutes to # of attempts at that minute
 
 class FreeThrowAnalyzer:
     def __init__(self):
