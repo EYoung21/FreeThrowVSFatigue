@@ -332,8 +332,8 @@ class FreeThrowAnalyzer:
 
                         attemptCounter.yrToMinToAttempts[year][curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                print("Minutes: ")
-                print(str(self.minutes))
+                # print("Minutes: ")
+                # print(str(self.minutes))
                 print()
     
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
