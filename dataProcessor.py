@@ -206,6 +206,7 @@ class FreeThrowAnalyzer:
                 player_entry_times[player_in] = converted_time
 
             if 'free throw' in str(play.get('description', '')):
+                print(str(play))
                 self.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
@@ -226,10 +227,15 @@ class FreeThrowAnalyzer:
                 if player not in player_entry_times:
                     print(f"Starter detected: {player}")
                     player_entry_times[player] = float(0.0)
+                
+                # print("HEREEEE")
 
                 entry_time = player_entry_times.get(player)
+                # print("HEREEEE2")
+                print(str(play.get('remaining_seconds_in_period')) + " " + str(play.get('period')) + " " + str(play.get('period_type')))
                 current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
-                
+                # print("HEREEEE3")
+
                 print(f"Entry time seconds: {entry_time}")
                 print(f"Current time seconds: {current_time}")
                 
@@ -325,10 +331,11 @@ class FreeThrowAnalyzer:
 
                         attemptCounter.yrToMinToAttempts[year][curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+                # print("Minutes: ")
+                # print(str(self.minutes))
                 print()
-            
-
-    def calculateConvertedIGT(remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
+    
+    def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
         # print("remaining seconds: " + str(remainingSecondsInQuarter))
         # print("quarter: " + str(quarter))
         # exit()
@@ -340,14 +347,15 @@ class FreeThrowAnalyzer:
             return (4*12*60) + (quarter*5*60) - remainingSecondsInPeriod
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
+    
     def calculateMinuteAndYearlyAverages(self):
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        for key in self.minutes:
+        for minute in self.minutes:
             
-            minuteAverage = self.minutes[key][0] / (self.minutes[key][0] + self.minutes[key][1])  #total made / total made + total missed
-            atMinuteAverages[key] = minuteAverage * 100 #to get percentage
+            minuteAverage = self.minutes[minute][0] / (self.minutes[minute][0] + self.minutes[minute][1])  #total made / total made + total missed
+            atMinuteAverages[minute] = minuteAverage * 100 #to get percentage
 
             # playerLength = len(list(self.minutes[key][2]))
             #don't think i need
@@ -356,16 +364,16 @@ class FreeThrowAnalyzer:
             
             denominatorSum = 0
 
-            for key2 in self.minutes[key][2]:
-                numerator = self.minutes[key][2][key2][0] * self.minutes[key][2][key2][1]
-                denominator = self.minutes[key][2][key2][0]
+            for player in self.minutes[minute][2]:
+                numerator = self.minutes[minute][2][player][0] * self.minutes[minute][2][player][1]
+                denominator = self.minutes[minute][2][player][0]
 
                 numeratorSum += numerator
 
                 denominatorSum += denominator
 
             
-            atMinuteYearlyAverages[key] = float(numeratorSum / denominatorSum)
+            atMinuteYearlyAverages[minute] = float(numeratorSum / denominatorSum)
             #this is our weighted average ft% at a given min
 
             #sum of all %s * attampts / sum of all attempts
@@ -442,8 +450,8 @@ class FreeThrowAnalyzer:
 
                 if fullString == player_name:
                     found = True
-                    print(f"Found {player_name}: FT made={row[12]}, FT attempted={row[13]}")
-                    print("Player from row: " + row[1])
+                    # print(f"Found {player_name}: FT made={row[12]}, FT attempted={row[13]}")
+                    # print("Player from row: " + row[1])
                     if int(row[13]) > 0: # avoid division by zero
                         made = row[12]
                         attempted = row[13]
