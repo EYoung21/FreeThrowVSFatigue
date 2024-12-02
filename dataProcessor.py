@@ -823,14 +823,14 @@ def main():
                         time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
                         continue
                 print("processed game")
-        print(f"Total neg at {year}:" + str(yearAnalyzer.total_negative_minutes))
+        print(f"Total neg at {year}: " + str(yearAnalyzer.total_negative_minutes))
         total_neg += yearAnalyzer.total_negative_minutes
-        print(f"Totl made at {year}" + str(yearAnalyzer.total_made))
+        print(f"Totl made at {year}: " + str(yearAnalyzer.total_made))
         total_made += yearAnalyzer.total_made
-        print(f"Total attempted at {year}" + str(yearAnalyzer.total_attempted))
+        print(f"Total attempted at {year}: " + str(yearAnalyzer.total_attempted))
         yrToNumberAttempted[year] = yearAnalyzer.total_attempted
         total_attempted += yearAnalyzer.total_attempted
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages(year)
+        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
 
