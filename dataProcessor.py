@@ -206,7 +206,7 @@ class FreeThrowAnalyzer:
                 player_entry_times[player_in] = converted_time
 
             if 'free throw' in str(play.get('description', '')):
-                print(str(play))
+                # print(str(play))
                 self.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
@@ -232,7 +232,7 @@ class FreeThrowAnalyzer:
 
                 entry_time = player_entry_times.get(player)
                 # print("HEREEEE2")
-                print(str(play.get('remaining_seconds_in_period')) + " " + str(play.get('period')) + " " + str(play.get('period_type')))
+                # print(str(play.get('remaining_seconds_in_period')) + " " + str(play.get('period')) + " " + str(play.get('period_type')))
                 current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
                 # print("HEREEEE3")
 
