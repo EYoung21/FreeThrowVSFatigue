@@ -120,6 +120,7 @@ class FreeThrowAnalyzer:
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
         try:
+            # print("we're here2")
             pbp_data = client.play_by_play(
                 home_team=team,
                 year=year,
@@ -130,7 +131,6 @@ class FreeThrowAnalyzer:
             self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
-
 
             # print("playByPlay dara: " + str(pbp_data))
             
@@ -170,6 +170,7 @@ class FreeThrowAnalyzer:
                 raise
     
     def _process_game_data(self, pbp_data: List[dict], team, year, month, day, seasonYear, attemptCounter):
+        # print("we're here3")
         player_entry_times = {}
         playersThatSubbedOut = set()
 
@@ -184,7 +185,7 @@ class FreeThrowAnalyzer:
         #     // number of players
         #     // weight by number of ft attempts for each player
         #     // weight would be number of attempts    (may want to store number made, too)
-
+        # print("yudjkse")
         for play in pbp_data:
             # print(str(play))
             # continue
@@ -331,8 +332,8 @@ class FreeThrowAnalyzer:
 
                         attemptCounter.yrToMinToAttempts[year][curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                # print("Minutes: ")
-                # print(str(self.minutes))
+                print("Minutes: ")
+                print(str(self.minutes))
                 print()
     
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
@@ -343,7 +344,7 @@ class FreeThrowAnalyzer:
         if str(typeIs) != "PeriodType.OVERTIME":
             return (quarter * 12 * 60) - remainingSecondsInPeriod #returns seconds elapses so far
         else:
-            print("it's OVERTIME!!dwkfuhwflhwfe")
+            # print("it's OVERTIME!!dwkfuhwflhwfe")
             return (4*12*60) + (quarter*5*60) - remainingSecondsInPeriod
 
         #will return array where first bucket is dictionary of minutes to minute averages and second bucket is dictionary of minutes to yearly averages
@@ -798,20 +799,21 @@ def main():
             
         yearAnalyzer = FreeThrowAnalyzer()
 
-        for key in allTeams:
-            arrHomeDates = get_team_home_dates(key, year)
-            print(f"Starting: {key}")
+        for team in allTeams:
+            arrHomeDates = get_team_home_dates(team, year)
+            print(f"Starting: {team}")
             print("homedates: " + str(arrHomeDates))
 
             for date in arrHomeDates:
-                print("Team: " + str(key))
+                print("Team: " + str(team))
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
                 analyzer.play_by_play_error_counter = 0
-
+                # print(str(curr_date))
                 try:
-                    yearAnalyzer.process_team_games(allTeams[key], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+                    # print("we're here")
+                    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
                 except Exception as e:
                     analyzer.play_by_play_error_counter += 1
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -819,7 +821,7 @@ def main():
                     error_msg = f"""
                     ERROR {analyzer.play_by_play_error_counter}:
                     Time: {timestamp}
-                    Team: {allTeams[key]}
+                    Team: {allTeams[team]}
                     Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
                     Error: {str(e)}
                     Traceback: {traceback.format_exc()}
