@@ -625,16 +625,28 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
     line_diff = slope_diff * np.array(minutes) + intercept_diff
 
-    # Plot original lines and trendlines (regression line will be plotted last)
+    # Create a separate figure for regression plot
+    fig_regression = plt.figure(figsize=(6, 6))
+    plt.scatter(ft_percentages, yearly_percentages, color='blue', alpha=0.5)
+    plt.plot(ft_percentages, regression_line, 'm--', 
+            label=f'Regression (R²: {r_value**2:.4f})', linewidth=2)
+    plt.xlabel('Minute FT%', fontsize=12)
+    plt.ylabel('Season Average FT%', fontsize=12)
+    plt.title('Regression: Minute FT% vs Season Average FT%')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(f'{startYear}-{endYear}_regression_plot.png', bbox_inches='tight', dpi=300)
+    plt.close()
+
+    # Plot original lines and trendlines
+    plt.figure(figsize=(12, 8))
     plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
     plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
     plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
     plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
     plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
     plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
-
-    # Plot regression line last so it appears on top
-    plt.plot(ft_percentages, regression_line, 'm--', label='Regression Between Minute FT% and Yearly FT%', linewidth=2)
 
     # Add regression statistics to plot
     stats_text = f'Regression Statistics:\nSlope: {slope:.4f}\nIntercept: {intercept:.4f}\nR²: {r_value**2:.4f}'
@@ -751,7 +763,7 @@ def process_season_stats(folder_path, mapping, yrMinAttempts):
     return [minute_avgs, yr_avgs]
 
 def main():
-    analyzer = FreeThrowAnalyzer()
+    # analyzer = FreeThrowAnalyzer()
 
     #now, for every team loop from 
 
@@ -826,17 +838,14 @@ def main():
                 print("Year: " + str(year))
                 print("Date: " + date)
                 curr_date = date.split("-")
-                analyzer.play_by_play_error_counter = 0
                 # print(str(curr_date))
                 try:
                     # print("we're here")
                     yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
                 except Exception as e:
-                    analyzer.play_by_play_error_counter += 1
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
                     error_msg = f"""
-                    ERROR {analyzer.play_by_play_error_counter}:
                     Time: {timestamp}
                     Team: {allTeams[team]}
                     Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
@@ -861,12 +870,14 @@ def main():
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
 
-        # Save dictionaries to text files
+        # Save dictionaries to sorted text files
         with open(minute_averages_file, 'w') as f:
-            json.dump(yearlyMinuteAveragesDict, f, indent=4)
-        
+            sorted_dict = dict(sorted(yearlyMinuteAveragesDict.items(), key=lambda x: float(x[0])))
+            json.dump(sorted_dict, f, indent=4)
+
         with open(yearly_averages_file, 'w') as f:
-            json.dump(yearlyMinuteYearlyAveragesDict, f, indent=4)
+            sorted_dict = dict(sorted(yearlyMinuteYearlyAveragesDict.items(), key=lambda x: float(x[0])))
+            json.dump(sorted_dict, f, indent=4)
 
         # with open(minute_total_dict_file, 'w') as f:
         #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
@@ -921,9 +932,9 @@ def main():
 
     # print("minuteYearlyAvg: " + str(minuteYearlyAveragesDict)) #empty for some reason?
 
-    print("Total neg from 2000-2024: " + str(analyzer.total_negative_minutes))
-    print("Total made from 2000-2024:" + str(analyzer.total_made))
-    print("Total made from 2000-2024" + str(analyzer.total_attempted))
+    # print("Total neg from 2000-2024: " + str(analyzer.total_negative_minutes))
+    # print("Total made from 2000-2024:" + str(analyzer.total_made))
+    # print("Total made from 2000-2024" + str(analyzer.total_attempted))
 
     print()
 
