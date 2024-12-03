@@ -559,6 +559,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
+    # Create dataForEachYear directory if it doesn't exist
+    if not os.path.exists('dataForEachYear'):
+        os.makedirs('dataForEachYear')
+
     # Get all minutes (x-axis)
     minutes = sorted(minute_averages.keys())
 
@@ -567,16 +571,26 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     yearly_percentages = [yearly_averages[m] for m in minutes]
     differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
 
+    # Save differences to a separate CSV in the dataForEachYear folder
+    diff_df = pd.DataFrame({
+        'Minute': minutes,
+        'Difference': differences
+    })
+    diff_df.to_csv(os.path.join('dataForEachYear', f'difference_averages_{startYear}-{endYear}.txt'), index=False)
+
     # Linear regression between minute averages and season averages
     slope, intercept, r_value, p_value, std_err = stats.linregress(ft_percentages, yearly_percentages)
 
-    # Log regression details
-    print(f"Linear Regression Between Minute FT% and Yearly FT%:")
-    print(f"  Slope: {slope:.4f}")
-    print(f"  Intercept: {intercept:.4f}")
-    print(f"  R-squared: {r_value**2:.4f}")
-    print(f"  P-value: {p_value:.4e}")
-    print(f"  Standard Error: {std_err:.4f}")
+    # Save regression details to text file
+    with open(f'{startYear}-{endYear}_regression_stats.txt', 'w') as f:
+        f.write(f"Analysis for {startYear}-{endYear} NBA Seasons\n")
+        f.write("="*40 + "\n\n")
+        f.write("Linear Regression Between Minute FT% and Yearly FT%:\n")
+        f.write(f"  Slope: {slope:.4f}\n")
+        f.write(f"  Intercept: {intercept:.4f}\n")
+        f.write(f"  R-squared: {r_value**2:.4f}\n")
+        f.write(f"  P-value: {p_value:.4e}\n")
+        f.write(f"  Standard Error: {std_err:.4f}\n")
 
     # Create a line for the regression
     regression_line = slope * np.array(ft_percentages) + intercept
@@ -611,18 +625,21 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
     line_diff = slope_diff * np.array(minutes) + intercept_diff
 
-    # Plot original lines
+    # Plot original lines and trendlines (regression line will be plotted last)
     plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
     plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
     plt.plot(minutes, differences, 'r-', label='Difference', linewidth=2)
-
-    # Plot regression line
-    plt.plot(ft_percentages, regression_line, 'm--', label='Regression Between Minute FT% and Yearly FT%', linewidth=2)
-
-    # Plot trendlines
     plt.plot(minutes, line_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
     plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
     plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+
+    # Plot regression line last so it appears on top
+    plt.plot(ft_percentages, regression_line, 'm--', label='Regression Between Minute FT% and Yearly FT%', linewidth=2)
+
+    # Add regression statistics to plot
+    stats_text = f'Regression Statistics:\nSlope: {slope:.4f}\nIntercept: {intercept:.4f}\nR²: {r_value**2:.4f}'
+    plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes, 
+            verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
 
     # Customize the plot
     if totalAttempted > 0:
