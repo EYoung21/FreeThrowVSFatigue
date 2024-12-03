@@ -912,10 +912,12 @@ def main():
     all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
 
     with open(all_minute_averages_file, 'w') as f:
-            json.dump(minute_averages, f, indent=4)
-        
+        sorted_dict = dict(sorted(minute_averages.items(), key=lambda x: float(x[0])))
+        json.dump(sorted_dict, f, indent=4)
+            
     with open(all_yearly_averages_file, 'w') as f:
-        json.dump(yearly_averages, f, indent=4)
+        sorted_dict = dict(sorted(yearly_averages.items(), key=lambda x: float(x[0])))
+        json.dump(sorted_dict, f, indent=4)
 
     # # This will convert each set() in the lists to a list while preserving the structure
     # with open(all_minute_total_dict_file, 'w') as f:
