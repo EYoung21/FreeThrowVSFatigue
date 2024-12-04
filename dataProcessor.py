@@ -385,14 +385,30 @@ class FreeThrowAnalyzer:
         #number_repeated represents how many consequetive times a player's ft average comes from another team
         # print("playername: " + player_name)
         def changeToFirst(word):
-            # print("word: " + word)
-            stringArr = word.split(" ")
-            firstString = stringArr[0][0] + "." #gets first letter of first name
-            secondString = stringArr[1] #gets second string
-            fullString = firstString + " " + secondString
+            if word == "Nenê":
+                return "N. Hilário"
+            if not word or not isinstance(word, str):
+                print(f"Warning: Invalid name format: {word}")
+                return None
+            
+            word = word.strip()
+            # Debug print
+            # print(f"Processing name: '{word}'")
 
-            return fullString
-        
+            stringArr = word.split(" ")
+            if len(stringArr) < 2:
+                print(f"Warning: Name does not contain space: {word}")
+                return None
+                
+            try:
+                firstString = stringArr[0][0] + "." #gets first letter of first name
+                secondString = stringArr[1] #gets second string
+                fullString = firstString + " " + secondString
+                return fullString
+            except Exception as e:
+                print(f"Error processing name '{word}': {str(e)}")
+                return None
+                
         try:
             if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
                 client.players_season_totals(
@@ -433,9 +449,11 @@ class FreeThrowAnalyzer:
         
         with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
             reader = csv.reader(file, delimiter=',')
-            # Skip the header row
-            next(reader)
+            next(reader)  # Skip header
             rows = list(reader)
+            if not rows:
+                print(f"Warning: No data found for year {year}")
+                return None
             #indcies 12 and 13 are made and attempted respectively
             rows = rows[:-1] #skip last row, league averages
             print(f"Looking for {player_name} in {year-1}-{year} season")
@@ -445,6 +463,10 @@ class FreeThrowAnalyzer:
                 # print("Player from row: " + row[1])
                 # print("name from rows: " + row[1])
                 fullString = changeToFirst(row[1])
+                if fullString is None:
+                    # Skip this row or handle the error appropriately
+                    continue
+
                 # print("changed: " + fullString)
                 # exit()
                 # print("Player from row changed name: " + fullString)
@@ -817,6 +839,7 @@ def main():
     # ca be calculated adding up 
 
     #VITAL, only commented for a sec for testing
+    # for year in range(2000, 2025):
     for year in range(2000, 2025):
 
         attemptCounter = minToAttemptsClass()
@@ -860,7 +883,7 @@ def main():
                     ----------------------------------------
                     """
                     
-                    with open('playByPlayErrors.txt', 'a') as f:
+                    with open('playByPlayErrors2,PostStrError.txt', 'a') as f:
                         f.write(error_msg)
                         time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
                         continue
