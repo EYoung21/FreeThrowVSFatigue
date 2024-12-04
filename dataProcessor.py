@@ -295,7 +295,7 @@ class FreeThrowAnalyzer:
                         self.minutes[curr_minute] = [1, 0, dict()]
                         self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
                         
-                        attemptCounter.minToAttempts[year][curr_minute] += 1
+                        attemptCounter.minToAttempts[curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
                     else:
                         print(str(player))
@@ -303,7 +303,7 @@ class FreeThrowAnalyzer:
                         self.minutes[curr_minute] = [0, 1, dict()]
                         self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                        attemptCounter.minToAttempts[year][curr_minute] += 1
+                        attemptCounter.minToAttempts[curr_minute] += 1
                 else:
                     ft_pct = self.get_player_ft_pct(player, seasonYear)
                     if ft_pct is None or ft_pct == "No free throws":
@@ -319,7 +319,7 @@ class FreeThrowAnalyzer:
                         else:
                             self.minutes[curr_minute][2][player][0] += 1
 
-                        attemptCounter.minToAttempts[year][curr_minute] += 1
+                        attemptCounter.minToAttempts[curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
                     else:
                         print(str(player))
@@ -330,7 +330,7 @@ class FreeThrowAnalyzer:
                         else:
                             self.minutes[curr_minute][2][player][0] += 1
 
-                        attemptCounter.minToAttempts[year][curr_minute] += 1
+                        attemptCounter.minToAttempts[curr_minute] += 1
                         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
                 # print("Minutes: ")
                 # print(str(self.minutes))
@@ -887,7 +887,7 @@ def main():
 
         with open(attempt_counter_file, 'w') as f:
             # Sort the dictionary by minutes (converting keys to float for numerical sorting)
-            sorted_dict = dict(sorted(attemptCounter.minToAttempts[year].items(), key=lambda x: float(x[0])))
+            sorted_dict = dict(sorted(attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
         # with open(minute_total_dict_file, 'w') as f:

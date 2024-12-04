@@ -1,0 +1,9 @@
+Analysis for 2001-2002 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.1501
+  Intercept: 65.1340
+  R-squared: 0.2821
+  P-value: 6.0694e-05
+  Standard Error: 0.0342
