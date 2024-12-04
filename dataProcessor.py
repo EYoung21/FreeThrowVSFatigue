@@ -62,6 +62,24 @@ import matplotlib.pyplot as plt
 
 # Time resets due to replay reviews or corrections? -- shouldn't be a problem, I would assume is accurately updated in nba
 
+class ErrorLogger:
+    def __init__(self, filename):
+        self.filename = filename
+        # Clear the file at start
+        with open(self.filename, 'w') as f:
+            f.write(f"Error Log Started: {datetime.now()}\n{'='*50}\n\n")
+    
+    def log_error(self, error_type, error_message, details=None):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open(self.filename, 'a') as f:
+            f.write(f"Time: {timestamp}\n")
+            f.write(f"Error Type: {error_type}\n")
+            f.write(f"Error Message: {error_message}\n")
+            if details:
+                f.write(f"Details: {details}\n")
+            f.write(f"{'='*50}\n\n")
+
+error_logger = ErrorLogger("AllErrors.txt")
 
 class minToAttemptsClass:
     def __init__(self):
@@ -72,6 +90,8 @@ class FreeThrowAnalyzer:
         # self.processed_games: Set[str] = set()
         self.minutes = dict()
         
+        self.error_logger = ErrorLogger("AllErrors.txt")
+
         #dict that goes from year to minute to attempts at that minute
 
         #here, what if instead of dict[minute] = ft made, fr missed, [#set of all players that made up that stat], we do:
@@ -139,33 +159,83 @@ class FreeThrowAnalyzer:
             # self.processed_games.add(game_id)
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 429:
+                # Log the initial rate limit error
+                error_details = {
+                    "team": str(team),
+                    "date": f"{year}-{month}-{day}",
+                    "status_code": 429,
+                    "error_type": "Rate Limit"
+                }
+                self.error_logger.log_error("RateLimitError", str(e), error_details)
+                
                 # Get the Retry-After header, if available
                 retry_after = e.response.headers.get("Retry-After")
                 if retry_after:
-                    # If Retry-After is in seconds, wait that long
+                    # Log retry attempt
+                    self.error_logger.log_error(
+                        "RetryAttempt", 
+                        f"Rate limited. Retrying after {retry_after} seconds.",
+                        {"retry_after": retry_after}
+                    )
                     print(f"Rate limited. Retrying after {retry_after} seconds.")
                     time.sleep(int(retry_after))
-                    # Retry the request
-                    pbp_data = client.play_by_play(
-                        home_team=team,
-                        year=year,
-                        month=month,
-                        day=day
-                    )
-                    time.sleep(1.86)
-                    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                    try:
+                        # Retry the request
+                        pbp_data = client.play_by_play(
+                            home_team=team,
+                            year=year,
+                            month=month,
+                            day=day
+                        )
+                        time.sleep(1.86)
+                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                    except Exception as retry_error:
+                        # Log any errors during retry
+                        error_details = {
+                            "team": str(team),
+                            "date": f"{year}-{month}-{day}",
+                            "retry_attempt": "after_rate_limit",
+                            "traceback": traceback.format_exc()
+                        }
+                        self.error_logger.log_error("RetryError", str(retry_error), error_details)
+                        raise
                 else:
+                    # Log default retry attempt
+                    self.error_logger.log_error(
+                        "RetryAttempt", 
+                        "Rate limited. No Retry-After header found. Using default 60 second wait.",
+                        {"default_wait": 60}
+                    )
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
-                    pbp_data = client.play_by_play(
-                        home_team=team,
-                        year=year,
-                        month=month,
-                        day=day
-                    )
-                    time.sleep(1.86)
-                    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                    try:
+                        pbp_data = client.play_by_play(
+                            home_team=team,
+                            year=year,
+                            month=month,
+                            day=day
+                        )
+                        time.sleep(1.86)
+                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                    except Exception as retry_error:
+                        # Log any errors during retry
+                        error_details = {
+                            "team": str(team),
+                            "date": f"{year}-{month}-{day}",
+                            "retry_attempt": "default_wait",
+                            "traceback": traceback.format_exc()
+                        }
+                        self.error_logger.log_error("RetryError", str(retry_error), error_details)
+                        raise
             else:
+                # Log non-rate-limit HTTP errors
+                error_details = {
+                    "team": str(team),
+                    "date": f"{year}-{month}-{day}",
+                    "status_code": e.response.status_code if hasattr(e, 'response') else 'N/A',
+                    "traceback": traceback.format_exc()
+                }
+                self.error_logger.log_error("HTTPError", str(e), error_details)
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
     
@@ -406,6 +476,13 @@ class FreeThrowAnalyzer:
                 fullString = firstString + " " + secondString
                 return fullString
             except Exception as e:
+                error_details = {
+                    "input_word": word,
+                    "string_array": stringArr,
+                    "error_type": type(e).__name__,
+                    "traceback": traceback.format_exc()
+                }
+                error_logger.log_error("NameProcessingError", f"Error processing name '{word}': {str(e)}", error_details)
                 print(f"Error processing name '{word}': {str(e)}")
                 return None
                 
@@ -702,20 +779,45 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     # plt.show()
 
  #this function would parse a printed txt file of 
-def parse_data_file(file_path):
-    # Open and read the file content
-    with open(file_path, 'r') as file:
-        content = file.read()
-
-    # Parse the data from string to Python dictionary
-    # Assuming the data format in the file is a valid Python dictionary structure
+def parse_data_file(file_path, error_logger):  # Add error_logger parameter
     try:
-        data = ast.literal_eval(content)
-    except (SyntaxError, ValueError) as e:
-        print("Error parsing file:", e)
+        # Open and read the file content
+        with open(file_path, 'r') as file:
+            content = file.read()
+            
+        # Parse the data from string to Python dictionary
+        try:
+            data = ast.literal_eval(content)
+            return data
+        except (SyntaxError, ValueError) as e:
+            error_details = {
+                "file_path": file_path,
+                "error_type": type(e).__name__,
+                "traceback": traceback.format_exc(),
+                "file_content_preview": content[:200] + "..." if len(content) > 200 else content
+            }
+            error_logger.log_error("ParseError", str(e), error_details)
+            print("Error parsing file:", e)
+            return None
+            
+    except FileNotFoundError as e:
+        error_details = {
+            "file_path": file_path,
+            "error_type": "FileNotFoundError",
+            "traceback": traceback.format_exc()
+        }
+        error_logger.log_error("FileError", str(e), error_details)
+        print(f"File not found: {file_path}")
         return None
-
-    return data
+    except IOError as e:
+        error_details = {
+            "file_path": file_path,
+            "error_type": "IOError",
+            "traceback": traceback.format_exc()
+        }
+        error_logger.log_error("FileError", str(e), error_details)
+        print(f"IO Error reading file: {file_path}")
+        return None
 
 
 def process_season_stats(folder_path):
@@ -771,9 +873,22 @@ def process_season_stats(folder_path):
                     yearly_counts[yrmin] += attempts_data[yrmin]
                     
         except FileNotFoundError:
+            error_details = {
+                "season": season,
+                "error_type": "FileNotFoundError",
+                "traceback": traceback.format_exc()
+            }
+            error_logger.log_error("FileNotFoundError", f"Could not find data files for season {season}", error_details)
             print(f"Warning: Could not find data files for season {season}")
             continue
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as e:
+            error_details = {
+                "season": season,
+                "error_type": "JSONDecodeError",
+                "error_message": str(e),
+                "traceback": traceback.format_exc()
+            }
+            error_logger.log_error("JSONDecodeError", f"Invalid JSON format in files for season {season}", error_details)
             print(f"Warning: Invalid JSON format in files for season {season}")
             continue
     
@@ -840,7 +955,7 @@ def main():
 
     #VITAL, only commented for a sec for testing
     # for year in range(2000, 2025):
-    for year in range(2003, 2025):
+    for year in range(2008, 2025):
 
         attemptCounter = minToAttemptsClass()
         attempt_counter_file = os.path.join('dataForEachYear', f'attempt_counter_{year-1}-{year}.txt')
@@ -869,11 +984,22 @@ def main():
                 curr_date = date.split("-")
                 # print(str(curr_date))
                 try:
-                    # print("we're here")
                     yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
                 except Exception as e:
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
+                    error_details = {
+                        "team": str(allTeams[team]),
+                        "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
+                        "year": year,
+                        "timestamp": timestamp,
+                        "traceback": traceback.format_exc()
+                    }
+                    
+                    # Log to error logger
+                    error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
+                    
+                    # Maintain existing error logging to separate file
                     error_msg = f"""
                     Time: {timestamp}
                     Team: {allTeams[team]}
