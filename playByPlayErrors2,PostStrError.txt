@@ -1,0 +1,226 @@
+
+                    Time: 2024-12-05 05:46:21
+                    Team: Team.DALLAS_MAVERICKS
+                    Date: 2014-04-01
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 05:50:21
+                    Team: Team.GOLDEN_STATE_WARRIORS
+                    Date: 2014-02-12
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 05:55:49
+                    Team: Team.LOS_ANGELES_CLIPPERS
+                    Date: 2014-04-19
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 06:05:48
+                    Team: Team.NEW_YORK_KNICKS
+                    Date: 2014-01-13
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 06:08:07
+                    Team: Team.OKLAHOMA_CITY_THUNDER
+                    Date: 2014-04-21
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 06:12:11
+                    Team: Team.PHOENIX_SUNS
+                    Date: 2014-02-08
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 06:16:09
+                    Team: Team.SAN_ANTONIO_SPURS
+                    Date: 2013-12-02
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 07:23:33
+                    Team: Team.ATLANTA_HAWKS
+                    Date: 2015-02-04
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 07:45:03
+                    Team: Team.MEMPHIS_GRIZZLIES
+                    Date: 2014-11-13
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 07:58:30
+                    Team: Team.PHOENIX_SUNS
+                    Date: 2014-11-12
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 08:03:21
+                    Team: Team.SAN_ANTONIO_SPURS
+                    Date: 2015-01-06
+                    Error: list index out of range
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 151, in process_team_games
+    self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+    ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 267, in _process_game_data
+    playersThatSubbedOut.add(desParsed2[1])
+                             ~~~~~~~~~~^^^
+IndexError: list index out of range
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-05 09:40:29
+                    Team: Team.OKLAHOMA_CITY_THUNDER
+                    Date: 2015-11-08
+                    Error: 502 Server Error: Bad Gateway for url: https://www.basketball-reference.com/boxscores/pbp/201511080OKC.html
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 987, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 144, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 225, in play_by_play
+    raise http_error
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 502 Server Error: Bad Gateway for url: https://www.basketball-reference.com/boxscores/pbp/201511080OKC.html
+
+                    ----------------------------------------
+                    

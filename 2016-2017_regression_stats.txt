@@ -1,0 +1,9 @@
+Analysis for 2016-2017 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.0212
+  Intercept: 74.5813
+  R-squared: 0.0020
+  P-value: 7.6562e-01
+  Standard Error: 0.0706

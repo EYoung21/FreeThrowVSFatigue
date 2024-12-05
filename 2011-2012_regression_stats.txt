@@ -1,0 +1,9 @@
+Analysis for 2011-2012 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.1566
+  Intercept: 62.5332
+  R-squared: 0.1557
+  P-value: 5.0222e-03
+  Standard Error: 0.0532

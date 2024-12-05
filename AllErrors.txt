@@ -1,15 +1,3 @@
-Error Log Started: 2024-12-04 23:36:07.642662
-==================================================
-
-Time: 2024-12-04 23:36:56
-Error Type: RateLimitError
-Error Message: 429 Client Error: Too Many Requests for url: https://www.basketball-reference.com/boxscores/pbp/201101170ATL.html
-Details: {'team': 'Team.ATLANTA_HAWKS', 'date': '2011-01-17', 'status_code': 429, 'error_type': 'Rate Limit'}
-==================================================
-
-Time: 2024-12-04 23:36:56
-Error Type: RetryAttempt
-Error Message: Rate limited. Retrying after 3600 seconds.
-Details: {'retry_after': '3600'}
+Error Log Started: 2024-12-05 14:19:25.277455
 ==================================================
 
