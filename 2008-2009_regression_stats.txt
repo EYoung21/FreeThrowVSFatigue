@@ -1,0 +1,9 @@
+Analysis for 2008-2009 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.0003
+  Intercept: 77.7078
+  R-squared: 0.0000
+  P-value: 9.8979e-01
+  Standard Error: 0.0249
