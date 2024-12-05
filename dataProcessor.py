@@ -1043,7 +1043,7 @@ def main():
         #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
 
         plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
-        
+        time.sleep(1.85)
         #stop after one year to check large
         # break
 
