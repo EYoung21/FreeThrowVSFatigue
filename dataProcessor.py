@@ -658,29 +658,24 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
-    # Create dataForEachYear directory if it doesn't exist
     if not os.path.exists('dataForEachYear'):
         os.makedirs('dataForEachYear')
 
-    # Get all minutes (x-axis)
-    minutes = sorted(minute_averages.keys())
-
-    # Get corresponding values for each line
-    ft_percentages = [minute_averages[m] for m in minutes]
-    yearly_percentages = [yearly_averages[m] for m in minutes]
+    # Convert and sort minutes, ensuring integer keys
+    minutes = sorted([float(k) for k in minute_averages.keys()])
+    ft_percentages = [minute_averages[str(int(m)) if m.is_integer() else str(m)] for m in minutes]
+    yearly_percentages = [yearly_averages[str(int(m)) if m.is_integer() else str(m)] for m in minutes]
     differences = [ft_percentages[i] - yearly_percentages[i] for i in range(len(minutes))]
 
-    # Save differences to a separate CSV in the dataForEachYear folder
+    # Rest of the function remains the same
     diff_df = pd.DataFrame({
         'Minute': minutes,
         'Difference': differences
     })
     diff_df.to_csv(os.path.join('dataForEachYear', f'difference_averages_{startYear}-{endYear}.txt'), index=False)
 
-    # Linear regression between minute averages and season averages
     slope, intercept, r_value, p_value, std_err = stats.linregress(ft_percentages, yearly_percentages)
 
-    # Save regression details to text file
     with open(f'{startYear}-{endYear}_regression_stats.txt', 'w') as f:
         f.write(f"Analysis for {startYear}-{endYear} NBA Seasons\n")
         f.write("="*40 + "\n\n")
@@ -691,10 +686,8 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
         f.write(f"  P-value: {p_value:.4e}\n")
         f.write(f"  Standard Error: {std_err:.4f}\n")
 
-    # Create a line for the regression
     regression_line = slope * np.array(ft_percentages) + intercept
 
-    # Save regression data to DataFrame
     regression_df = pd.DataFrame({
         'Minute_FT%': ft_percentages,
         'Yearly_FT%': yearly_percentages,
@@ -702,7 +695,6 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     })
     regression_df.to_csv(f'{startYear}-{endYear}_regression_analysis.csv', index=False)
 
-    # Create DataFrame and save to CSV for original data
     df = pd.DataFrame({
         'Minute': minutes,
         'Minute_Average_FT%': ft_percentages,
@@ -711,10 +703,6 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     })
     df.to_csv(f'{startYear}-{endYear}_ft_percentage_data.csv', index=False)
 
-    # Create the plot
-    plt.figure(figsize=(12, 8))
-
-    # Calculate trendlines
     slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
     line_ft = slope_ft * np.array(minutes) + intercept_ft
 
@@ -724,8 +712,7 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
     line_diff = slope_diff * np.array(minutes) + intercept_diff
 
-    # Create a separate figure for regression plot
-    fig_regression = plt.figure(figsize=(6, 6))
+    plt.figure(figsize=(6, 6))
     plt.scatter(ft_percentages, yearly_percentages, color='blue', alpha=0.5)
     plt.plot(ft_percentages, regression_line, 'm--', 
             label=f'Regression (R²: {r_value**2:.4f})', linewidth=2)
@@ -738,7 +725,6 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     plt.savefig(f'{startYear}-{endYear}_regression_plot.png', bbox_inches='tight', dpi=300)
     plt.close()
 
-    # Plot original lines and trendlines
     plt.figure(figsize=(12, 8))
     plt.plot(minutes, ft_percentages, 'b-', label='Actual FT% at minute', linewidth=2)
     plt.plot(minutes, yearly_percentages, 'g-', label='Players\' Season Average', linewidth=2)
@@ -747,77 +733,21 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     plt.plot(minutes, line_yearly, 'g:', label=f'Season Avg Trend (slope: {slope_yearly:.4f})', linewidth=1)
     plt.plot(minutes, line_diff, 'r:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
 
-    # Add regression statistics to plot
     stats_text = f'Regression Statistics:\nSlope: {slope:.4f}\nIntercept: {intercept:.4f}\nR²: {r_value**2:.4f}'
     plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes, 
             verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
 
-    # Customize the plot
-    if totalAttempted > 0:
-        percentage = round(totalMade/totalAttempted * 100, 2)
-    else:
-        percentage = ""
+    percentage = round(totalMade/totalAttempted * 100, 2) if totalAttempted > 0 else ""
     plt.title(f'Free Throw Percentage by Minutes Played for {startYear}-{endYear} Season\nFTA: {totalAttempted}, FTs Made: {totalMade}, %: {percentage}%', 
               fontsize=14, pad=20)
     plt.xlabel('Minutes Played', fontsize=12)
     plt.ylabel('Free Throw Percentage', fontsize=12)
     plt.grid(True, linestyle='--', alpha=0.7)
     plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
-
-    # Add a horizontal line at y=0 for reference in difference
     plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
-
-    # Format y-axis as percentage
     plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
-
-    # Adjust layout to prevent legend cutoff
     plt.tight_layout()
-
-    # Save the plot
-    plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png', 
-                bbox_inches='tight', dpi=300)
-    # plt.show()
-
- #this function would parse a printed txt file of 
-def parse_data_file(file_path, error_logger):  # Add error_logger parameter
-    try:
-        # Open and read the file content
-        with open(file_path, 'r') as file:
-            content = file.read()
-            
-        # Parse the data from string to Python dictionary
-        try:
-            data = ast.literal_eval(content)
-            return data
-        except (SyntaxError, ValueError) as e:
-            error_details = {
-                "file_path": file_path,
-                "error_type": type(e).__name__,
-                "traceback": traceback.format_exc(),
-                "file_content_preview": content[:200] + "..." if len(content) > 200 else content
-            }
-            error_logger.log_error("ParseError", str(e), error_details)
-            print("Error parsing file:", e)
-            return None
-            
-    except FileNotFoundError as e:
-        error_details = {
-            "file_path": file_path,
-            "error_type": "FileNotFoundError",
-            "traceback": traceback.format_exc()
-        }
-        error_logger.log_error("FileError", str(e), error_details)
-        print(f"File not found: {file_path}")
-        return None
-    except IOError as e:
-        error_details = {
-            "file_path": file_path,
-            "error_type": "IOError",
-            "traceback": traceback.format_exc()
-        }
-        error_logger.log_error("FileError", str(e), error_details)
-        print(f"IO Error reading file: {file_path}")
-        return None
+    plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png', bbox_inches='tight', dpi=300)
 
 
 def process_season_stats(folder_path):
