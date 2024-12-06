@@ -1,0 +1,9 @@
+Analysis for 2022-2023 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.3474
+  Intercept: 49.7922
+  R-squared: 0.2478
+  P-value: 3.1840e-04
+  Standard Error: 0.0892

@@ -1,0 +1,9 @@
+Analysis for 2000-2024 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.1063
+  Intercept: 68.2748
+  R-squared: 0.1794
+  P-value: 1.2729e-03
+  Standard Error: 0.0312

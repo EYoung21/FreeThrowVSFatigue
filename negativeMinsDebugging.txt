@@ -1,0 +1,21 @@
+
+                    Negative minutes detected:
+                    Player: M. Muscala
+                    Entry time (seconds): 1440.0
+                    Current time (seconds): 792.0
+                    Minutes played: -10.8
+                    Team: Team.BROOKLYN_NETS
+                    Year: 2023
+                    Month: 12
+                    Day: 08
+                    
+                    Negative minutes detected:
+                    Player: M. Muscala
+                    Entry time (seconds): 1440.0
+                    Current time (seconds): 792.0
+                    Minutes played: -10.8
+                    Team: Team.BROOKLYN_NETS
+                    Year: 2023
+                    Month: 12
+                    Day: 08
+                    
