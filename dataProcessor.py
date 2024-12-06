@@ -941,111 +941,106 @@ def main():
         "WASHINGTON WIZARDS": Team.WASHINGTON_WIZARDS
     }
 
-    def set_default(obj):
-        if isinstance(obj, set):
-            return list(obj)
-        raise TypeError
-
-    total_neg = 0
-    total_made = 0
-    total_attempted = 0
+    # total_neg = 0
+    # total_made = 0
+    # total_attempted = 0
 
     # yrToNumberAttempted = dict()
     # ca be calculated adding up 
 
     #VITAL, only commented for a sec for testing
     # for year in range(2000, 2025):
-    for year in range(2023, 2025):
+    # for year in range(2023, 2025):
 
-        attemptCounter = minToAttemptsClass()
-        attempt_counter_file = os.path.join('dataForEachYear', f'attempt_counter_{year-1}-{year}.txt')
-        # Check if both files already exist
-        minute_averages_file = os.path.join('dataForEachYear', f'minute_averages_{year-1}-{year}.txt')
-        yearly_averages_file = os.path.join('dataForEachYear', f'yearly_averages_{year-1}-{year}.txt')
+    #     attemptCounter = minToAttemptsClass()
+    #     attempt_counter_file = os.path.join('dataForEachYear', f'attempt_counter_{year-1}-{year}.txt')
+    #     # Check if both files already exist
+    #     minute_averages_file = os.path.join('dataForEachYear', f'minute_averages_{year-1}-{year}.txt')
+    #     yearly_averages_file = os.path.join('dataForEachYear', f'yearly_averages_{year-1}-{year}.txt')
 
-        # minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
+    #     # minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
         
-        #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
-        # if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
-        #     print(f"Files for {year-1}-{year} already exist, skipping...")
-        #     continue
+    #     #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
+    #     # if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
+    #     #     print(f"Files for {year-1}-{year} already exist, skipping...")
+    #     #     continue
             
-        yearAnalyzer = FreeThrowAnalyzer()
+    #     yearAnalyzer = FreeThrowAnalyzer()
 
-        for team in allTeams:
-            arrHomeDates = get_team_home_dates(team, year)
-            print(f"Starting: {team}")
-            print("homedates: " + str(arrHomeDates))
+    #     for team in allTeams:
+    #         arrHomeDates = get_team_home_dates(team, year)
+    #         print(f"Starting: {team}")
+    #         print("homedates: " + str(arrHomeDates))
 
-            for date in arrHomeDates:
-                print("Team: " + str(team))
-                print("Year: " + str(year))
-                print("Date: " + date)
-                curr_date = date.split("-")
-                # print(str(curr_date))
-                try:
-                    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
-                except Exception as e:
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    #         for date in arrHomeDates:
+    #             print("Team: " + str(team))
+    #             print("Year: " + str(year))
+    #             print("Date: " + date)
+    #             curr_date = date.split("-")
+    #             # print(str(curr_date))
+    #             try:
+    #                 yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    #             except Exception as e:
+    #                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
-                    error_details = {
-                        "team": str(allTeams[team]),
-                        "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
-                        "year": year,
-                        "timestamp": timestamp,
-                        "traceback": traceback.format_exc()
-                    }
+    #                 error_details = {
+    #                     "team": str(allTeams[team]),
+    #                     "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
+    #                     "year": year,
+    #                     "timestamp": timestamp,
+    #                     "traceback": traceback.format_exc()
+    #                 }
                     
-                    # Log to error logger
-                    error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
+    #                 # Log to error logger
+    #                 error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
                     
-                    # Maintain existing error logging to separate file
-                    error_msg = f"""
-                    Time: {timestamp}
-                    Team: {allTeams[team]}
-                    Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
-                    Error: {str(e)}
-                    Traceback: {traceback.format_exc()}
-                    ----------------------------------------
-                    """
+    #                 # Maintain existing error logging to separate file
+    #                 error_msg = f"""
+    #                 Time: {timestamp}
+    #                 Team: {allTeams[team]}
+    #                 Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
+    #                 Error: {str(e)}
+    #                 Traceback: {traceback.format_exc()}
+    #                 ----------------------------------------
+    #                 """
                     
-                    with open('playByPlayErrors2,PostStrError.txt', 'a') as f:
-                        f.write(error_msg)
-                        time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
-                        continue
-                print("processed game")
-        print(f"Total neg at {year}: " + str(yearAnalyzer.total_negative_minutes))
-        total_neg += yearAnalyzer.total_negative_minutes
-        print(f"Totl made at {year}: " + str(yearAnalyzer.total_made))
-        total_made += yearAnalyzer.total_made
-        print(f"Total attempted at {year}: " + str(yearAnalyzer.total_attempted))
-        # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
-        total_attempted += yearAnalyzer.total_attempted
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
-        yearlyMinuteAveragesDict = yearlyAnsArr[0]
-        yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
+    #                 with open('playByPlayErrors2,PostStrError.txt', 'a') as f:
+    #                     f.write(error_msg)
+    #                     time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
+    #                     continue
+    #             print("processed game")
+    #     print(f"Total neg at {year}: " + str(yearAnalyzer.total_negative_minutes))
+    #     total_neg += yearAnalyzer.total_negative_minutes
+    #     print(f"Totl made at {year}: " + str(yearAnalyzer.total_made))
+    #     total_made += yearAnalyzer.total_made
+    #     print(f"Total attempted at {year}: " + str(yearAnalyzer.total_attempted))
+    #     # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
+    #     total_attempted += yearAnalyzer.total_attempted
+    #     yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
+    #     yearlyMinuteAveragesDict = yearlyAnsArr[0]
+    #     yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
 
-        # Save dictionaries to sorted text files
-        with open(minute_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(yearlyMinuteAveragesDict.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+    #     # Save dictionaries to sorted text files
+    #     with open(minute_averages_file, 'w') as f:
+    #         sorted_dict = dict(sorted(yearlyMinuteAveragesDict.items(), key=lambda x: float(x[0])))
+    #         json.dump(sorted_dict, f, indent=4)
 
-        with open(yearly_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(yearlyMinuteYearlyAveragesDict.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+    #     with open(yearly_averages_file, 'w') as f:
+    #         sorted_dict = dict(sorted(yearlyMinuteYearlyAveragesDict.items(), key=lambda x: float(x[0])))
+    #         json.dump(sorted_dict, f, indent=4)
 
-        with open(attempt_counter_file, 'w') as f:
-            # Sort the dictionary by minutes (converting keys to float for numerical sorting)
-            sorted_dict = dict(sorted(attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+    #     with open(attempt_counter_file, 'w') as f:
+    #         # Sort the dictionary by minutes (converting keys to float for numerical sorting)
+    #         sorted_dict = dict(sorted(attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
+    #         json.dump(sorted_dict, f, indent=4)
 
-        # with open(minute_total_dict_file, 'w') as f:
-        #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
+    #     # with open(minute_total_dict_file, 'w') as f:
+    #     #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
 
-        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
-        time.sleep(1.89)
-        #stop after one year to check large
-        # break
+    #     plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
+    #     time.sleep(1.89)
+    #     #stop after one year to check large
+    #     # break
 
 
 
@@ -1098,7 +1093,7 @@ def main():
 
     print()
 
-    plot_ft_percentages(minute_averages, yearly_averages, 2000, 2024, total_made, total_attempted)
+    plot_ft_percentages(minute_averages, yearly_averages, 2000, 2024, totalMade=1087740, totalAttempted=1429733)
 
     exit()
 
