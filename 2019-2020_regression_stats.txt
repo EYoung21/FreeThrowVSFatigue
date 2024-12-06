@@ -1,0 +1,9 @@
+Analysis for 2019-2020 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: 0.1903
+  Intercept: 60.9226
+  R-squared: 0.4541
+  P-value: 2.0868e-07
+  Standard Error: 0.0311
