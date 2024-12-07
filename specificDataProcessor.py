@@ -994,7 +994,7 @@ def main():
 
     bestworst = best_ft_shooters + worst_ft_shooters
 
-    for year in range(2000, 2025):
+    for year in range(2005, 2025):
         player_attemptCounter = playerToMinToAttemptsClass()
         
         player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
@@ -1045,19 +1045,28 @@ def main():
         
         playerAttemptsAtMinsDict = player_attemptCounter
 
-        # Save dictionaries to sorted text files
+        # When saving dictionaries to files, handle the nested structure correctly
         with open(player_minute_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(playerAtMinuteAvgs.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+            # For player minute averages, we don't need to sort the outer dictionary by player names
+            # Each player's inner dictionary of minutes should be sorted
+            sorted_player_data = {}
+            for player, minute_data in playerAtMinuteAvgs.items():
+                # Sort the inner dictionary by minute number
+                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+                sorted_player_data[player] = sorted_minutes
+            json.dump(sorted_player_data, f, indent=4)
 
         with open(player_yearly_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(playerSeasonAvgs.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+            # Season averages don't need sorting as they're single values per player
+            json.dump(playerSeasonAvgs, f, indent=4)
 
         with open(player_attempt_counter_file, 'w') as f:
-            # Sort the dictionary by minutes (converting keys to float for numerical sorting)
-            sorted_dict = dict(sorted(playerAttemptsAtMinsDict.items(), key=lambda x: float(x[0])))
-            json.dump(sorted_dict, f, indent=4)
+            sorted_attempts = {}
+            for player, minute_data in playerAttemptsAtMinsDict.playerToMinToAttempts.items():
+                # Sort each player's attempts by minute
+                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+                sorted_attempts[player] = sorted_minutes
+            json.dump(sorted_attempts, f, indent=4)
 
         time.sleep(1.89)
         #stop after one year to check large
