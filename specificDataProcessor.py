@@ -39,29 +39,6 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
-
-# Look for? / do we maybe need to handle?:
-
-# Technical fouls where players aren't actually subbed   ----  handled by substitutions, ex:
-# Technical foul by B. Portis	 	16-17	 	 
-# 5:01.0	Technical foul by B. Portis	 	16-17	 	 
-# 5:01.0	 	 	16-17	 	Technical foul by A. Nembhard
-# 5:01.0	B. Portis ejected from game	 	16-17	 	 
-# 5:01.0	 	 	16-18	+1	T. Haliburton makes technical free throw
-# 5:01.0	P. Connaughton enters the game for P. Beverley	 	16-18	 	 
-# 5:01.0	A. Jackson enters the game for B. Portis
-
-# Start of quarters where players "enter" but aren't substituting --- handled already!
-
-# Injuries where players leave without a substitution 
-# When there's injuries, it displays as a substitution: ex:Nov 17, 2024
-	# J. Wells enters the game for V. Williams
-
-# Overtime periods? -- handled, i think this is what was causing the negative minutes glitch, it's fixed now
-# Play off games? -- I tested, they're included
-
-# Time resets due to replay reviews or corrections? -- shouldn't be a problem, I would assume is accurately updated in nba
-
 class ErrorLogger:
     def __init__(self, filename):
         self.filename = filename
@@ -79,64 +56,39 @@ class ErrorLogger:
                 f.write(f"Details: {details}\n")
             f.write(f"{'='*50}\n\n")
 
-error_logger = ErrorLogger("AllErrors.txt")
+error_logger = ErrorLogger("SpecificPlayerVersionErrors.txt")
 
-class minToAttemptsClass:
+class playerToMinToAttemptsClass:
     def __init__(self):
-        self.minToAttempts = defaultdict(int) #cause its a defaultdict mapping mins to attempts at that minute
+        self.playerToMinToAttempts = defaultdict(lambda: defaultdict(int)) #cause its a defaultdict mapping mins to attempts at that minute
 
 class FreeThrowAnalyzer:
     def __init__(self):
         # self.processed_games: Set[str] = set()
-        self.minutes = dict()
+        self.playerMinutes = dict()
         
-        self.error_logger = ErrorLogger("AllErrors.txt")
+        self.error_logger = ErrorLogger("SpecificPlayerVersionErrors.txt")
 
-        #dict that goes from year to minute to attempts at that minute
-
-        #here, what if instead of dict[minute] = ft made, fr missed, [#set of all players that made up that stat], we do:
-
-        # minute -> ftms ftas (all players made up that figure)
-
-        #NEW IDEA!
-        # dict[minute] = [fts made, fts missed, all players that made up that stat's yearly averages added up, the number of players that amde up that stat]
-        # then we can calculate the average of the yearly averages at each minute later.
-        #NEW IDEA!
-
-
-        # // total %
-        # // number of players that make up percentage
-        # // weight by number of ft attempts for each player
-        # // weight would be number of attempts    (may want to store number made, too)
-
-
-        #WHAT TO DO
-        # add up all the total %s, where total % == (sum of all yearly percentage * number of ft attempted) / sum of all # ft attempted
-        # divide that total by the number of players that made up the percentage through accumulator
-
-        # weight handled above
-
-
-
-        #each minute should have a total made and total missed
-        #AND a an average of each player's yearly ft % that is included in the above
-        #      - we can accomplish this by keeping a set of players that show freethrows during this consequetive minute
-        #      - and also then calculating the whole average after we're done parsing data (Made / made + missed)
-        self.total_attempted = 0
-        self.total_made = 0
-        self.total_negative_minutes = 0
-        self.ftNameToActualName = dict()
+        self.playerToTotalAttempted = defaultdict() #will map players to their total number of attempts this year
+        # self.total_attempted = 0
         
-        #dictionary of dictionaries
-        self.actualNameToSeasonAverages = dict()
-        #maps from "actual_name" to a dictionary of years mapped to arrays of [total_made, total_attempted] //should eliminate having to reparse seaosn averages
+        self.playerToTotalMade = defaultdict() # will map players to their total number of fts made this year
+        # self.total_made = 0
 
-        self.dictionary_error_counter = 0
+        self.playerToSeasonAvg = dict()
 
-        self.play_by_play_error_counter = 0
+        # self.ftNameToActualName = dict()
+        
+        # #dictionary of dictionaries
+        # self.actualNameToSeasonAverages = dict()
+        # #maps from "actual_name" to a dictionary of years mapped to arrays of [total_made, total_attempted] //should eliminate having to reparse seaosn averages
+
+        # self.dictionary_error_counter = 0
+
+        # self.play_by_play_error_counter = 0
 
             
-    def process_team_games(self, team: Team, year: int, month: int, day: int, seasonYear, attemptCounter):
+    def process_team_games(self, team: Team, year: int, month: int, day: int, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst):
         #for each team, loop through every day in the season and get only HOME games, call this function on it
         """Get play by play data for a team's game on a specific date."""
         try:
@@ -148,7 +100,7 @@ class FreeThrowAnalyzer:
                 day=day
             )
             time.sleep(1.89)
-            self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter) #passing year so I can print it
+            self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst) #passing year so I can print it
             # print("play by play: " + str(pbp_data))
             # exit()
 
@@ -188,7 +140,7 @@ class FreeThrowAnalyzer:
                             day=day
                         )
                         time.sleep(1.89)
-                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
                     except Exception as retry_error:
                         # Log any errors during retry
                         error_details = {
@@ -216,7 +168,7 @@ class FreeThrowAnalyzer:
                             day=day
                         )
                         time.sleep(1.89)
-                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter)
+                        self._process_game_data(pbp_data, team, year, month, day, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
                     except Exception as retry_error:
                         # Log any errors during retry
                         error_details = {
@@ -239,7 +191,7 @@ class FreeThrowAnalyzer:
                 print(f"Error getting PBP {team} on {year}-{month}-{day}: {e}")
                 raise
     
-    def _process_game_data(self, pbp_data: List[dict], team, year, month, day, seasonYear, attemptCounter):
+    def _process_game_data(self, pbp_data: List[dict], team, year, month, day, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst):
         # print("we're here3")
         player_entry_times = {}
         playersThatSubbedOut = set()
@@ -256,6 +208,7 @@ class FreeThrowAnalyzer:
         #     // weight by number of ft attempts for each player
         #     // weight would be number of attempts    (may want to store number made, too)
         # print("yudjkse")
+        
         for play in pbp_data:
             # print(str(play))
             # continue
@@ -264,29 +217,45 @@ class FreeThrowAnalyzer:
                 desParsed = play['description'].split(' enters')
                 player_in = desParsed[0]
                 desParsed2 = desParsed[1].split('for ')
-                playersThatSubbedOut.add(desParsed2[1])
+                player_out = desParsed2[1]
+
+                if player_in not in bestworst and player_out not in bestworst:
+                    continue
+
+                if player_in in bestworst:
+                    converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
+                    player_entry_times[player_in] = converted_time
+                
+                if player_out in bestworst:
+                    playersThatSubbedOut.add(player_out)
                 
                 # Debug: Print substitution details
-                converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
+                
                 # print(f"\n=== Substitution ===")
                 # print(f"Player entering: {player_in}")
                 # print(f"Period: {play.get('period')}")
                 # print(f"Remaining seconds: {play.get('remaining_seconds_in_period')}")
                 # print(f"Converted time: {converted_time}")
                 
-                player_entry_times[player_in] = converted_time
+                
 
             if 'free throw' in str(play.get('description', '')):
                 # print(str(play))
-                self.total_attempted += 1
+                # self.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
-                    self.total_made += 1
+                    if player not in bestworst or player in playersThatSubbedOut:
+                        continue
+                    self.playerToTotalMade[player] += 1
+                    self.playerToTotalAttempted[player] += 1
                 if 'misses' in play['description']:
                     player = play['description'].split(' misses')[0]
+                    if player not in bestworst or player in playersThatSubbedOut:
+                        continue
+                    self.playerToTotalAttempted[player] += 1
 
-                if player in playersThatSubbedOut:
-                    continue
+                # if player in playersThatSubbedOut:
+                #     continue
                 print("Curr team: " + str(team))
                 print("Curr year: " + str(year))
                 # Debug: Print free throw details
@@ -338,8 +307,6 @@ class FreeThrowAnalyzer:
 
                     with open('negativeMinsDebugging.txt', 'a') as f:
                         f.write(debug_string)  # Write to file
-
-                    self.total_negative_minutes += 1
                     continue
 
                 curr_minute = int(math.floor(minutes_played))
@@ -352,7 +319,16 @@ class FreeThrowAnalyzer:
                 # ft_pct = self.get_player_ft_pct(player, seasonYear)
                 # print("returned: " + str(ft_pct))
                 # exit()
-                if curr_minute not in self.minutes:
+
+
+                #AM LOOKING HERE!!!
+
+
+                if player not in self.playerToSeasonAvg:
+                    self.playerToSeasonAvg[player] = 
+
+
+                if curr_minute not in self.playerMinutes[player]:
                     ft_pct = self.get_player_ft_pct(player, seasonYear)
                     # print(str(ft_pct))
                     if ft_pct is None or ft_pct == "No free throws":
@@ -874,21 +850,20 @@ def main():
     best_ft_shooters = ["I. Thomas", "S. Nash", "D. Lillard", "P. Stojaković", "C. Billups", "R. Allen", "J. Redick", "K. Irving", "K. Durant", "K. Middleton", "D. Nowitzki", "K. Korver", "D. Gallinari", "E. Boykins", "D. Booker"]
 
     worst_ft_shooters = ["B. Wallace", "A. Drummond", "D. Jordan", "S. O'Neal", "D. Howard", "A. Walker", "R. Gobert", "T. Chandler", "B. Bol", "B. Biyombo", "M. Harrell", "S. Adams", "J. McGee", "C. Capela", "G. Antetokounmpo"]
-    # total_neg = 0
+
+    bestworst = best_ft_shooters + worst_ft_shooters
     # total_made = 0
     # total_attempted = 0
-
-    # yrToNumberAttempted = dict()
-    # ca be calculated adding up 
 
     #VITAL, only commented for a sec for testing
     # for year in range(2023, 2025):
     for year in range(2000, 2025):
-        attemptCounter = minToAttemptsClass()
-        attempt_counter_file = os.path.join('dataForEachYear', f'attempt_counter_{year-1}-{year}.txt')
+        player_attemptCounter = playerToMinToAttemptsClass() #alter to go from a given player to a given minute to a given number of attempts at said minute
+        
+        player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
         # Check if both files already exist
-        minute_averages_file = os.path.join('dataForEachYear', f'minute_averages_{year-1}-{year}.txt')
-        yearly_averages_file = os.path.join('dataForEachYear', f'yearly_averages_{year-1}-{year}.txt')
+        player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
+        player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
 
         # minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
         
@@ -897,7 +872,7 @@ def main():
         #     print(f"Files for {year-1}-{year} already exist, skipping...")
         #     continue
             
-        yearAnalyzer = FreeThrowAnalyzer()
+        player_yearAnalyzer = FreeThrowAnalyzer()
 
         for team in allTeams:
             arrHomeDates = get_team_home_dates(team, year)
@@ -911,7 +886,7 @@ def main():
                 curr_date = date.split("-")
                 # print(str(curr_date))
                 try:
-                    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+                    player_yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, player_attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
                 except Exception as e:
                     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
@@ -941,35 +916,35 @@ def main():
                         time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
                         continue
                 print("processed game")
-        print(f"Total neg at {year}: " + str(yearAnalyzer.total_negative_minutes))
-        total_neg += yearAnalyzer.total_negative_minutes
-        print(f"Totl made at {year}: " + str(yearAnalyzer.total_made))
-        total_made += yearAnalyzer.total_made
-        print(f"Total attempted at {year}: " + str(yearAnalyzer.total_attempted))
+        print(f"Totl made at {year}: " + str(player_yearAnalyzer.total_made))
+        total_made += player_yearAnalyzer.total_made
+        print(f"Total attempted at {year}: " + str(player_yearAnalyzer.total_attempted))
         # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
-        total_attempted += yearAnalyzer.total_attempted
-        yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
+        total_attempted += player_yearAnalyzer.total_attempted
+        yearlyAnsArr = player_yearAnalyzer.calculateMinuteAndYearlyAverages()
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
 
         # Save dictionaries to sorted text files
-        with open(minute_averages_file, 'w') as f:
+        with open(player_minute_averages_file, 'w') as f:
             sorted_dict = dict(sorted(yearlyMinuteAveragesDict.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
-        with open(yearly_averages_file, 'w') as f:
+        with open(player_yearly_averages_file, 'w') as f:
             sorted_dict = dict(sorted(yearlyMinuteYearlyAveragesDict.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
-        with open(attempt_counter_file, 'w') as f:
+        with open(player_attempt_counter_file, 'w') as f:
             # Sort the dictionary by minutes (converting keys to float for numerical sorting)
-            sorted_dict = dict(sorted(attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
+            sorted_dict = dict(sorted(player_attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
         # with open(minute_total_dict_file, 'w') as f:
         #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
 
-        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, yearAnalyzer.total_made, yearAnalyzer.total_attempted)
+        #we probably don't need yearlyMinuteYearlyAveragesDict here, as we can just go fetch player averages at different years to be our baselines
+        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, player_yearAnalyzer.total_made, player_yearAnalyzer.total_attempted)
+
         time.sleep(1.89)
         #stop after one year to check large
         # break
@@ -988,20 +963,38 @@ def main():
     # print("minutesDict: " + str(analyzer.minutes))
 
     # analyzer.minutes = {2: [1564, 435, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'S. Aldama', 'P. Connaughton', 'J. Landale', 'A. Coffey', 'E. Mobley', 'D. Terry', 'A. Fudge', 'J. Isaac', 'D. Jordan', 'B. Williams', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'G. Brown', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'D. Bane', 'P. Banchero', 'D. Lillard', 'P. Watson', 'J. Cain', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'N. Little', 'J. Morant', 'M. Bagley', 'D. Schröder', 'T. Thompson', 'O. Toppin', 'D. Sabonis', 'J. Freeman-Liberty', 'F. Ntilikina', 'T. Lyles', 'I. Okoro', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'L. Waters', 'S. Milton', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'T. Camara', 'D. Green', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'H. Barnes', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'S. Barnes', 'C. LeVert', 'J. Murray', 'R. Jackson', 'T. Vukcevic', 'S. Sharpe', 'J. Crowder', 'T. Craig', 'Z. Williams', 'J. Nwora', 'D. Rose', 'J. Tatum', 'J. Collins', 'D. Roddy', 'I. Jackson', 'L. Walker', 'M. Moody', 'K. Thompson', 'A. Nembhard', 'J. Konchar', 'J. McGee', 'D. Exum', 'C. Joseph', 'C. Cunningham', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'A. Black', 'T. Maxey', 'J. Jaquez', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'L. Shamet', 'D. Šarić', 'D. Booker', 'S. Lee', 'J. Nowell', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'G. Niang', 'S. Henderson', 'K. George', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'U. Garuba', 'O. Anunoby', 'I. Quickley', 'K. Hayes', 'D. Hunter', 'P. Washington', 'C. Gillespie', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'J. Rhoden', 'Z. Williamson', 'G. Dick', 'D. Banton', 'J. Bernard', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'D. Vassell', 'Y. Watanabe', 'F. Korkmaz', 'D. Garland', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'C. Sexton', 'K. Martin', 'M. Flynn', 'T. Rozier', 'M. Robinson', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'J. Randle', 'R. Williams', 'S. Pippen ', 'J. Davis', 'N. Batum', 'J. Clarkson', 'G. Mathews', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'O. Okongwu', 'L. Stevens', 'S. Mays', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'C. Reddish', 'N. Richards', 'J. Giddey', 'B. Brown', 'J. Vanderbilt', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'B. Hyland', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'G. Harris', 'K. Oubre', 'M. Fultz', 'B. Lopez', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'M. Diabaté', 'K. Caldwell-Pope', 'N. Clowney', 'L. Garza', 'I. Badji', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'B. Biyombo', 'M. Bridges', 'N. Marshall', 'K. Olynyk', 'D. Daniels', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Zeller', 'C. Holmgren', 'C. Swider', 'D. Melton', 'M. Diakite', 'B. Marjanović', 'J. Wilson', 'A. Gill', 'R. Gobert', 'M. Plumlee', 'K. Huerter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'T. Smith', 'J. Strawther', 'K. Porziņģis', 'K. Knox', 'A. Lawson', 'B. Key', 'K. Anderson', 'J. Minott', 'M. Strus', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'D. Nix', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'A. Len', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'F. VanVleet', 'R. Lopez', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'T. Mann', 'J. Brunson', 'R. Rupert', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Conley', 'L. Miller', 'C. Boucher', 'K. Love', 'C. Okeke', 'D. Robinson', 'A. Davis', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'D. Jeffries', 'B. McGowens', 'B. Fernando', 'D. Bertāns', 'L. Black', 'L. Dončić', 'J. Hardy', 'S. Lundy', 'K. Kuzma'}], 3: [1589, 423, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'P. Connaughton', 'J. Landale', 'A. Sanogo', 'A. Coffey', 'D. Terry', 'E. Mobley', 'J. Isaac', 'D. Jordan', 'B. Williams', 'I. Livers', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'S. Umude', 'D. Bane', 'P. Banchero', 'H. Giles', 'D. Lillard', 'P. Watson', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'M. Bagley', 'D. Schröder', 'R. Rollins', 'J. Holiday', 'F. Petrušev', 'O. Toppin', 'D. Sabonis', 'T. Lyles', 'I. Okoro', 'L. Dort', 'J. Goodwin', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'O. Tshiebwe', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'C. LeVert', 'J. Murray', 'R. Jackson', 'S. Sharpe', 'J. Richardson', 'T. Craig', 'B. Beal', 'J. Nwora', 'T. Warren', 'J. Tatum', 'J. Collins', 'D. Roddy', 'D. Murray', 'L. Walker', 'M. Moody', 'I. Jackson', 'K. Thompson', 'A. Nembhard', 'J. McGee', 'D. Exum', 'P. Baldwin', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'T. Maxey', 'J. Jaquez', 'K. Ellis', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'D. Šarić', 'D. Booker', 'L. Shamet', 'J. Hart', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'S. Henderson', 'K. George', 'M. Nowell', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'I. Quickley', 'D. Hunter', 'P. Washington', 'P. Mills', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'Z. Williamson', 'G. Dick', 'A. Simons', 'D. Banton', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'F. Korkmaz', 'N. Queta', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'J. Springer', 'C. Sexton', 'W. Kessler', 'K. Martin', 'M. Flynn', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'A. Nesmith', 'J. Randle', 'H. Highsmith', 'R. Williams', 'S. Pippen ', 'J. Davis', 'J. Clarkson', 'G. Mathews', 'T. Prince', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'S. Hauser', 'O. Okongwu', 'S. Mays', 'L. Stevens', 'K. Dunn', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'J. McLaughlin', 'J. Hood-Schifino', 'N. Richards', 'B. Brown', 'C. Payne', 'D. McDermott', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'K. Oubre', 'M. Fultz', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Fontecchio', 'O. Dieng', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'D. House', 'K. Caldwell-Pope', 'L. Garza', 'I. Badji', 'T. Forrest', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'N. Hinton', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'M. Bridges', 'C. Castleton', 'N. Marshall', 'K. Olynyk', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'L. Kennard', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Holmgren', 'B. Marjanović', 'G. Temple', 'J. Phillips', 'B. Sheppard', "R. O'Neale", 'A. Gill', 'M. Plumlee', 'R. Gobert', 'T. Bryant', 'J. Porter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'M. Muscala', 'J. Strawther', 'K. Lewis', 'K. Porziņģis', 'L. Šamanić', 'K. Anderson', 'A. Horford', 'A. Holiday', 'A. Hagans', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'J. Champagnie', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'B. Boeheim', 'I. Wainright', 'T. Mann', 'J. Brunson', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Pereira', 'C. Boucher', 'K. Love', 'D. Robinson', 'A. Davis', 'A. Caruso', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'M. Smart', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'B. McGowens', 'B. Fernando', 'L. Black', 'G. Santos', 'L. Dončić', 'C. Houstan', 'J. Hardy', 'S. Lundy', 'K. Looney', 'K. Kuzma'}]}
-    results = process_season_stats("./dataForEachYear")
-    
-    minute_averages = results[0]
-    yearly_averages = results[1]
-    
-    all_minute_averages_file = f'all_minute_averages_2000-2024.txt'
-    all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
+    results = process_season_stats("./dataForEachPlayerYear")
+    #here, results should return an array of size 4:
+        # 1 - minute_averages for worst players
+        # 2 - yearly_averages for worst playrs
+        # 3 - minute_averages for best players
+        # 4 - minute_averages for best players
 
-    with open(all_minute_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(minute_averages.items(), key=lambda x: float(x[0])))
+
+    worst_minute_averages = results[0]
+    worst_yearly_averages = results[1]
+    best_minute_averages = results[2]
+    best_yearly_averages = results[3]
+    
+    worst_all_minute_averages_file = f'worst_all_player_minute_averages_2000-2024.txt'
+    worst_all_yearly_averages_file = f'worst_all_player_yearly_averages_2000-2024.txt'
+    best_all_minute_averages_file = f'best_all_player_minute_averages_2000-2024.txt'
+    best_all_yearly_averages_file = f'best_all_player_yearly_averages_2000-2024.txt'
+
+    with open(worst_all_minute_averages_file, 'w') as f:
+        sorted_dict = dict(sorted(worst_minute_averages.items(), key=lambda x: float(x[0])))
         json.dump(sorted_dict, f, indent=4)
             
-    with open(all_yearly_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(yearly_averages.items(), key=lambda x: float(x[0])))
+    with open(worst_all_yearly_averages_file, 'w') as f:
+        sorted_dict = dict(sorted(worst_yearly_averages.items(), key=lambda x: float(x[0])))
+        json.dump(sorted_dict, f, indent=4)
+
+    with open(best_all_minute_averages_file, 'w') as f:
+        sorted_dict = dict(sorted(best_minute_averages.items(), key=lambda x: float(x[0])))
+        json.dump(sorted_dict, f, indent=4)
+
+    with open(best_all_yearly_averages_file, 'w') as f:
+        sorted_dict = dict(sorted(best_yearly_averages.items(), key=lambda x: float(x[0])))
         json.dump(sorted_dict, f, indent=4)
 
     print()
