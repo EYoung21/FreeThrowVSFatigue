@@ -65,7 +65,7 @@ class playerToMinToAttemptsClass:
 class FreeThrowAnalyzer:
     def __init__(self):
         # self.processed_games: Set[str] = set()
-        self.playerMinutes = dict()
+        self.playerMinutes = defaultdict(lambda: defaultdict([]))
         
         self.error_logger = ErrorLogger("SpecificPlayerVersionErrors.txt")
 
@@ -325,61 +325,36 @@ class FreeThrowAnalyzer:
 
 
                 if player not in self.playerToSeasonAvg:
-                    self.playerToSeasonAvg[player] = 
-
-
-                if curr_minute not in self.playerMinutes[player]:
                     ft_pct = self.get_player_ft_pct(player, seasonYear)
-                    # print(str(ft_pct))
-                    if ft_pct is None or ft_pct == "No free throws":
-                        print(f"No FT data found for {player} in year {year}")
-                        continue
-                    
-                    if 'makes' in play['description']:
-                        print(str(player))
-                        print("make")
-                        self.minutes[curr_minute] = [1, 0, dict()]
-                        self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
-                        
-                        attemptCounter.minToAttempts[curr_minute] += 1
-                        # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                    else:
-                        print(str(player))
-                        print("miss")
-                        self.minutes[curr_minute] = [0, 1, dict()]
-                        self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100] # Convert to percentage
-                        # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                        attemptCounter.minToAttempts[curr_minute] += 1
+                    self.playerToSeasonAvg[player] = ft_pct[0]/ft_pct[1] * 100
+
+                # if player not in self.playerMinutes:
+                #     if 'makes' in play['description']:
+                #         print(str(player))
+                #         print("make")
+                #         self.playerMinutes[player][curr_minute] = [1, 0]                        
+                #         attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
+                #         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
+
+
+                if ft_pct is None or ft_pct == "No free throws":
+                    print(f"No FT data found for {player} in year {year}")
+                    continue
+                
+                if player not in self.playerMinutes:
+                    self.playerMinutes = [0, 0]
+
+                if 'makes' in play['description']:
+                    print(str(player))
+                    print("make")
+                    self.playerMinutes[player][curr_minute][0] += 1
+                    attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
                 else:
-                    ft_pct = self.get_player_ft_pct(player, seasonYear)
-                    if ft_pct is None or ft_pct == "No free throws":
-                        print(f"No FT data found for {player} in year {year}")
-                        continue
-                        
-                    if 'makes' in play['description']:
-                        print(str(player))
-                        print("make")
-                        self.minutes[curr_minute][0] += 1
-                        if player not in self.minutes[curr_minute][2]:
-                            self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100]
-                        else:
-                            self.minutes[curr_minute][2][player][0] += 1
-
-                        attemptCounter.minToAttempts[curr_minute] += 1
-                        # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                    else:
-                        print(str(player))
-                        print("miss")
-                        self.minutes[curr_minute][1] += 1
-                        if player not in self.minutes[curr_minute][2]:
-                            self.minutes[curr_minute][2][player] = [1, ft_pct[0]/ft_pct[1] * 100]
-                        else:
-                            self.minutes[curr_minute][2][player][0] += 1
-
-                        attemptCounter.minToAttempts[curr_minute] += 1
-                        # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-                # print("Minutes: ")
-                # print(str(self.minutes))
+                    print(str(player))
+                    print("miss")
+                    self.playerMinute[player][curr_minute][1] += 1
+                    attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
+            
                 print()
     
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
@@ -900,25 +875,10 @@ def main():
                     
                     # Log to error logger
                     error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
-                    
-                    # Maintain existing error logging to separate file
-                    error_msg = f"""
-                    Time: {timestamp}
-                    Team: {allTeams[team]}
-                    Date: {curr_date[0]}-{curr_date[1]}-{curr_date[2]}
-                    Error: {str(e)}
-                    Traceback: {traceback.format_exc()}
-                    ----------------------------------------
-                    """
-                    
-                    with open('playByPlayErrors2,PostStrError.txt', 'a') as f:
-                        f.write(error_msg)
-                        time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
-                        continue
+                
+                    time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
+                    continue
                 print("processed game")
-        print(f"Totl made at {year}: " + str(player_yearAnalyzer.total_made))
-        total_made += player_yearAnalyzer.total_made
-        print(f"Total attempted at {year}: " + str(player_yearAnalyzer.total_attempted))
         # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
         total_attempted += player_yearAnalyzer.total_attempted
         yearlyAnsArr = player_yearAnalyzer.calculateMinuteAndYearlyAverages()
