@@ -64,28 +64,13 @@ class playerToMinToAttemptsClass:
 
 class FreeThrowAnalyzer:
     def __init__(self):
-        # self.processed_games: Set[str] = set()
         self.playerMinutes = defaultdict(lambda: defaultdict([]))
-        
         self.error_logger = ErrorLogger("SpecificPlayerVersionErrors.txt")
-
-        self.playerToTotalAttempted = defaultdict() #will map players to their total number of attempts this year
-        # self.total_attempted = 0
         
-        self.playerToTotalMade = defaultdict() # will map players to their total number of fts made this year
-        # self.total_made = 0
-
+        # Use defaultdict to automatically initialize counters for new players
+        self.playerToTotalAttempted = defaultdict(int)
+        self.playerToTotalMade = defaultdict(int)
         self.playerToSeasonAvg = dict()
-
-        # self.ftNameToActualName = dict()
-        
-        # #dictionary of dictionaries
-        # self.actualNameToSeasonAverages = dict()
-        # #maps from "actual_name" to a dictionary of years mapped to arrays of [total_made, total_attempted] //should eliminate having to reparse seaosn averages
-
-        # self.dictionary_error_counter = 0
-
-        # self.play_by_play_error_counter = 0
 
             
     def process_team_games(self, team: Team, year: int, month: int, day: int, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst):
@@ -192,27 +177,10 @@ class FreeThrowAnalyzer:
                 raise
     
     def _process_game_data(self, pbp_data: List[dict], team, year, month, day, seasonYear, attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst):
-        # print("we're here3")
         player_entry_times = {}
         playersThatSubbedOut = set()
 
-        # self.technical_foul_counter = {}  # Tracks technicals per player
-
-        # Debug: Print the full game timeline
-        # print("\n=== Game Timeline ===")
-        # for play in pbp_data:
-        #     print(f"Period: {play.get('period')}, Remaining Seconds: {play.get('remaining_seconds_in_period')}, Description: {play.get('description')}")
-        
-        # // total %
-        #     // number of players
-        #     // weight by number of ft attempts for each player
-        #     // weight would be number of attempts    (may want to store number made, too)
-        # print("yudjkse")
-        
         for play in pbp_data:
-            # print(str(play))
-            # continue
-
             if 'enters' in str(play.get('description', '')):
                 desParsed = play['description'].split(' enters')
                 player_in = desParsed[0]
@@ -223,74 +191,43 @@ class FreeThrowAnalyzer:
                     continue
 
                 if player_in in bestworst:
-                    converted_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
+                    converted_time = self.calculateConvertedIGT(
+                        play.get('remaining_seconds_in_period'),
+                        play.get('period'),
+                        play.get('period_type')
+                    )
                     player_entry_times[player_in] = converted_time
                 
                 if player_out in bestworst:
                     playersThatSubbedOut.add(player_out)
-                
-                # Debug: Print substitution details
-                
-                # print(f"\n=== Substitution ===")
-                # print(f"Player entering: {player_in}")
-                # print(f"Period: {play.get('period')}")
-                # print(f"Remaining seconds: {play.get('remaining_seconds_in_period')}")
-                # print(f"Converted time: {converted_time}")
-                
-                
 
             if 'free throw' in str(play.get('description', '')):
-                # print(str(play))
-                # self.total_attempted += 1
                 if 'makes' in play['description']:
                     player = play['description'].split(' makes')[0]
                     if player not in bestworst or player in playersThatSubbedOut:
                         continue
                     self.playerToTotalMade[player] += 1
                     self.playerToTotalAttempted[player] += 1
-                if 'misses' in play['description']:
+                elif 'misses' in play['description']:
                     player = play['description'].split(' misses')[0]
                     if player not in bestworst or player in playersThatSubbedOut:
                         continue
                     self.playerToTotalAttempted[player] += 1
 
-                # if player in playersThatSubbedOut:
-                #     continue
-                print("Curr team: " + str(team))
-                print("Curr year: " + str(year))
-                # Debug: Print free throw details
-                # print(f"\n=== Free Throw ===")
-                # print(f"Player: {player}")
-                # print(f"Period: {play.get('period')}")
-                # print(f"Remaining seconds: {play.get('remaining_seconds_in_period')}")
-                
                 if player not in player_entry_times:
-                    print(f"Starter detected: {player}")
-                    player_entry_times[player] = float(0.0)
-                
-                # print("HEREEEE")
+                    player_entry_times[player] = 0.0
 
                 entry_time = player_entry_times.get(player)
-                # print("HEREEEE2")
-                # print(str(play.get('remaining_seconds_in_period')) + " " + str(play.get('period')) + " " + str(play.get('period_type')))
-                current_time = self.calculateConvertedIGT(play.get('remaining_seconds_in_period'), play.get('period'), play.get('period_type'))
-                # print("HEREEEE3")
+                current_time = self.calculateConvertedIGT(
+                    play.get('remaining_seconds_in_period'),
+                    play.get('period'),
+                    play.get('period_type')
+                )
 
-                print(f"Entry time seconds: {entry_time}")
-                print(f"Current time seconds: {current_time}")
-                
                 seconds_played = current_time - entry_time
-                
-                # print(f"Seconds played: {seconds_played}")
-                
                 minutes_played = seconds_played / 60
 
-                print(f"Minutes played: {minutes_played}")
-                
                 if minutes_played < 0:
-                    print(f"WARNING: Negative minutes detected at {minutes_played}!")
-                    # print(f"Full play data: {play}")
-
                     debug_string = f"""
                     Negative minutes detected:
                     Player: {str(player)}
@@ -302,60 +239,27 @@ class FreeThrowAnalyzer:
                     Month: {str(month)}
                     Day: {str(day)}
                     """
-
                     print(debug_string)
-
                     with open('negativeMinsDebugging.txt', 'a') as f:
-                        f.write(debug_string)  # Write to file
+                        f.write(debug_string)
                     continue
 
                 curr_minute = int(math.floor(minutes_played))
 
-                print("minute played: " + str(curr_minute))
-
-                
-                # print("curr_minute: " + str(curr_minute))
-                # print(str(self.minutes))
-                # ft_pct = self.get_player_ft_pct(player, seasonYear)
-                # print("returned: " + str(ft_pct))
-                # exit()
-
-
-                #AM LOOKING HERE!!!
-
-
                 if player not in self.playerToSeasonAvg:
                     ft_pct = self.get_player_ft_pct(player, seasonYear)
-                    self.playerToSeasonAvg[player] = ft_pct[0]/ft_pct[1] * 100
+                    if ft_pct and ft_pct != "No free throws":
+                        self.playerToSeasonAvg[player] = ft_pct[0]/ft_pct[1] * 100
 
-                # if player not in self.playerMinutes:
-                #     if 'makes' in play['description']:
-                #         print(str(player))
-                #         print("make")
-                #         self.playerMinutes[player][curr_minute] = [1, 0]                        
-                #         attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
-                #         # print("percentage just retrieved: " + str(self.minutes[curr_minute][2][player][1]))
-
-
-                if ft_pct is None or ft_pct == "No free throws":
-                    print(f"No FT data found for {player} in year {year}")
-                    continue
-                
                 if player not in self.playerMinutes:
-                    self.playerMinutes = [0, 0]
+                    self.playerMinutes[player] = defaultdict(lambda: [0, 0])
 
                 if 'makes' in play['description']:
-                    print(str(player))
-                    print("make")
                     self.playerMinutes[player][curr_minute][0] += 1
                     attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
                 else:
-                    print(str(player))
-                    print("miss")
-                    self.playerMinute[player][curr_minute][1] += 1
+                    self.playerMinutes[player][curr_minute][1] += 1
                     attemptCounter.playerToMinToAttempts[player][curr_minute] += 1
-            
-                print()
     
     def calculateConvertedIGT(self, remainingSecondsInPeriod, quarter, typeIs): #remaining seconds, quarter (1, 2, 3, 4)
         # print("remaining seconds: " + str(remainingSecondsInQuarter))
@@ -374,7 +278,7 @@ class FreeThrowAnalyzer:
         atMinuteAverages = dict() #maps minutes to their minute averages (of all fts at that minute)
         atMinuteYearlyAverages = dict()
 
-        for minute in self.minutes:
+        for minute in self.playerMinutes:
             
             minuteAverage = self.minutes[minute][0] / (self.minutes[minute][0] + self.minutes[minute][1])  #total made / total made + total missed
             atMinuteAverages[minute] = minuteAverage * 100 #to get percentage
@@ -701,94 +605,356 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
     plt.savefig(f'{startYear}-{endYear}_ft_percentage_analysis.png', bbox_inches='tight', dpi=300)
 
 
-def process_season_stats(folder_path):
-    """
-    Process basketball statistics from multiple seasons (1999-2024) and calculate overall averages.
+# def process_season_stats(folder_path):
+#     """
+#     Process basketball statistics from multiple seasons (1999-2024) and calculate overall averages.
     
-    Args:
-        folder_path (str): Path to the folder containing the season data files
-        attempt_counter_file (str): Path template for files containing attempt counts
+#     Args:
+#         folder_path (str): Path to the folder containing the season data files
+#         attempt_counter_file (str): Path template for files containing attempt counts
         
-    Returns:
-        Tuple[Dict[str, float], Dict[str, float]]: Two dictionaries containing:
-            1. Average minutes per player number across all seasons
-            2. Average yearly statistics per player number across all seasons
-    """
-    minute_sums = {}
-    minute_counts = {}
-    yearly_sums = {}
-    yearly_counts = {}
+#     Returns:
+#         Tuple[Dict[str, float], Dict[str, float]]: Two dictionaries containing:
+#             1. Average minutes per player number across all seasons
+#             2. Average yearly statistics per player number across all seasons
+#     """
+#     minute_sums = {}
+#     minute_counts = {}
+#     yearly_sums = {}
+#     yearly_counts = {}
     
-    # Process seasons from 1999-2000 to 2023-2024
-    for year in range(1999, 2024):
-        season = f"{year}-{year+1}"
+#     # Process seasons from 1999-2000 to 2023-2024
+#     for year in range(1999, 2024):
+#         season = f"{year}-{year+1}"
         
-        # Construct file paths
-        minute_file = os.path.join(folder_path, f"minute_averages_{season}.txt")
-        yearly_file = os.path.join(folder_path, f"yearly_averages_{season}.txt")
-        attempts_file = os.path.join(folder_path, f"attempt_counter_{season}.txt")
+#         # Construct file paths
+#         minute_file = os.path.join(folder_path, f"minute_averages_{season}.txt")
+#         yearly_file = os.path.join(folder_path, f"yearly_averages_{season}.txt")
+#         attempts_file = os.path.join(folder_path, f"attempt_counter_{season}.txt")
         
+#         try:
+#             # Load attempts data for this year
+#             with open(attempts_file, 'r') as f:
+#                 attempts_data = json.loads(f.read())
+            
+#             # Process minute averages
+#             with open(minute_file, 'r') as f:
+#                 minute_data = json.loads(f.read())
+#                 for min, percentage in minute_data.items():
+#                     if min not in minute_sums:
+#                         minute_sums[min] = 0
+#                         minute_counts[min] = 0
+#                     minute_sums[min] += percentage
+#                     minute_counts[min] += 1
+            
+#             # Process yearly averages
+#             with open(yearly_file, 'r') as f:
+#                 yearly_data = json.loads(f.read())
+#                 for yrmin, per in yearly_data.items():
+#                     if yrmin not in yearly_sums:
+#                         yearly_sums[yrmin] = 0
+#                         yearly_counts[yrmin] = 0
+#                     yearly_sums[yrmin] += per * attempts_data[yrmin] # Use attempts from file
+#                     yearly_counts[yrmin] += attempts_data[yrmin]
+                    
+#         except FileNotFoundError:
+#             error_details = {
+#                 "season": season,
+#                 "error_type": "FileNotFoundError",
+#                 "traceback": traceback.format_exc()
+#             }
+#             error_logger.log_error("FileNotFoundError", f"Could not find data files for season {season}", error_details)
+#             print(f"Warning: Could not find data files for season {season}")
+#             continue
+#         except json.JSONDecodeError as e:
+#             error_details = {
+#                 "season": season,
+#                 "error_type": "JSONDecodeError",
+#                 "error_message": str(e),
+#                 "traceback": traceback.format_exc()
+#             }
+#             error_logger.log_error("JSONDecodeError", f"Invalid JSON format in files for season {season}", error_details)
+#             print(f"Warning: Invalid JSON format in files for season {season}")
+#             continue
+    
+#     minute_avgs = {}
+#     yr_avgs = {}
+
+#     for minute in minute_sums:
+#         minute_avgs[minute] = minute_sums[minute] / minute_counts[minute]
+    
+#     for min in yearly_sums:
+#         yr_avgs[min] = yearly_sums[min] / yearly_counts[min]
+    
+#     return [minute_avgs, yr_avgs]
+
+
+
+def create_player_career_graphs(player_list, data_dir="dataForEachPlayerYear", output_dir="ft_analysis_graphs"):
+    """Create career graphs and save data for each player."""
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    # Initialize player career dictionaries
+    player_career_minutes = defaultdict(lambda: defaultdict(lambda: [0, 0]))  # player -> minute -> [makes, misses]
+    player_career_attempts = defaultdict(lambda: defaultdict(int))  # player -> minute -> attempts
+    player_season_avgs = defaultdict(list)  # player -> list of season averages
+    
+    # Process each season
+    for year in range(2000, 2025):
+        season = f"{year-1}-{year}"
         try:
-            # Load attempts data for this year
-            with open(attempts_file, 'r') as f:
-                attempts_data = json.loads(f.read())
-            
-            # Process minute averages
-            with open(minute_file, 'r') as f:
-                minute_data = json.loads(f.read())
-                for min, percentage in minute_data.items():
-                    if min not in minute_sums:
-                        minute_sums[min] = 0
-                        minute_counts[min] = 0
-                    minute_sums[min] += percentage
-                    minute_counts[min] += 1
-            
-            # Process yearly averages
-            with open(yearly_file, 'r') as f:
-                yearly_data = json.loads(f.read())
-                for yrmin, per in yearly_data.items():
-                    if yrmin not in yearly_sums:
-                        yearly_sums[yrmin] = 0
-                        yearly_counts[yrmin] = 0
-                    yearly_sums[yrmin] += per * attempts_data[yrmin] # Use attempts from file
-                    yearly_counts[yrmin] += attempts_data[yrmin]
+            # Load data files
+            with open(os.path.join(data_dir, f'player_minute_averages_{season}.txt'), 'r') as f:
+                minute_data = json.load(f)
+            with open(os.path.join(data_dir, f'yearly_averages_{season}.txt'), 'r') as f:
+                season_data = json.load(f)
+            with open(os.path.join(data_dir, f'player_attempt_counter_{season}.txt'), 'r') as f:
+                attempt_data = json.load(f)
+                
+            # Aggregate data for each player
+            for player in player_list:
+                if player in minute_data:
+                    for minute, data in minute_data[player].items():
+                        attempts = attempt_data[player][minute]
+                        makes = int(data[0])  # First element is makes
+                        player_career_minutes[player][minute][0] += makes
+                        player_career_minutes[player][minute][1] += attempts - makes
+                        player_career_attempts[player][minute] += attempts
+                    
+                if player in season_data:
+                    player_season_avgs[player].append(season_data[player])
                     
         except FileNotFoundError:
-            error_details = {
-                "season": season,
-                "error_type": "FileNotFoundError",
-                "traceback": traceback.format_exc()
-            }
-            error_logger.log_error("FileNotFoundError", f"Could not find data files for season {season}", error_details)
-            print(f"Warning: Could not find data files for season {season}")
-            continue
-        except json.JSONDecodeError as e:
-            error_details = {
-                "season": season,
-                "error_type": "JSONDecodeError",
-                "error_message": str(e),
-                "traceback": traceback.format_exc()
-            }
-            error_logger.log_error("JSONDecodeError", f"Invalid JSON format in files for season {season}", error_details)
-            print(f"Warning: Invalid JSON format in files for season {season}")
+            print(f"Missing data files for season {season}")
             continue
     
-    minute_avgs = {}
-    yr_avgs = {}
+    # Create individual player graphs
+    for player in player_list:
+        if player in player_career_minutes:
+            # Calculate career stats
+            total_makes = sum(data[0] for data in player_career_minutes[player].values())
+            total_attempts = sum(player_career_attempts[player].values())
+            career_pct = (total_makes / total_attempts * 100) if total_attempts > 0 else 0
+            
+            minutes = sorted(player_career_minutes[player].keys())
+            
+            # Calculate percentages and baseline
+            percentages = []
+            baseline = []
+            attempts = []
+            
+            for m in minutes:
+                attempts_at_min = player_career_attempts[player][m]
+                makes = player_career_minutes[player][m][0]
+                if attempts_at_min > 0:
+                    percentages.append(makes / attempts_at_min * 100)
+                    baseline.append(career_pct)  # Using career average as baseline
+                    attempts.append(attempts_at_min)
+            
+            # Calculate differences
+            differences = [p - b for p, b in zip(percentages, baseline)]
+            
+            # Calculate trend lines
+            slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, percentages)
+            slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
+            
+            trend_ft = slope_ft * np.array(minutes) + intercept_ft
+            trend_diff = slope_diff * np.array(minutes) + intercept_diff
+            
+            # Calculate regression between actual and baseline
+            slope_reg, intercept_reg, r_value_reg, p_value_reg, std_err_reg = stats.linregress(percentages, baseline)
+            regression_line = slope_reg * np.array(percentages) + intercept_reg
+            
+            # Create timeline plot
+            plt.figure(figsize=(12, 8))
+            
+            plt.plot(minutes, percentages, 'b-', label='FT% at minute', linewidth=2)
+            plt.plot(minutes, baseline, 'r--', label=f'Career Average: {career_pct:.1f}%', linewidth=2)
+            plt.plot(minutes, differences, 'g-', label='Difference', linewidth=2)
+            
+            plt.plot(minutes, trend_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
+            plt.plot(minutes, trend_diff, 'g:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+            
+            stats_text = (f'Career Stats:\nFTA: {total_attempts:,}\n'
+                         f'FTM: {total_makes:,}\nFT%: {career_pct:.1f}%\n\n'
+                         f'Trends:\nFT% Slope: {slope_ft:.4f}\n'
+                         f'Diff Slope: {slope_diff:.4f}')
+            plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes,
+                    verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
+            
+            plt.title(f'{player} Career Free Throws\n'
+                     f'FTA: {total_attempts:,}, FTM: {total_makes:,}, FT%: {career_pct:.1f}%')
+            plt.xlabel('Minutes into Game')
+            plt.ylabel('Free Throw Percentage')
+            plt.grid(True, linestyle='--', alpha=0.7)
+            plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+            plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
+            
+            plt.tight_layout()
+            plt.savefig(os.path.join(output_dir, f'{player.replace(" ", "_")}_career_timeline.png'),
+                       bbox_inches='tight', dpi=300)
+            plt.close()
+            
+            # Create regression scatter plot
+            plt.figure(figsize=(8, 8))
+            plt.scatter(percentages, baseline, color='blue', alpha=0.5)
+            plt.plot(percentages, regression_line, 'm--', 
+                    label=f'Regression (R²: {r_value_reg**2:.4f})', linewidth=2)
+            
+            plt.title(f'{player} - Regression: Actual vs Career Average\n'
+                     f'FTA: {total_attempts:,}, FTM: {total_makes:,}, FT%: {career_pct:.1f}%')
+            plt.xlabel('Actual FT%', fontsize=12)
+            plt.ylabel('Career Average FT%', fontsize=12)
+            plt.grid(True, linestyle='--', alpha=0.7)
+            
+            regression_stats = (f'Regression Statistics:\n'
+                              f'Slope: {slope_reg:.4f}\n'
+                              f'Intercept: {intercept_reg:.4f}\n'
+                              f'R²: {r_value_reg**2:.4f}')
+            plt.text(0.02, 0.98, regression_stats, transform=plt.gca().transAxes,
+                    verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
+            
+            plt.legend()
+            plt.tight_layout()
+            plt.savefig(os.path.join(output_dir, f'{player.replace(" ", "_")}_regression.png'),
+                       bbox_inches='tight', dpi=300)
+            plt.close()
+            
+            # Save data to CSV
+            df = pd.DataFrame({
+                'Minute': minutes,
+                'FT_Percentage': percentages,
+                'Baseline': baseline,
+                'Difference': differences,
+                'Attempts': attempts,
+                'FT_Trend': trend_ft,
+                'Difference_Trend': trend_diff,
+                'Regression_Line': regression_line
+            })
+            df.to_csv(os.path.join(output_dir, f'{player.replace(" ", "_")}_data.csv'), index=False)
 
-    for minute in minute_sums:
-        minute_avgs[minute] = minute_sums[minute] / minute_counts[minute]
+def create_group_graph(players, group_name, data_dir="dataForEachPlayerYear", output_dir="ft_analysis_graphs"):
+    """Create a composite graph and save data for a group of players."""
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    # Initialize group data
+    group_minutes = defaultdict(lambda: [0, 0])  # minute -> [total_makes, total_attempts]
     
-    for min in yearly_sums:
-        yr_avgs[min] = yearly_sums[min] / yearly_counts[min]
+    # Process each season
+    for year in range(2000, 2025):
+        season = f"{year-1}-{year}"
+        try:
+            with open(os.path.join(data_dir, f'player_minute_averages_{season}.txt'), 'r') as f:
+                minute_data = json.load(f)
+            with open(os.path.join(data_dir, f'player_attempt_counter_{season}.txt'), 'r') as f:
+                attempt_data = json.load(f)
+                
+            for player in players:
+                if player in minute_data:
+                    for minute, data in minute_data[player].items():
+                        attempts = attempt_data[player][minute]
+                        makes = int(data[0])
+                        group_minutes[minute][0] += makes
+                        group_minutes[minute][1] += attempts
+                        
+        except FileNotFoundError:
+            print(f"Missing data files for season {season}")
+            continue
     
-    return [minute_avgs, yr_avgs]
+    # Calculate group totals
+    total_makes = sum(data[0] for data in group_minutes.values())
+    total_attempts = sum(data[1] for data in group_minutes.values())
+    group_pct = (total_makes / total_attempts * 100) if total_attempts > 0 else 0
+    
+    minutes = sorted(group_minutes.keys())
+    percentages = []
+    baseline = []
+    attempts = []
+    
+    for m in minutes:
+        total_attempts_at_min = group_minutes[m][1]
+        if total_attempts_at_min > 0:
+            percentages.append(group_minutes[m][0] / total_attempts_at_min * 100)
+            baseline.append(group_pct)  # Using group average as baseline
+            attempts.append(total_attempts_at_min)
+    
+    # Calculate differences
+    differences = [p - b for p, b in zip(percentages, baseline)]
+    
+    # Calculate trend lines
+    slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, percentages)
+    slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
+    
+    trend_ft = slope_ft * np.array(minutes) + intercept_ft
+    trend_diff = slope_diff * np.array(minutes) + intercept_diff
+    
+    # Calculate regression between actual and baseline
+    slope_reg, intercept_reg, r_value_reg, p_value_reg, std_err_reg = stats.linregress(percentages, baseline)
+    regression_line = slope_reg * np.array(percentages) + intercept_reg
+    
+    # Create timeline plot
+    plt.figure(figsize=(15, 10))
+    
+    plt.plot(minutes, percentages, 'b-', label='Group FT%', linewidth=3)
+    plt.plot(minutes, baseline, 'r--', label=f'Group Average: {group_pct:.1f}%', linewidth=2)
+    plt.plot(minutes, differences, 'g-', label='Difference', linewidth=2)
+    
+    plt.plot(minutes, trend_ft, 'b:', label=f'FT% Trend (slope: {slope_ft:.4f})', linewidth=1)
+    plt.plot(minutes, trend_diff, 'g:', label=f'Difference Trend (slope: {slope_diff:.4f})', linewidth=1)
+    
+    stats_text = (f'Group Stats:\nFTA: {total_attempts:,}\n'
+                 f'FTM: {total_makes:,}\nFT%: {group_pct:.1f}%\n\n'
+                 f'Trends:\nFT% Slope: {slope_ft:.4f}\n'
+                 f'Diff Slope: {slope_diff:.4f}')
+    plt.text(0.02, 0.98, stats_text, transform=plt.gca().transAxes,
+            verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
+    
+    plt.title(f'{group_name} Shooters Career Free Throws\n'
+              f'FTA: {total_attempts:,}, FTM: {total_makes:,}, FT%: {group_pct:.1f}%')
+    plt.xlabel('Minutes into Game')
+    plt.ylabel('Free Throw Percentage')
+    plt.grid(True, linestyle='--', alpha=0.7)
+    plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f'{group_name.lower()}_group_timeline.png'),
+                bbox_inches='tight', dpi=300)
+    plt.close()
+    
+    # Create regression scatter plot
+    plt.figure(figsize=(8, 8))
+    plt.scatter(percentages, baseline, color='blue', alpha=0.5)
+    plt.plot(percentages, regression_line, 'm--', 
+            label=f'Regression (R²: {r_value_reg**2:.4f})', linewidth=2)
+    
+    plt.title(f'{group_name} Shooters - Regression: Actual vs Group Average\n'
+              f'FTA: {total_attempts:,}, FTM: {total_makes:,}, FT%: {group_pct:.1f}%')
+    plt.xlabel('Actual FT%', fontsize=12)
+    plt.ylabel('Group Average FT%', fontsize=12)
+    plt.grid(True, linestyle='--', alpha=0.7)
+    
+    regression_stats = (f'Regression Statistics:\n'
+                       f'Slope: {slope_reg:.4f}\n'
+                       f'Intercept: {intercept_reg:.4f}\n'
+                       f'R²: {r_value_reg**2:.4f}')
+    plt.text(0.02, 0.98, regression_stats, transform=plt.gca().transAxes,
+            verticalalignment='top', bbox=dict(facecolor='white', alpha=0.8))
+    
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, f'{group_name.lower()}_group_regression.png'),
+                bbox_inches='tight', dpi=300)
+    plt.close()
+    
+    # Save data
+
+
+
 
 def main():
-    # analyzer = FreeThrowAnalyzer()
-
-    #now, for every team loop from 
-
     allTeams = {
         "ATLANTA HAWKS": Team.ATLANTA_HAWKS,
         "BOSTON CELTICS": Team.BOSTON_CELTICS,
@@ -827,26 +993,19 @@ def main():
     worst_ft_shooters = ["B. Wallace", "A. Drummond", "D. Jordan", "S. O'Neal", "D. Howard", "A. Walker", "R. Gobert", "T. Chandler", "B. Bol", "B. Biyombo", "M. Harrell", "S. Adams", "J. McGee", "C. Capela", "G. Antetokounmpo"]
 
     bestworst = best_ft_shooters + worst_ft_shooters
-    # total_made = 0
-    # total_attempted = 0
 
-    #VITAL, only commented for a sec for testing
-    # for year in range(2023, 2025):
     for year in range(2000, 2025):
-        player_attemptCounter = playerToMinToAttemptsClass() #alter to go from a given player to a given minute to a given number of attempts at said minute
+        player_attemptCounter = playerToMinToAttemptsClass()
         
         player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
-        # Check if both files already exist
-        player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
-        player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
+        #stores attempts at each minute for a year
 
-        # minute_total_dict_file = f"all_minute_total_dict_file_{year-1}-{year}"
-        
-        #comment this out to produce new documents for minute and minute yearly avgs at minutes (or delete exisitng ones)
-        # if os.path.exists(minute_averages_file) and os.path.exists(yearly_averages_file):
-        #     print(f"Files for {year-1}-{year} already exist, skipping...")
-        #     continue
-            
+        player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
+        #stores averages at each minute for a given year
+
+        player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
+        #stores yearly averages for different players
+
         player_yearAnalyzer = FreeThrowAnalyzer()
 
         for team in allTeams:
@@ -879,87 +1038,42 @@ def main():
                     time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
                     continue
                 print("processed game")
-        # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
-        total_attempted += player_yearAnalyzer.total_attempted
-        yearlyAnsArr = player_yearAnalyzer.calculateMinuteAndYearlyAverages()
-        yearlyMinuteAveragesDict = yearlyAnsArr[0]
-        yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
+
+        playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
+
+        playerSeasonAvgs = player_yearAnalyzer.playerToSeasonAvg
+        
+        playerAttemptsAtMinsDict = player_attemptCounter
 
         # Save dictionaries to sorted text files
         with open(player_minute_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(yearlyMinuteAveragesDict.items(), key=lambda x: float(x[0])))
+            sorted_dict = dict(sorted(playerAtMinuteAvgs.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
         with open(player_yearly_averages_file, 'w') as f:
-            sorted_dict = dict(sorted(yearlyMinuteYearlyAveragesDict.items(), key=lambda x: float(x[0])))
+            sorted_dict = dict(sorted(playerSeasonAvgs.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
 
         with open(player_attempt_counter_file, 'w') as f:
             # Sort the dictionary by minutes (converting keys to float for numerical sorting)
-            sorted_dict = dict(sorted(player_attemptCounter.minToAttempts.items(), key=lambda x: float(x[0])))
+            sorted_dict = dict(sorted(playerAttemptsAtMinsDict.items(), key=lambda x: float(x[0])))
             json.dump(sorted_dict, f, indent=4)
-
-        # with open(minute_total_dict_file, 'w') as f:
-        #     json.dump(yearAnalyzer.minutes, f, indent=4, default=set_default)
-
-        #we probably don't need yearlyMinuteYearlyAveragesDict here, as we can just go fetch player averages at different years to be our baselines
-        plot_ft_percentages(yearlyMinuteAveragesDict, yearlyMinuteYearlyAveragesDict, year-1, year, player_yearAnalyzer.total_made, player_yearAnalyzer.total_attempted)
 
         time.sleep(1.89)
         #stop after one year to check large
         # break
 
 
+    # Create individual career graphs for all players
+    create_player_career_graphs(best_ft_shooters + worst_ft_shooters)
+    print("Created individual player graphs")
 
-
-
-
-
+    # Create group graphs
+    create_group_graph(best_ft_shooters, "Best")
+    print("Created Best Shooters group graphs")
     
-    #for 2023-24 season
-    # analyzer.minutes = parse_data_file("/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dictionary.txt")
-
-    #this will print the dictionary
-    # print("minutesDict: " + str(analyzer.minutes))
-
-    # analyzer.minutes = {2: [1564, 435, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'S. Aldama', 'P. Connaughton', 'J. Landale', 'A. Coffey', 'E. Mobley', 'D. Terry', 'A. Fudge', 'J. Isaac', 'D. Jordan', 'B. Williams', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'G. Brown', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'D. Bane', 'P. Banchero', 'D. Lillard', 'P. Watson', 'J. Cain', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'N. Little', 'J. Morant', 'M. Bagley', 'D. Schröder', 'T. Thompson', 'O. Toppin', 'D. Sabonis', 'J. Freeman-Liberty', 'F. Ntilikina', 'T. Lyles', 'I. Okoro', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'L. Waters', 'S. Milton', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'T. Camara', 'D. Green', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'H. Barnes', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'S. Barnes', 'C. LeVert', 'J. Murray', 'R. Jackson', 'T. Vukcevic', 'S. Sharpe', 'J. Crowder', 'T. Craig', 'Z. Williams', 'J. Nwora', 'D. Rose', 'J. Tatum', 'J. Collins', 'D. Roddy', 'I. Jackson', 'L. Walker', 'M. Moody', 'K. Thompson', 'A. Nembhard', 'J. Konchar', 'J. McGee', 'D. Exum', 'C. Joseph', 'C. Cunningham', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'A. Black', 'T. Maxey', 'J. Jaquez', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'L. Shamet', 'D. Šarić', 'D. Booker', 'S. Lee', 'J. Nowell', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'G. Niang', 'S. Henderson', 'K. George', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'U. Garuba', 'O. Anunoby', 'I. Quickley', 'K. Hayes', 'D. Hunter', 'P. Washington', 'C. Gillespie', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'J. Rhoden', 'Z. Williamson', 'G. Dick', 'D. Banton', 'J. Bernard', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'D. Vassell', 'Y. Watanabe', 'F. Korkmaz', 'D. Garland', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'C. Sexton', 'K. Martin', 'M. Flynn', 'T. Rozier', 'M. Robinson', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'J. Randle', 'R. Williams', 'S. Pippen ', 'J. Davis', 'N. Batum', 'J. Clarkson', 'G. Mathews', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'O. Okongwu', 'L. Stevens', 'S. Mays', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'C. Reddish', 'N. Richards', 'J. Giddey', 'B. Brown', 'J. Vanderbilt', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'B. Hyland', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'G. Harris', 'K. Oubre', 'M. Fultz', 'B. Lopez', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'M. Diabaté', 'K. Caldwell-Pope', 'N. Clowney', 'L. Garza', 'I. Badji', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'B. Biyombo', 'M. Bridges', 'N. Marshall', 'K. Olynyk', 'D. Daniels', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Zeller', 'C. Holmgren', 'C. Swider', 'D. Melton', 'M. Diakite', 'B. Marjanović', 'J. Wilson', 'A. Gill', 'R. Gobert', 'M. Plumlee', 'K. Huerter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'T. Smith', 'J. Strawther', 'K. Porziņģis', 'K. Knox', 'A. Lawson', 'B. Key', 'K. Anderson', 'J. Minott', 'M. Strus', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'D. Nix', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'A. Len', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'F. VanVleet', 'R. Lopez', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'T. Mann', 'J. Brunson', 'R. Rupert', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Conley', 'L. Miller', 'C. Boucher', 'K. Love', 'C. Okeke', 'D. Robinson', 'A. Davis', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'D. Jeffries', 'B. McGowens', 'B. Fernando', 'D. Bertāns', 'L. Black', 'L. Dončić', 'J. Hardy', 'S. Lundy', 'K. Kuzma'}], 3: [1589, 423, {'T. Watford', 'B. Bol', 'J. Robinson-Earl', 'P. Connaughton', 'J. Landale', 'A. Sanogo', 'A. Coffey', 'D. Terry', 'E. Mobley', 'J. Isaac', 'D. Jordan', 'B. Williams', 'I. Livers', 'K. Durant', 'N. Jović', 'D. DeRozan', 'C. Braun', 'G. Bitadze', 'T. Jackson-Davis', 'P. George', 'D. Mitchell', 'Z. LaVine', 'M. Turner', 'I. Stewart', 'S. Umude', 'D. Bane', 'P. Banchero', 'H. Giles', 'D. Lillard', 'P. Watson', 'T. Haliburton', 'C. Thomas', 'K. Irving', 'P. Achiuwa', 'M. Bagley', 'D. Schröder', 'R. Rollins', 'J. Holiday', 'F. Petrušev', 'O. Toppin', 'D. Sabonis', 'T. Lyles', 'I. Okoro', 'L. Dort', 'J. Goodwin', 'C. Wallace', 'D. Theis', 'K. Murray', 'Z. Nnaji', 'J. Allen', 'B. Miller', 'C. Martin', 'J. Poole', 'J. Grant', 'P. Beverley', 'O. Tshiebwe', 'A. Pokusevski', 'J. Sims', 'C. Metu', 'O. Prosper', 'D. Barlow', 'O. Robinson', 'B. Wesley', 'R. Hachimura', 'T. Eason', 'J. Sochan', 'C. LeVert', 'J. Murray', 'R. Jackson', 'S. Sharpe', 'J. Richardson', 'T. Craig', 'B. Beal', 'J. Nwora', 'T. Warren', 'J. Tatum', 'J. Collins', 'D. Roddy', 'D. Murray', 'L. Walker', 'M. Moody', 'I. Jackson', 'K. Thompson', 'A. Nembhard', 'J. McGee', 'D. Exum', 'P. Baldwin', 'K. Towns', 'J. Robinson', 'V. Williams', 'E. Fournier', 'J. Alvarado', 'T. Maxey', 'J. Jaquez', 'K. Ellis', 'B. Mathurin', 'A. Thompson', 'M. Beauchamp', 'D. Brooks', 'B. Boston', 'D. Šarić', 'D. Booker', 'L. Shamet', 'J. Hart', 'T. Harris', 'Z. Collins', 'J. Ramsey', 'J. Jackson', 'K. Leonard', 'D. Powell', 'D. Avdija', 'V. Wembanyama', 'R. Holmes', 'M. Williams', 'N. Vučević', 'I. Joe', 'L. James', 'R. Council', 'S. Henderson', 'K. George', 'M. Nowell', 'T. Hardaway', 'D. DiVincenzo', 'O. Yurtseven', 'A. Wiggins', 'B. Ingram', 'I. Quickley', 'D. Hunter', 'P. Washington', 'P. Mills', 'D. Jarreau', 'J. Embiid', 'B. Portis', 'C. Anthony', 'G. Hayward', 'T. Jones', 'Z. Williamson', 'G. Dick', 'A. Simons', 'D. Banton', 'J. Poeltl', 'I. Zubac', 'P. Reed', 'M. Branham', 'A. Drummond', 'T. Brown', 'L. Markkanen', 'M. Wagner', 'O. Agbaji', 'M. Sasser', 'F. Korkmaz', 'N. Queta', 'S. Bey', 'D. Gallinari', 'D. White', 'C. Paul', 'G. Jackson', 'M. Morris', 'J. Springer', 'C. Sexton', 'W. Kessler', 'K. Martin', 'M. Flynn', 'M. Kleber', 'N. Powell', 'I. Hartenstein', 'B. Bogdanović', 'C. McCollum', 'B. Sensabaugh', 'A. Nesmith', 'J. Randle', 'H. Highsmith', 'R. Williams', 'S. Pippen ', 'J. Davis', 'J. Clarkson', 'G. Mathews', 'T. Prince', 'C. Capela', 'C. Livingston', 'O. Sarr', 'C. Porter', 'K. Johnson', 'E. Omoruyi', 'S. Hauser', 'O. Okongwu', 'S. Mays', 'L. Stevens', 'K. Dunn', 'T. Herro', 'J. Green', 'S. Gilgeous-Alexander', 'J. McLaughlin', 'J. Hood-Schifino', 'N. Richards', 'B. Brown', 'C. Payne', 'D. McDermott', 'J. Valančiūnas', 'N. Alexander-Walker', 'D. Gafford', 'K. Lofton', 'J. Johnson', 'U. Azubuike', 'D. Lively', 'K. Oubre', 'M. Fultz', 'S. Mamukelashvili', 'M. McBride', 'T. McConnell', 'O. Brissett', 'S. Fontecchio', 'O. Dieng', 'S. Cissoko', 'B. Coulibaly', 'J. Walker', 'A. Sengun', 'R. Barrett', 'D. House', 'K. Caldwell-Pope', 'L. Garza', 'I. Badji', 'T. Forrest', 'T. Young', 'E. Gordon', 'J. Okogie', 'D. Reath', 'N. Hinton', 'P. Pritchard', 'D. Sharpe', 'J. Ingles', 'M. Monk', 'N. Reid', 'M. Bridges', 'C. Castleton', 'N. Marshall', 'K. Olynyk', 'J. Nurkić', 'G. Williams', 'J. Ivey', 'J. Wiseman', 'A. Dosunmu', 'C. White', 'L. Nance', 'J. Butler', 'G. Allen', 'G. Antetokounmpo', 'K. Middleton', 'L. Ball', 'M. Brogdon', 'J. Tate', 'L. Kennard', 'A. Burks', 'D. Russell', 'P. Siakam', 'C. Holmgren', 'B. Marjanović', 'G. Temple', 'J. Phillips', 'B. Sheppard', "R. O'Neale", 'A. Gill', 'M. Plumlee', 'R. Gobert', 'T. Bryant', 'J. Porter', 'F. Wagner', 'J. Hawkins', 'J. Harden', 'A. Green', 'C. Osman', 'W. Carter', 'J. Hayes', 'B. Adebayo', 'J. Suggs', 'T. Hendricks', 'J. Juzang', 'J. LaRavia', 'A. Reaves', 'M. Christie', 'L. Kornet', 'M. Muscala', 'J. Strawther', 'K. Lewis', 'K. Porziņģis', 'L. Šamanić', 'K. Anderson', 'A. Horford', 'A. Holiday', 'A. Hagans', 'C. Kispert', 'S. Merrill', 'S. Dinwiddie', 'C. Johnson', 'C. Duarte', 'D. Wright', 'D. Fox', 'D. Dennis', 'T. Murphy', 'M. Bamba', 'C. Whitmore', 'J. Brown', 'S. Curry', 'J. McDaniels', 'J. Champagnie', 'D. Eubanks', 'T. Horton-Tucker', 'J. Kuminga', 'J. Thor', 'D. Smith', 'J. Smith', 'B. Boeheim', 'I. Wainright', 'T. Mann', 'J. Brunson', 'V. Micić', 'M. Porter', 'B. Podziemski', 'M. Pereira', 'C. Boucher', 'K. Love', 'D. Robinson', 'A. Davis', 'A. Caruso', 'N. Jokić', 'G. Trent', 'A. Edwards', 'J. Duren', 'W. Matthews', 'A. Gordon', 'M. Smart', 'K. Bates-Diop', 'N. Claxton', 'R. Westbrook', 'C. Wood', 'J. Williams', 'D. Jones', 'B. McGowens', 'B. Fernando', 'L. Black', 'G. Santos', 'L. Dončić', 'C. Houstan', 'J. Hardy', 'S. Lundy', 'K. Looney', 'K. Kuzma'}]}
-    results = process_season_stats("./dataForEachPlayerYear")
-    #here, results should return an array of size 4:
-        # 1 - minute_averages for worst players
-        # 2 - yearly_averages for worst playrs
-        # 3 - minute_averages for best players
-        # 4 - minute_averages for best players
-
-
-    worst_minute_averages = results[0]
-    worst_yearly_averages = results[1]
-    best_minute_averages = results[2]
-    best_yearly_averages = results[3]
-    
-    worst_all_minute_averages_file = f'worst_all_player_minute_averages_2000-2024.txt'
-    worst_all_yearly_averages_file = f'worst_all_player_yearly_averages_2000-2024.txt'
-    best_all_minute_averages_file = f'best_all_player_minute_averages_2000-2024.txt'
-    best_all_yearly_averages_file = f'best_all_player_yearly_averages_2000-2024.txt'
-
-    with open(worst_all_minute_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(worst_minute_averages.items(), key=lambda x: float(x[0])))
-        json.dump(sorted_dict, f, indent=4)
-            
-    with open(worst_all_yearly_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(worst_yearly_averages.items(), key=lambda x: float(x[0])))
-        json.dump(sorted_dict, f, indent=4)
-
-    with open(best_all_minute_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(best_minute_averages.items(), key=lambda x: float(x[0])))
-        json.dump(sorted_dict, f, indent=4)
-
-    with open(best_all_yearly_averages_file, 'w') as f:
-        sorted_dict = dict(sorted(best_yearly_averages.items(), key=lambda x: float(x[0])))
-        json.dump(sorted_dict, f, indent=4)
-
-    print()
-
-    plot_ft_percentages(minute_averages, yearly_averages, 2000, 2024, totalMade=1087740, totalAttempted=1429733)
+    create_group_graph(worst_ft_shooters, "Worst")
+    print("Created Worst Shooters group graphs")
 
     exit()
 
