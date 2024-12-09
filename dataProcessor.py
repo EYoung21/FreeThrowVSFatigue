@@ -769,7 +769,7 @@ def process_season_stats(folder_path):
     yearly_counts = {}
     
     # Process seasons from 1999-2000 to 2023-2024
-    for year in range(1999, 2024):
+    for year in range(1997, 2024):
         season = f"{year}-{year+1}"
         
         # Construct file paths
