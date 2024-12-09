@@ -1052,6 +1052,7 @@ def main():
                     time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
                     continue
                 print("processed game")
+            time.sleep(2.0)
 
         playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
 
