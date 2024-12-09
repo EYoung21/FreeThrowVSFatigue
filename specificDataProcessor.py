@@ -691,55 +691,57 @@ def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, to
 
 
 def create_player_career_graphs(player_list, data_dir="dataForEachPlayerYear", output_dir="ft_analysis_graphs"):
-    """Create career graphs and save data for each player."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    # Initialize player career dictionaries
-    player_career_minutes = defaultdict(lambda: defaultdict(lambda: [0, 0]))  # player -> minute -> [makes, misses]
-    player_career_attempts = defaultdict(lambda: defaultdict(int))  # player -> minute -> attempts
-    player_season_avgs = defaultdict(list)  # player -> list of season averages
+    player_career_minutes = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+    player_career_attempts = defaultdict(lambda: defaultdict(int))
+    player_season_data = defaultdict(lambda: defaultdict(dict))
     
-    # Process each season
     for year in range(2000, 2025):
         season = f"{year-1}-{year}"
         try:
-            # Load data files
+            # Load and convert data
             with open(os.path.join(data_dir, f'player_minute_averages_{season}.txt'), 'r') as f:
                 minute_data = json.load(f)
+                minute_data = {player: {float(k): v for k, v in minutes.items()} 
+                             for player, minutes in minute_data.items()}
+            
             with open(os.path.join(data_dir, f'yearly_averages_{season}.txt'), 'r') as f:
-                season_data = json.load(f)
+                season_avgs = json.load(f)
+            
             with open(os.path.join(data_dir, f'player_attempt_counter_{season}.txt'), 'r') as f:
                 attempt_data = json.load(f)
-                
-            # Aggregate data for each player
+                attempt_data = {player: {float(k): v for k, v in attempts.items()}
+                              for player, attempts in attempt_data.items()}
+            
+            # Aggregate data per player
             for player in player_list:
-                if player in minute_data:
+                if player in minute_data and player in season_avgs and player in attempt_data:
+                    player_season_data[player][year] = {
+                        'minute_data': minute_data[player],
+                        'attempts': attempt_data[player],
+                        'season_avg': season_avgs[player]
+                    }
+                    
                     for minute, data in minute_data[player].items():
                         attempts = attempt_data[player][minute]
-                        makes = int(data[0])  # First element is makes
+                        makes = int(data[0])
                         player_career_minutes[player][minute][0] += makes
                         player_career_minutes[player][minute][1] += attempts - makes
                         player_career_attempts[player][minute] += attempts
-                    
-                if player in season_data:
-                    player_season_avgs[player].append(season_data[player])
-                    
+                        
         except FileNotFoundError:
             print(f"Missing data files for season {season}")
             continue
-    
-    # Create individual player graphs
+
     for player in player_list:
         if player in player_career_minutes:
-            # Calculate career stats
             total_makes = sum(data[0] for data in player_career_minutes[player].values())
             total_attempts = sum(player_career_attempts[player].values())
             career_pct = (total_makes / total_attempts * 100) if total_attempts > 0 else 0
             
             minutes = sorted(player_career_minutes[player].keys())
-            
-            # Calculate percentages and baseline
             percentages = []
             baseline = []
             attempts = []
@@ -747,14 +749,24 @@ def create_player_career_graphs(player_list, data_dir="dataForEachPlayerYear", o
             for m in minutes:
                 attempts_at_min = player_career_attempts[player][m]
                 makes = player_career_minutes[player][m][0]
+                
                 if attempts_at_min > 0:
+                    # Calculate actual percentage
                     percentages.append(makes / attempts_at_min * 100)
-                    baseline.append(career_pct)  # Using career average as baseline
                     attempts.append(attempts_at_min)
+                    
+                    # Calculate weighted baseline for this minute
+                    weighted_baseline = 0
+                    total_weights = 0
+                    for year_data in player_season_data[player].values():
+                        if m in year_data['attempts']:
+                            weight = year_data['attempts'][m]
+                            weighted_baseline += year_data['season_avg'] * weight
+                            total_weights += weight
+                    
+                    baseline.append(weighted_baseline / total_weights if total_weights > 0 else career_pct)
             
-            # Calculate differences
             differences = [p - b for p, b in zip(percentages, baseline)]
-            
             # Calculate trend lines
             slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, percentages)
             slope_diff, intercept_diff, r_value_diff, p_value_diff, std_err_diff = stats.linregress(minutes, differences)
@@ -835,24 +847,36 @@ def create_player_career_graphs(player_list, data_dir="dataForEachPlayerYear", o
             df.to_csv(os.path.join(output_dir, f'{player.replace(" ", "_")}_data.csv'), index=False)
 
 def create_group_graph(players, group_name, data_dir="dataForEachPlayerYear", output_dir="ft_analysis_graphs"):
-    """Create a composite graph and save data for a group of players."""
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         
-    # Initialize group data
-    group_minutes = defaultdict(lambda: [0, 0])  # minute -> [total_makes, total_attempts]
+    group_season_data = defaultdict(lambda: defaultdict(dict))
+    group_minutes = defaultdict(lambda: [0, 0])  # [makes, attempts]
     
-    # Process each season
     for year in range(2000, 2025):
         season = f"{year-1}-{year}"
         try:
             with open(os.path.join(data_dir, f'player_minute_averages_{season}.txt'), 'r') as f:
                 minute_data = json.load(f)
+                minute_data = {player: {float(k): v for k, v in minutes.items()} 
+                             for player, minutes in minute_data.items()}
+            
+            with open(os.path.join(data_dir, f'yearly_averages_{season}.txt'), 'r') as f:
+                season_avgs = json.load(f)
+            
             with open(os.path.join(data_dir, f'player_attempt_counter_{season}.txt'), 'r') as f:
                 attempt_data = json.load(f)
-                
+                attempt_data = {player: {float(k): v for k, v in attempts.items()}
+                              for player, attempts in attempt_data.items()}
+            
             for player in players:
-                if player in minute_data:
+                if player in minute_data and player in season_avgs and player in attempt_data:
+                    group_season_data[year][player] = {
+                        'minute_data': minute_data[player],
+                        'attempts': attempt_data[player],
+                        'season_avg': season_avgs[player]
+                    }
+                    
                     for minute, data in minute_data[player].items():
                         attempts = attempt_data[player][minute]
                         makes = int(data[0])
@@ -863,22 +887,32 @@ def create_group_graph(players, group_name, data_dir="dataForEachPlayerYear", ou
             print(f"Missing data files for season {season}")
             continue
     
-    # Calculate group totals
-    total_makes = sum(data[0] for data in group_minutes.values())
-    total_attempts = sum(data[1] for data in group_minutes.values())
-    group_pct = (total_makes / total_attempts * 100) if total_attempts > 0 else 0
-    
     minutes = sorted(group_minutes.keys())
     percentages = []
     baseline = []
     attempts = []
     
+    total_makes = sum(data[0] for data in group_minutes.values())
+    total_attempts = sum(data[1] for data in group_minutes.values())
+    group_pct = (total_makes / total_attempts * 100) if total_attempts > 0 else 0
+    
     for m in minutes:
         total_attempts_at_min = group_minutes[m][1]
         if total_attempts_at_min > 0:
             percentages.append(group_minutes[m][0] / total_attempts_at_min * 100)
-            baseline.append(group_pct)  # Using group average as baseline
             attempts.append(total_attempts_at_min)
+            
+            weighted_baseline = 0
+            total_weights = 0
+            for season_data in group_season_data.values():
+                for player, player_data in season_data.items():
+                    if m in player_data['attempts']:
+                        weight = player_data['attempts'][m]
+                        season_ft_pct = player_data['season_avg']
+                        weighted_baseline += season_ft_pct * weight
+                        total_weights += weight
+            
+            baseline.append(weighted_baseline / total_weights if total_weights > 0 else group_pct)
     
     # Calculate differences
     differences = [p - b for p, b in zip(percentages, baseline)]
@@ -994,88 +1028,88 @@ def main():
 
     bestworst = best_ft_shooters + worst_ft_shooters
 
-    for year in range(2019, 2025):
-        player_attemptCounter = playerToMinToAttemptsClass()
+    # for year in range(2019, 2025):
+    #     player_attemptCounter = playerToMinToAttemptsClass()
         
-        player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
-        #stores attempts at each minute for a year
+    #     player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
+    #     #stores attempts at each minute for a year
 
-        player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
-        #stores averages at each minute for a given year
+    #     player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
+    #     #stores averages at each minute for a given year
 
-        player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
-        #stores yearly averages for different players
+    #     player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
+    #     #stores yearly averages for different players
 
-        player_yearAnalyzer = FreeThrowAnalyzer()
+    #     player_yearAnalyzer = FreeThrowAnalyzer()
 
-        for team in allTeams:
-            arrHomeDates = get_team_home_dates(team, year)
-            print(f"Starting: {team}")
-            print("homedates: " + str(arrHomeDates))
+    #     for team in allTeams:
+    #         arrHomeDates = get_team_home_dates(team, year)
+    #         print(f"Starting: {team}")
+    #         print("homedates: " + str(arrHomeDates))
 
-            for date in arrHomeDates:
-                print("Team: " + str(team))
-                print("Year: " + str(year))
-                print("Date: " + date)
-                curr_date = date.split("-")
-                # print(str(curr_date))
-                try:
-                    player_yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, player_attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
-                except Exception as e:
-                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    #         for date in arrHomeDates:
+    #             print("Team: " + str(team))
+    #             print("Year: " + str(year))
+    #             print("Date: " + date)
+    #             curr_date = date.split("-")
+    #             # print(str(curr_date))
+    #             try:
+    #                 player_yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, player_attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
+    #             except Exception as e:
+    #                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
-                    error_details = {
-                        "team": str(allTeams[team]),
-                        "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
-                        "year": year,
-                        "timestamp": timestamp,
-                        "traceback": traceback.format_exc()
-                    }
+    #                 error_details = {
+    #                     "team": str(allTeams[team]),
+    #                     "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
+    #                     "year": year,
+    #                     "timestamp": timestamp,
+    #                     "traceback": traceback.format_exc()
+    #                 }
                     
-                    # Log to error logger
-                    error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
+    #                 # Log to error logger
+    #                 error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
                 
-                    time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
-                    continue
-                print("processed game")
+    #                 time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
+    #                 continue
+    #             print("processed game")
 
-        playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
+    #     playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
 
-        playerSeasonAvgs = player_yearAnalyzer.playerToSeasonAvg
+    #     playerSeasonAvgs = player_yearAnalyzer.playerToSeasonAvg
         
-        playerAttemptsAtMinsDict = player_attemptCounter
+    #     playerAttemptsAtMinsDict = player_attemptCounter
 
-        # When saving dictionaries to files, handle the nested structure correctly
-        with open(player_minute_averages_file, 'w') as f:
-            # For player minute averages, we don't need to sort the outer dictionary by player names
-            # Each player's inner dictionary of minutes should be sorted
-            sorted_player_data = {}
-            for player, minute_data in playerAtMinuteAvgs.items():
-                # Sort the inner dictionary by minute number
-                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
-                sorted_player_data[player] = sorted_minutes
-            json.dump(sorted_player_data, f, indent=4)
+    #     # When saving dictionaries to files, handle the nested structure correctly
+    #     with open(player_minute_averages_file, 'w') as f:
+    #         # For player minute averages, we don't need to sort the outer dictionary by player names
+    #         # Each player's inner dictionary of minutes should be sorted
+    #         sorted_player_data = {}
+    #         for player, minute_data in playerAtMinuteAvgs.items():
+    #             # Sort the inner dictionary by minute number
+    #             sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+    #             sorted_player_data[player] = sorted_minutes
+    #         json.dump(sorted_player_data, f, indent=4)
 
-        with open(player_yearly_averages_file, 'w') as f:
-            # Season averages don't need sorting as they're single values per player
-            json.dump(playerSeasonAvgs, f, indent=4)
+    #     with open(player_yearly_averages_file, 'w') as f:
+    #         # Season averages don't need sorting as they're single values per player
+    #         json.dump(playerSeasonAvgs, f, indent=4)
 
-        with open(player_attempt_counter_file, 'w') as f:
-            sorted_attempts = {}
-            for player, minute_data in playerAttemptsAtMinsDict.playerToMinToAttempts.items():
-                # Sort each player's attempts by minute
-                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
-                sorted_attempts[player] = sorted_minutes
-            json.dump(sorted_attempts, f, indent=4)
+    #     with open(player_attempt_counter_file, 'w') as f:
+    #         sorted_attempts = {}
+    #         for player, minute_data in playerAttemptsAtMinsDict.playerToMinToAttempts.items():
+    #             # Sort each player's attempts by minute
+    #             sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+    #             sorted_attempts[player] = sorted_minutes
+    #         json.dump(sorted_attempts, f, indent=4)
 
-        time.sleep(1.89)
-        #stop after one year to check large
-        # break
+    #     time.sleep(1.89)
+    #     #stop after one year to check large
+    #     # break
 
 
-    # Create individual career graphs for all players
-    create_player_career_graphs(best_ft_shooters + worst_ft_shooters)
-    print("Created individual player graphs")
+    # # Create individual career graphs for all players
+    # create_player_career_graphs(best_ft_shooters + worst_ft_shooters)
+    # print("Created individual player graphs")
 
     # Create group graphs
     create_group_graph(best_ft_shooters, "Best")
