@@ -1,15 +1,3 @@
-Error Log Started: 2024-12-08 16:54:41.610087
-==================================================
-
-Time: 2024-12-08 16:58:04
-Error Type: RateLimitError
-Error Message: 429 Client Error: Too Many Requests for url: https://www.basketball-reference.com/boxscores/pbp/200701130CHI.html
-Details: {'team': 'Team.CHICAGO_BULLS', 'date': '2007-01-13', 'status_code': 429, 'error_type': 'Rate Limit'}
-==================================================
-
-Time: 2024-12-08 16:58:04
-Error Type: RetryAttempt
-Error Message: Rate limited. Retrying after 3600 seconds.
-Details: {'retry_after': '3600'}
+Error Log Started: 2024-12-09 00:13:26.576113
 ==================================================
 
