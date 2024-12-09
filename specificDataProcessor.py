@@ -1028,88 +1028,88 @@ def main():
 
     bestworst = best_ft_shooters + worst_ft_shooters
 
-    # for year in range(2019, 2025):
-    #     player_attemptCounter = playerToMinToAttemptsClass()
+    for year in range(1998, 2000):
+        player_attemptCounter = playerToMinToAttemptsClass()
         
-    #     player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
-    #     #stores attempts at each minute for a year
+        player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
+        #stores attempts at each minute for a year
 
-    #     player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
-    #     #stores averages at each minute for a given year
+        player_minute_averages_file = os.path.join('dataForEachPlayerYear', f'player_minute_averages_{year-1}-{year}.txt')
+        #stores averages at each minute for a given year
 
-    #     player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
-    #     #stores yearly averages for different players
+        player_yearly_averages_file = os.path.join('dataForEachPlayerYear', f'yearly_averages_{year-1}-{year}.txt')
+        #stores yearly averages for different players
 
-    #     player_yearAnalyzer = FreeThrowAnalyzer()
+        player_yearAnalyzer = FreeThrowAnalyzer()
 
-    #     for team in allTeams:
-    #         arrHomeDates = get_team_home_dates(team, year)
-    #         print(f"Starting: {team}")
-    #         print("homedates: " + str(arrHomeDates))
+        for team in allTeams:
+            arrHomeDates = get_team_home_dates(team, year)
+            print(f"Starting: {team}")
+            print("homedates: " + str(arrHomeDates))
 
-    #         for date in arrHomeDates:
-    #             print("Team: " + str(team))
-    #             print("Year: " + str(year))
-    #             print("Date: " + date)
-    #             curr_date = date.split("-")
-    #             # print(str(curr_date))
-    #             try:
-    #                 player_yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, player_attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
-    #             except Exception as e:
-    #                 timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            for date in arrHomeDates:
+                print("Team: " + str(team))
+                print("Year: " + str(year))
+                print("Date: " + date)
+                curr_date = date.split("-")
+                # print(str(curr_date))
+                try:
+                    player_yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, player_attemptCounter, best_ft_shooters, worst_ft_shooters, bestworst)
+                except Exception as e:
+                    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     
-    #                 error_details = {
-    #                     "team": str(allTeams[team]),
-    #                     "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
-    #                     "year": year,
-    #                     "timestamp": timestamp,
-    #                     "traceback": traceback.format_exc()
-    #                 }
+                    error_details = {
+                        "team": str(allTeams[team]),
+                        "date": f"{curr_date[0]}-{curr_date[1]}-{curr_date[2]}",
+                        "year": year,
+                        "timestamp": timestamp,
+                        "traceback": traceback.format_exc()
+                    }
                     
-    #                 # Log to error logger
-    #                 error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
+                    # Log to error logger
+                    error_logger.log_error("ProcessTeamGamesError", str(e), error_details)
                 
-    #                 time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
-    #                 continue
-    #             print("processed game")
+                    time.sleep(2.0) #for just this one we will sleep for longer to not get rate limited
+                    continue
+                print("processed game")
 
-    #     playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
+        playerAtMinuteAvgs = player_yearAnalyzer.playerMinutes
 
-    #     playerSeasonAvgs = player_yearAnalyzer.playerToSeasonAvg
+        playerSeasonAvgs = player_yearAnalyzer.playerToSeasonAvg
         
-    #     playerAttemptsAtMinsDict = player_attemptCounter
+        playerAttemptsAtMinsDict = player_attemptCounter
 
-    #     # When saving dictionaries to files, handle the nested structure correctly
-    #     with open(player_minute_averages_file, 'w') as f:
-    #         # For player minute averages, we don't need to sort the outer dictionary by player names
-    #         # Each player's inner dictionary of minutes should be sorted
-    #         sorted_player_data = {}
-    #         for player, minute_data in playerAtMinuteAvgs.items():
-    #             # Sort the inner dictionary by minute number
-    #             sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
-    #             sorted_player_data[player] = sorted_minutes
-    #         json.dump(sorted_player_data, f, indent=4)
+        # When saving dictionaries to files, handle the nested structure correctly
+        with open(player_minute_averages_file, 'w') as f:
+            # For player minute averages, we don't need to sort the outer dictionary by player names
+            # Each player's inner dictionary of minutes should be sorted
+            sorted_player_data = {}
+            for player, minute_data in playerAtMinuteAvgs.items():
+                # Sort the inner dictionary by minute number
+                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+                sorted_player_data[player] = sorted_minutes
+            json.dump(sorted_player_data, f, indent=4)
 
-    #     with open(player_yearly_averages_file, 'w') as f:
-    #         # Season averages don't need sorting as they're single values per player
-    #         json.dump(playerSeasonAvgs, f, indent=4)
+        with open(player_yearly_averages_file, 'w') as f:
+            # Season averages don't need sorting as they're single values per player
+            json.dump(playerSeasonAvgs, f, indent=4)
 
-    #     with open(player_attempt_counter_file, 'w') as f:
-    #         sorted_attempts = {}
-    #         for player, minute_data in playerAttemptsAtMinsDict.playerToMinToAttempts.items():
-    #             # Sort each player's attempts by minute
-    #             sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
-    #             sorted_attempts[player] = sorted_minutes
-    #         json.dump(sorted_attempts, f, indent=4)
+        with open(player_attempt_counter_file, 'w') as f:
+            sorted_attempts = {}
+            for player, minute_data in playerAttemptsAtMinsDict.playerToMinToAttempts.items():
+                # Sort each player's attempts by minute
+                sorted_minutes = dict(sorted(minute_data.items(), key=lambda x: int(x[0])))
+                sorted_attempts[player] = sorted_minutes
+            json.dump(sorted_attempts, f, indent=4)
 
-    #     time.sleep(1.89)
-    #     #stop after one year to check large
-    #     # break
+        time.sleep(1.89)
+        #stop after one year to check large
+        # break
 
 
-    # # Create individual career graphs for all players
-    # create_player_career_graphs(best_ft_shooters + worst_ft_shooters)
-    # print("Created individual player graphs")
+    # Create individual career graphs for all players
+    create_player_career_graphs(best_ft_shooters + worst_ft_shooters)
+    print("Created individual player graphs")
 
     # Create group graphs
     create_group_graph(best_ft_shooters, "Best")
