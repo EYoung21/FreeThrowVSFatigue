@@ -1,6 +1,6 @@
 # do for wnba after?
 #adjust for intentional misses at end of games somehow (or just drowned out by noise?)
-#fix issue where error number for play by play parsing (/ other exceptions) doesn't increment
+#fix issue where error number for play by play parsing
 
 import csv
 from basketball_reference_web_scraper import client
@@ -17,7 +17,6 @@ import pandas as pd
 from bs4 import BeautifulSoup
 import ast
 import os
-#import this
 from nba_api.stats.static import players
 from nba_api.stats.endpoints import commonplayerinfo
 import traceback

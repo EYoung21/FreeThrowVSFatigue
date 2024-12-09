@@ -1,7 +1,6 @@
 # do for wnba after?
 #adjust for intentional misses at end of games somehow (or just drowned out by noise?)
-#fix issue where error number for play by play parsing (/ other exceptions) doesn't increment
-
+#fix issue where error number for play by play parsing
 import csv
 from basketball_reference_web_scraper import client
 import time
@@ -23,7 +22,6 @@ import json
 from scipy import stats
 import os
 from collections import defaultdict
-
 
 # Look for? / do we maybe need to handle?:
 
@@ -636,11 +634,6 @@ def get_team_home_dates(team, year):
 
         
     return sorted(list(dates))
-
-from scipy import stats
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
     if not os.path.exists('dataForEachYear'):
