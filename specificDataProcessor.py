@@ -1008,7 +1008,7 @@ def main():
 
     bestworst = best_ft_shooters + worst_ft_shooters
 
-    for year in range(1998, 2000):
+    for year in range(1999, 2000):
         player_attemptCounter = playerToMinToAttemptsClass()
         
         player_attempt_counter_file = os.path.join('dataForEachPlayerYear', f'player_attempt_counter_{year-1}-{year}.txt')
