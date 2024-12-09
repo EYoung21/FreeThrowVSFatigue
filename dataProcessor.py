@@ -969,8 +969,8 @@ def main():
     minute_averages = results[0]
     yearly_averages = results[1]
     
-    all_minute_averages_file = f'all_minute_averages_2000-2024.txt'
-    all_yearly_averages_file = f'all_yearly_averages_2000-2024.txt'
+    all_minute_averages_file = f'all_minute_averages_1997-2024.txt'
+    all_yearly_averages_file = f'all_yearly_averages_1997-2024.txt'
 
     with open(all_minute_averages_file, 'w') as f:
         sorted_dict = dict(sorted(minute_averages.items(), key=lambda x: float(x[0])))
