@@ -6,38 +6,23 @@ import csv
 from basketball_reference_web_scraper import client
 import time
 import requests
-from basketball_reference_web_scraper.data import Team, OutputType
-from datetime import datetime
-from typing import Dict, List, Set
+from basketball_reference_web_scraper.data import Team, OutputType, Location
+from typing import Dict, List, Set, Tuple
 import math
-from basketball_reference_web_scraper.data import Team, Location
 import matplotlib.pyplot as plt
 import numpy as np
 from datetime import datetime, timedelta
-import csv
 import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
 import ast
-import os
-#import this
 from nba_api.stats.static import players
 from nba_api.stats.endpoints import commonplayerinfo
 import traceback
-from datetime import datetime
 import json
-import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
-import pandas as pd
 import os
-import json
-from typing import Dict, List, Tuple
 from collections import defaultdict
-from scipy import stats
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 
 # Look for? / do we maybe need to handle?:

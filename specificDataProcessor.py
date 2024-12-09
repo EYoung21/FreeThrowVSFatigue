@@ -6,15 +6,12 @@ import csv
 from basketball_reference_web_scraper import client
 import time
 import requests
-from basketball_reference_web_scraper.data import Team, OutputType
-from datetime import datetime
-from typing import Dict, List, Set
+from basketball_reference_web_scraper.data import Team, OutputType, Location
+from datetime import datetime, timedelta
+from typing import Dict, List, Set, Tuple
 import math
-from basketball_reference_web_scraper.data import Team, Location
 import matplotlib.pyplot as plt
 import numpy as np
-from datetime import datetime, timedelta
-import csv
 import pytz
 import pandas as pd
 from bs4 import BeautifulSoup
@@ -24,20 +21,9 @@ import os
 from nba_api.stats.static import players
 from nba_api.stats.endpoints import commonplayerinfo
 import traceback
-from datetime import datetime
 import json
-import numpy as np
 from scipy import stats
-import matplotlib.pyplot as plt
-import pandas as pd
-import os
-import json
-from typing import Dict, List, Tuple
 from collections import defaultdict
-from scipy import stats
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 
 class ErrorLogger:
     def __init__(self, filename):
@@ -507,11 +493,6 @@ def get_team_home_dates(team, year):
         
     return sorted(list(dates))
 
-from scipy import stats
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-
 def plot_ft_percentages(minute_averages, yearly_averages, startYear, endYear, totalMade, totalAttempted):
     if not os.path.exists('dataForEachYear'):
         os.makedirs('dataForEachYear')
@@ -698,7 +679,7 @@ def create_player_career_graphs(player_list, data_dir="dataForEachPlayerYear", o
     player_career_attempts = defaultdict(lambda: defaultdict(int))
     player_season_data = defaultdict(lambda: defaultdict(dict))
     
-    for year in range(1997, 2025):
+    for year in range(2000, 2025):
         season = f"{year-1}-{year}"
         try:
             # Load and convert data
@@ -853,7 +834,7 @@ def create_group_graph(players, group_name, data_dir="dataForEachPlayerYear", ou
     group_season_data = defaultdict(lambda: defaultdict(dict))
     group_minutes = defaultdict(lambda: [0, 0])  # [makes, attempts]
     
-    for year in range(1997, 2025):
+    for year in range(2000, 2025):
         season = f"{year-1}-{year}"
         try:
             with open(os.path.join(data_dir, f'player_minute_averages_{season}.txt'), 'r') as f:
