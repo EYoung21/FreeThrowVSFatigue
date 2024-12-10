@@ -7,13 +7,13 @@ import os
 
 # Read and parse the JSON data from the correct directory
 data_dir = 'dataForEachYear'
-with open(os.path.join(data_dir, 'attempt_counter_1996-1997.txt'), 'r') as f:
+with open(os.path.join(data_dir, 'attempt_counter_1997-1998.txt'), 'r') as f:
     attempts_data = json.load(f)
     
-with open(os.path.join(data_dir, 'minute_averages_1996-1997.txt'), 'r') as f:
+with open(os.path.join(data_dir, 'minute_averages_1997-1998.txt'), 'r') as f:
     minute_averages = json.load(f)
     
-with open(os.path.join(data_dir, 'yearly_averages_1996-1997.txt'), 'r') as f:
+with open(os.path.join(data_dir, 'yearly_averages_1997-1998.txt'), 'r') as f:
     yearly_averages = json.load(f)
 
 if not os.path.exists('dataForEachYear'):
@@ -30,14 +30,14 @@ diff_df = pd.DataFrame({
     'Minute': minutes,
     'Difference': differences
 })
-diff_df.to_csv(os.path.join('dataForEachYear', 'difference_averages_1996-1997.txt'), index=False)
+diff_df.to_csv(os.path.join('dataForEachYear', 'difference_averages_1997-1998.txt'), index=False)
 
 # Calculate regression statistics
 slope, intercept, r_value, p_value, std_err = stats.linregress(ft_percentages, yearly_percentages)
 
 # Save regression stats
-with open('1996-1997_regression_stats.txt', 'w') as f:
-    f.write("Analysis for 1996-1997 NBA Seasons\n")
+with open('1997-1998_regression_stats.txt', 'w') as f:
+    f.write("Analysis for 1997-1998 NBA Seasons\n")
     f.write("="*40 + "\n\n")
     f.write("Linear Regression Between Minute FT% and Yearly FT%:\n")
     f.write(f"  Slope: {slope:.4f}\n")
@@ -54,7 +54,7 @@ regression_df = pd.DataFrame({
     'Yearly_FT%': yearly_percentages,
     'Regression_Predicted': regression_line
 })
-regression_df.to_csv('1996-1997_regression_analysis.csv', index=False)
+regression_df.to_csv('1997-1998_regression_analysis.csv', index=False)
 
 # Save full dataset
 df = pd.DataFrame({
@@ -63,7 +63,7 @@ df = pd.DataFrame({
     'Season_Average_FT%': yearly_percentages,
     'Difference': differences
 })
-df.to_csv('1996-1997_ft_percentage_data.csv', index=False)
+df.to_csv('1997-1998_ft_percentage_data.csv', index=False)
 
 # Calculate trend lines
 slope_ft, intercept_ft, r_value_ft, p_value_ft, std_err_ft = stats.linregress(minutes, ft_percentages)
@@ -86,7 +86,7 @@ plt.title('Regression: Minute FT% vs Season Average FT%')
 plt.grid(True, linestyle='--', alpha=0.7)
 plt.legend()
 plt.tight_layout()
-plt.savefig('1996-1997_regression_plot.png', bbox_inches='tight', dpi=300)
+plt.savefig('1997-1998_regression_plot.png', bbox_inches='tight', dpi=300)
 plt.close()
 
 # Create percentage analysis plot
@@ -107,7 +107,7 @@ total_attempts = sum(attempts_data.values())
 total_makes = sum(v * minute_averages[k] / 100 for k, v in attempts_data.items())
 percentage = round(total_makes/total_attempts * 100, 2) if total_attempts > 0 else ""
 
-plt.title(f'Free Throw Percentage by Minutes Played for 1996-1997 Season\nFTA: {total_attempts}, FTs Made: {int(total_makes)}, %: {percentage}%', 
+plt.title(f'Free Throw Percentage by Minutes Played for 1997-1998 Season\nFTA: {total_attempts}, FTs Made: {int(total_makes)}, %: {percentage}%', 
           fontsize=14, pad=20)
 plt.xlabel('Minutes Played', fontsize=12)
 plt.ylabel('Free Throw Percentage', fontsize=12)
@@ -116,5 +116,5 @@ plt.legend(fontsize=10, bbox_to_anchor=(1.05, 1), loc='upper left')
 plt.axhline(y=0, color='k', linestyle='-', alpha=0.1)
 plt.gca().yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.1f}%'.format(y)))
 plt.tight_layout()
-plt.savefig('1996-1997_ft_percentage_analysis.png', bbox_inches='tight', dpi=300)
+plt.savefig('1997-1998_ft_percentage_analysis.png', bbox_inches='tight', dpi=300)
 plt.close()

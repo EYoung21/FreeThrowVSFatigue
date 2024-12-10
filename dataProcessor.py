@@ -858,7 +858,7 @@ def main():
 
     #VITAL, only commented for a sec for testing
     # for year in range(2000, 2025):
-    for year in range(1998, 2000):
+    for year in range(1999, 2000):
 
         attemptCounter = minToAttemptsClass()
         attempt_counter_file = os.path.join('dataForEachYear', f'attempt_counter_{year-1}-{year}.txt')
