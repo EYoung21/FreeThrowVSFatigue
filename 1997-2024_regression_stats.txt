@@ -1,4 +1,4 @@
-Analysis for 2000-2024 NBA Seasons
+Analysis for 1997-2024 NBA Seasons
 ========================================
 
 Linear Regression Between Minute FT% and Yearly FT%:

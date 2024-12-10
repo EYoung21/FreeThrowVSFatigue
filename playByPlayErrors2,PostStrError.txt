@@ -1457,3 +1457,803 @@ IndexError: list index out of range
 
                     ----------------------------------------
                     
+                    Time: 2024-12-10 04:40:53
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-05
+                    Error: Date with year set to 1999, month set to 02, and day set to 05 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902050CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 05 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:40:55
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-06
+                    Error: Date with year set to 1999, month set to 02, and day set to 06 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902060CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 06 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:40:57
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-08
+                    Error: Date with year set to 1999, month set to 02, and day set to 08 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902080CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 08 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:40:59
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-10
+                    Error: Date with year set to 1999, month set to 02, and day set to 10 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902100CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 10 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:02
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-24
+                    Error: Date with year set to 1999, month set to 02, and day set to 24 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902240CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 24 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:04
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-02-26
+                    Error: Date with year set to 1999, month set to 02, and day set to 26 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199902260CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 02, and day set to 26 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:06
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-01
+                    Error: Date with year set to 1999, month set to 03, and day set to 01 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903010CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 01 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:08
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-09
+                    Error: Date with year set to 1999, month set to 03, and day set to 09 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903090CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 09 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:10
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-17
+                    Error: Date with year set to 1999, month set to 03, and day set to 17 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903170CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 17 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:12
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-19
+                    Error: Date with year set to 1999, month set to 03, and day set to 19 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903190CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 19 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:14
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-24
+                    Error: Date with year set to 1999, month set to 03, and day set to 24 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903240CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 24 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:16
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-26
+                    Error: Date with year set to 1999, month set to 03, and day set to 26 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903260CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 26 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:18
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-28
+                    Error: Date with year set to 1999, month set to 03, and day set to 28 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903280CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 28 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:20
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-30
+                    Error: Date with year set to 1999, month set to 03, and day set to 30 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903300CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 30 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:23
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-03-31
+                    Error: Date with year set to 1999, month set to 03, and day set to 31 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199903310CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 03, and day set to 31 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:25
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-02
+                    Error: Date with year set to 1999, month set to 04, and day set to 02 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904020CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 02 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:27
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-05
+                    Error: Date with year set to 1999, month set to 04, and day set to 05 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904050CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 05 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:29
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-07
+                    Error: Date with year set to 1999, month set to 04, and day set to 07 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904070CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 07 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:31
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-09
+                    Error: Date with year set to 1999, month set to 04, and day set to 09 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904090CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 09 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:33
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-14
+                    Error: Date with year set to 1999, month set to 04, and day set to 14 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904140CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 14 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:35
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-21
+                    Error: Date with year set to 1999, month set to 04, and day set to 21 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904210CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 21 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:37
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-24
+                    Error: Date with year set to 1999, month set to 04, and day set to 24 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904240CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 24 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:39
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-26
+                    Error: Date with year set to 1999, month set to 04, and day set to 26 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904260CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 26 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:41
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-04-30
+                    Error: Date with year set to 1999, month set to 04, and day set to 30 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199904300CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 04, and day set to 30 is invalid
+
+                    ----------------------------------------
+                    
+                    Time: 2024-12-10 04:41:43
+                    Team: Team.CHARLOTTE_HORNETS
+                    Date: 1999-05-04
+                    Error: Date with year set to 1999, month set to 05, and day set to 04 is invalid
+                    Traceback: Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 220, in play_by_play
+    values = http_service.play_by_play(home_team=home_team, day=day, month=month, year=year)
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/http_service.py", line 100, in play_by_play
+    response.raise_for_status()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/requests/models.py", line 1024, in raise_for_status
+    raise HTTPError(http_error_msg, response=self)
+requests.exceptions.HTTPError: 404 Client Error: Not Found for url: https://www.basketball-reference.com/boxscores/pbp/199905040CHO.html
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 890, in main
+    yearAnalyzer.process_team_games(allTeams[team], curr_date[0], curr_date[1], curr_date[2], year, attemptCounter)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/eliyoung/Stat011Project/FatigueVSFreethrow/dataProcessor.py", line 127, in process_team_games
+    pbp_data = client.play_by_play(
+        home_team=team,
+    ...<2 lines>...
+        day=day
+    )
+  File "/Users/eliyoung/Stat011Project/myenv/lib/python3.13/site-packages/basketball_reference_web_scraper/client.py", line 223, in play_by_play
+    raise InvalidDate(day=day, month=month, year=year)
+basketball_reference_web_scraper.errors.InvalidDate: Date with year set to 1999, month set to 05, and day set to 04 is invalid
+
+                    ----------------------------------------
+                    

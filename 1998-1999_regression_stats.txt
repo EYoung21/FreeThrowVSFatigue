@@ -1,0 +1,9 @@
+Analysis for 1998-1999 NBA Seasons
+========================================
+
+Linear Regression Between Minute FT% and Yearly FT%:
+  Slope: -0.0719
+  Intercept: 79.5018
+  R-squared: 0.0680
+  P-value: 7.0426e-02
+  Standard Error: 0.0388
