@@ -918,10 +918,10 @@ def main():
                         continue
                 print("processed game")
         print(f"Totl made at {year}: " + str(yearAnalyzer.total_made))
-        total_made += yearAnalyzer.total_made
+        # total_made += yearAnalyzer.total_made
         print(f"Total attempted at {year}: " + str(yearAnalyzer.total_attempted))
         # yrToNumberAttempted[year] = yearAnalyzer.total_attempted
-        total_attempted += yearAnalyzer.total_attempted
+        # total_attempted += yearAnalyzer.total_attempted
         yearlyAnsArr = yearAnalyzer.calculateMinuteAndYearlyAverages()
         yearlyMinuteAveragesDict = yearlyAnsArr[0]
         yearlyMinuteYearlyAveragesDict = yearlyAnsArr[1]
