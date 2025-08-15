@@ -327,11 +327,16 @@ class FreeThrowAnalyzer:
                 return None
                 
         try:
-            if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+            raw_dir = os.path.join('data', 'raw')
+            raw_file = os.path.join(raw_dir, f"{year-1}_{year}_player_season_totals.csv")
+            root_file = f"./{year-1}_{year}_player_season_totals.csv"
+            if not os.path.exists(raw_file) and not os.path.exists(root_file):
+                if not os.path.exists(raw_dir):
+                    os.makedirs(raw_dir)
                 client.players_season_totals(
                     season_end_year=year, 
                     output_type=OutputType.CSV, 
-                    output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                    output_file_path=raw_file
                 )
                 time.sleep(1.89)
         except requests.exceptions.HTTPError as e:
@@ -342,29 +347,40 @@ class FreeThrowAnalyzer:
                     # If Retry-After is in seconds, wait that long
                     print(f"Rate limited. Retrying after {retry_after} seconds.")
                     time.sleep(int(retry_after))
-                    # Retry the request
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                    raw_dir = os.path.join('data', 'raw')
+                    raw_file = os.path.join(raw_dir, f"{year-1}_{year}_player_season_totals.csv")
+                    if not os.path.exists(raw_file):
+                        if not os.path.exists(raw_dir):
+                            os.makedirs(raw_dir)
                         client.players_season_totals(
                             season_end_year=year, 
                             output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                            output_file_path=raw_file
                         )
                         time.sleep(1.89)
                 else:
                     print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                     time.sleep(60)  # Default wait time if Retry-After header is missing
-                    if not os.path.exists(f"./{year-1}_{year}_player_season_totals.csv"):
+                    raw_dir = os.path.join('data', 'raw')
+                    raw_file = os.path.join(raw_dir, f"{year-1}_{year}_player_season_totals.csv")
+                    if not os.path.exists(raw_file):
+                        if not os.path.exists(raw_dir):
+                            os.makedirs(raw_dir)
                         client.players_season_totals(
                             season_end_year=year, 
                             output_type=OutputType.CSV, 
-                            output_file_path=f"./{year-1}_{year}_player_season_totals.csv"
+                            output_file_path=raw_file
                         )
                         time.sleep(1.89)
             else:
                 # Re-raise if it's a different HTTP error
                 raise
         
-        with open(f"./{year-1}_{year}_player_season_totals.csv") as file:
+        raw_dir = os.path.join('data', 'raw')
+        preferred_path = os.path.join(raw_dir, f"{year-1}_{year}_player_season_totals.csv")
+        fallback_path = f"./{year-1}_{year}_player_season_totals.csv"
+        open_path = preferred_path if os.path.exists(preferred_path) else fallback_path
+        with open(open_path) as file:
             reader = csv.reader(file, delimiter=',')
             next(reader)  # Skip header
             rows = list(reader)
@@ -422,11 +438,16 @@ class FreeThrowAnalyzer:
 def get_team_home_dates(team, year):
     # Open the file and create the reader
     try:
-        if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+        raw_dir = os.path.join('data', 'raw')
+        raw_file = os.path.join(raw_dir, f"{year-1}_{year}_season.csv")
+        root_file = f"./{year-1}_{year}_season.csv"
+        if not os.path.exists(raw_file) and not os.path.exists(root_file):
+            if not os.path.exists(raw_dir):
+                os.makedirs(raw_dir)
             client.season_schedule(
                 season_end_year=year,
                 output_type=OutputType.CSV,
-                output_file_path=f"./{year-1}_{year}_season.csv"
+                output_file_path=raw_file
             )
             time.sleep(1.89)
     except requests.exceptions.HTTPError as e:
@@ -437,22 +458,29 @@ def get_team_home_dates(team, year):
                 # If Retry-After is in seconds, wait that long
                 print(f"Rate limited. Retrying after {retry_after} seconds.")
                 time.sleep(int(retry_after))
-                # Retry the request
-                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                raw_dir = os.path.join('data', 'raw')
+                raw_file = os.path.join(raw_dir, f"{year-1}_{year}_season.csv")
+                if not os.path.exists(raw_file):
+                    if not os.path.exists(raw_dir):
+                        os.makedirs(raw_dir)
                     client.season_schedule(
                         season_end_year=year,
                         output_type=OutputType.CSV,
-                        output_file_path=f"./{year-1}_{year}_season.csv"
+                        output_file_path=raw_file
                     )
                     time.sleep(1.89)
             else:
                 print("Rate limited. No Retry-After header found. Waiting 60 seconds before retrying.")
                 time.sleep(60)  # Default wait time if Retry-After header is missing
-                if not os.path.exists(f"./{year-1}_{year}_season.csv"):
+                raw_dir = os.path.join('data', 'raw')
+                raw_file = os.path.join(raw_dir, f"{year-1}_{year}_season.csv")
+                if not os.path.exists(raw_file):
+                    if not os.path.exists(raw_dir):
+                        os.makedirs(raw_dir)
                     client.season_schedule(
                         season_end_year=year,
                         output_type=OutputType.CSV,
-                        output_file_path=f"./{year-1}_{year}_season.csv"
+                        output_file_path=raw_file
                     )
                     time.sleep(1.89)
         else:
@@ -460,7 +488,11 @@ def get_team_home_dates(team, year):
             raise
 
 
-    with open(f"./{year-1}_{year}_season.csv") as file:
+    raw_dir = os.path.join('data', 'raw')
+    preferred_path = os.path.join(raw_dir, f"{year-1}_{year}_season.csv")
+    fallback_path = f"./{year-1}_{year}_season.csv"
+    open_path = preferred_path if os.path.exists(preferred_path) else fallback_path
+    with open(open_path) as file:
         reader = csv.reader(file, delimiter=',')
         # Skip the header row
         next(reader)
