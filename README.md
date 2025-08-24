@@ -63,3 +63,14 @@ Installed via `requirements.txt`:
 
 ### License
 GNU General Public License v3.0
+
+### Final project report (STAT 011, Swarthmore)
+This project was completed as my final project for STAT 011 (Statistical Methods I) at Swarthmore College.
+
+View the full write-up below. If the embed does not render on your platform, use the link.
+
+<div align="center">
+  <object data="docs/STATS%20011_%20%E2%80%9CDrained%20or%20Just%20Tired%20%E2%80%93%20Effects%20of%20Consecutive%20Minutes%20Played%20on%20Free%20Throw%20Accuracy%E2%80%9D%20%281%29.pdf" type="application/pdf" width="100%" height="800px">
+    <a href="docs/STATS%20011_%20%E2%80%9CDrained%20or%20Just%20Tired%20%E2%80%93%20Effects%20of%20Consecutive%20Minutes%20Played%20on%20Free%20Throw%20Accuracy%E2%80%9D%20%281%29.pdf">Open the STAT 011 final report (PDF)</a>
+  </object>
+</div>
